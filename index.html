@@ -465,8 +465,18 @@ sb.auth.onAuthStateChange(async (event, session) => {
   id('loading-screen').classList.add('hidden');
   if(session?.user) {
     currentUser = session.user;
-    const name = session.user.email.split('@')[0];
-    const displayName = name.charAt(0).toUpperCase() + name.slice(1);
+    // Mapeia emails conhecidos para nomes amigáveis
+    const emailMap = {
+      'naiarha': 'Naiarha',
+      'esdras': 'Esdras',
+    };
+    const emailPrefix = session.user.email.split('@')[0].toLowerCase();
+    let displayName = emailMap[emailPrefix];
+    if (!displayName) {
+      // tenta encontrar parcial
+      const found = Object.keys(emailMap).find(k => emailPrefix.includes(k));
+      displayName = found ? emailMap[found] : emailPrefix.charAt(0).toUpperCase() + emailPrefix.slice(1,10);
+    }
     id('user-name').textContent = displayName;
     id('user-avatar').textContent = displayName.charAt(0).toUpperCase();
     id('dash-greeting').textContent = `Olá, ${displayName}! 👋`;
