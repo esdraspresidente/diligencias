@@ -14,100 +14,99 @@
   <link rel="icon" href="icon-192.png"/>
   <link rel="preconnect" href="https://fonts.googleapis.com"/>
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600;9..40,700&display=swap" rel="stylesheet"/>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
     :root {
-      --bg: #F5F4F2;
-      --white: #FFFFFF;
-      --border: #E8E8E6;
-      --border2: #F0EFED;
-      --text: #1A1A2E;
-      --text2: #6B7280;
-      --text3: #9CA3AF;
-      --accent: #5B21B6;
-      --accent2: #7C3AED;
-      --accent-bg: #EDE9FE;
-      --green: #059669;
-      --yellow: #D97706;
-      --blue: #2563EB;
-      --red: #DC2626;
-      --sidebar-w: 220px;
-      --header-h: 56px;
-      --radius: 12px;
-      --shadow: 0 1px 3px rgba(0,0,0,.08), 0 1px 2px rgba(0,0,0,.04);
+      --bg: #F5F4F2; --white: #FFFFFF; --border: #E8E8E6; --border2: #F0EFED;
+      --text: #1A1A2E; --text2: #6B7280; --text3: #9CA3AF;
+      --accent: #5B21B6; --accent2: #7C3AED; --accent-bg: #EDE9FE;
+      --green: #059669; --yellow: #D97706; --blue: #2563EB; --red: #DC2626;
+      --sidebar-w: 220px; --header-h: 56px; --radius: 12px;
+      --shadow: 0 1px 3px rgba(0,0,0,.08);
     }
     * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
     html, body { height: 100%; font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); }
-    
-    /* ── LAYOUT ── */
+
+    /* LOGIN */
+    #login-screen {
+      position: fixed; inset: 0; background: var(--bg);
+      display: flex; align-items: center; justify-content: center;
+      z-index: 999; padding: 24px;
+    }
+    #login-screen.hidden { display: none; }
+    .login-box {
+      background: var(--white); border: 1px solid var(--border);
+      border-radius: 16px; padding: 36px 32px; width: 100%; max-width: 360px;
+      box-shadow: 0 8px 40px rgba(0,0,0,.08);
+    }
+    .login-logo { display: flex; align-items: center; gap: 10px; margin-bottom: 28px; justify-content: center; }
+    .login-logo-icon {
+      width: 40px; height: 40px; border-radius: 10px;
+      background: linear-gradient(135deg, #7C3AED, #5B21B6);
+      display: flex; align-items: center; justify-content: center; font-size: 20px;
+    }
+    .login-title { font-size: 20px; font-weight: 700; color: var(--text); letter-spacing: -.3px; }
+    .login-sub { font-size: 12px; color: var(--text3); text-align: center; margin-bottom: 28px; }
+    .login-field { display: flex; flex-direction: column; gap: 5px; margin-bottom: 14px; }
+    .login-field label { font-size: 11px; font-weight: 600; color: var(--text3); text-transform: uppercase; letter-spacing: .6px; }
+    .login-field input {
+      background: #F9FAFB; border: 1px solid var(--border); border-radius: 8px;
+      padding: 11px 14px; color: var(--text); font-size: 14px; font-family: inherit; width: 100%;
+    }
+    .login-field input:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px rgba(139,92,246,.1); }
+    .login-btn {
+      width: 100%; background: var(--accent); color: #fff; border: none;
+      padding: 12px; border-radius: 9px; font-weight: 700; font-size: 14px;
+      cursor: pointer; font-family: inherit; margin-top: 8px; transition: opacity .15s;
+    }
+    .login-btn:active { opacity: .85; }
+    .login-err { font-size: 12px; color: var(--red); text-align: center; margin-top: 10px; min-height: 16px; }
+
+    /* APP */
     #app { display: flex; flex-direction: column; height: 100%; }
-    
-    /* ── HEADER ── */
+    #app.hidden { display: none; }
+
     #header {
       position: fixed; top: 0; left: 0; right: 0; z-index: 100;
-      height: var(--header-h); background: var(--white);
-      border-bottom: 1px solid var(--border);
-      display: flex; align-items: center; padding: 0 16px;
-      justify-content: space-between;
+      height: var(--header-h); background: var(--white); border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; padding: 0 16px; justify-content: space-between;
       padding-top: env(safe-area-inset-top);
     }
     .header-logo { display: flex; align-items: center; gap: 10px; }
-    .logo-icon {
-      width: 30px; height: 30px; border-radius: 8px;
-      background: linear-gradient(135deg, #7C3AED, #5B21B6);
-      display: flex; align-items: center; justify-content: center; font-size: 14px; flex-shrink: 0;
-    }
+    .logo-icon { width: 30px; height: 30px; border-radius: 8px; background: linear-gradient(135deg,#7C3AED,#5B21B6); display: flex; align-items: center; justify-content: center; font-size: 14px; flex-shrink: 0; }
     .logo-text { font-weight: 700; font-size: 14px; color: var(--text); letter-spacing: -.2px; }
     .logo-sub { font-size: 10px; color: var(--text3); line-height: 1; }
-    #menu-btn {
-      background: none; border: none; cursor: pointer; padding: 6px;
-      color: var(--text2); display: flex; align-items: center;
+    #menu-btn { background: none; border: none; cursor: pointer; padding: 6px; color: var(--text2); display: flex; align-items: center; }
+    #new-btn { background: var(--accent); color: #fff; border: none; padding: 7px 14px; border-radius: 8px; font-weight: 600; font-size: 12px; cursor: pointer; font-family: inherit; }
+    .user-chip {
+      display: flex; align-items: center; gap: 6px; background: var(--accent-bg);
+      border-radius: 20px; padding: 4px 10px 4px 6px; cursor: pointer;
     }
-    #new-btn {
-      background: var(--accent); color: #fff; border: none;
-      padding: 7px 14px; border-radius: 8px; font-weight: 600;
-      font-size: 12px; cursor: pointer; font-family: inherit;
-    }
+    .user-avatar { width: 22px; height: 22px; border-radius: 50%; background: var(--accent); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 700; }
+    .user-name { font-size: 11px; font-weight: 600; color: var(--accent); }
 
-    /* ── BODY LAYOUT ── */
     #body { display: flex; flex: 1; margin-top: var(--header-h); overflow: hidden; height: calc(100% - var(--header-h)); }
 
-    /* ── SIDEBAR ── */
-    #overlay {
-      position: fixed; inset: 0; background: rgba(0,0,0,.35);
-      z-index: 200; display: none;
-    }
+    #overlay { position: fixed; inset: 0; background: rgba(0,0,0,.35); z-index: 200; display: none; }
     #overlay.open { display: block; }
     #sidebar {
       position: fixed; top: 0; left: 0; bottom: 0; z-index: 201;
-      width: var(--sidebar-w); background: var(--white);
-      border-right: 1px solid var(--border);
-      padding: 16px 10px; display: flex; flex-direction: column;
-      gap: 2px; transform: translateX(-100%);
-      transition: transform .22s cubic-bezier(.4,0,.2,1);
+      width: var(--sidebar-w); background: var(--white); border-right: 1px solid var(--border);
+      padding: 16px 10px; display: flex; flex-direction: column; gap: 2px;
+      transform: translateX(-100%); transition: transform .22s cubic-bezier(.4,0,.2,1);
       padding-top: calc(16px + env(safe-area-inset-top));
     }
     #sidebar.open { transform: translateX(0); }
     .sidebar-logo { display: flex; align-items: center; gap: 9px; padding: 6px 10px 16px; }
-    .sidebar-logo .logo-icon { width: 32px; height: 32px; font-size: 15px; }
-    .sidebar-section-label {
-      font-size: 10px; font-weight: 700; color: #C4C8D2;
-      letter-spacing: 1px; text-transform: uppercase;
-      padding: 6px 10px 8px;
-    }
-    .nav-item {
-      display: flex; align-items: center; gap: 10px;
-      padding: 9px 12px; border-radius: 8px; cursor: pointer;
-      font-size: 13px; font-weight: 500; color: var(--text2);
-      transition: all .15s; border: none; background: none;
-      width: 100%; text-align: left; font-family: inherit;
-    }
+    .sidebar-section-label { font-size: 10px; font-weight: 700; color: #C4C8D2; letter-spacing: 1px; text-transform: uppercase; padding: 6px 10px 8px; }
+    .nav-item { display: flex; align-items: center; gap: 10px; padding: 9px 12px; border-radius: 8px; cursor: pointer; font-size: 13px; font-weight: 500; color: var(--text2); transition: all .15s; border: none; background: none; width: 100%; text-align: left; font-family: inherit; }
     .nav-item:hover { background: #F3F0FC; }
     .nav-item.active { background: var(--accent-bg); color: var(--accent); font-weight: 600; }
     .nav-icon { width: 18px; text-align: center; font-size: 15px; opacity: .8; }
     .sidebar-footer { margin-top: auto; padding: 12px 10px 0; border-top: 1px solid var(--border2); }
-    .sidebar-footer p { font-size: 10px; color: var(--text3); line-height: 1.6; }
+    .logout-btn { display: flex; align-items: center; gap: 8px; padding: 8px 10px; border-radius: 8px; cursor: pointer; font-size: 12px; font-weight: 500; color: var(--red); border: none; background: none; width: 100%; font-family: inherit; transition: background .15s; }
+    .logout-btn:hover { background: #FEF2F2; }
 
-    /* ── MAIN ── */
     #main { flex: 1; overflow-y: auto; padding: 24px 16px; padding-bottom: calc(24px + env(safe-area-inset-bottom)); }
     @media (min-width: 768px) {
       #sidebar { position: sticky; top: var(--header-h); height: calc(100vh - var(--header-h)); transform: none !important; }
@@ -115,101 +114,50 @@
       #main { padding: 28px 28px; }
     }
 
-    /* ── PAGES ── */
     .page { display: none; animation: fadeUp .2s ease; }
     .page.active { display: block; }
-    @keyframes fadeUp { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes fadeUp { from { opacity:0; transform:translateY(6px); } to { opacity:1; transform:translateY(0); } }
 
-    /* ── TYPOGRAPHY ── */
     .page-title { font-size: 20px; font-weight: 700; color: var(--text); letter-spacing: -.3px; }
     .page-sub { font-size: 12px; color: var(--text3); margin-top: 3px; }
-
-    /* ── CARDS ── */
     .card { background: var(--white); border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow); }
     .card-pad { padding: 18px 20px; }
-
-    /* ── STATS GRID ── */
     .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 20px; }
     @media (min-width: 640px) { .stats-grid { grid-template-columns: repeat(4,1fr); } }
-    .stat-card {
-      background: var(--white); border: 1px solid var(--border);
-      border-radius: var(--radius); padding: 16px;
-      border-top: 3px solid var(--accent);
-    }
+    .stat-card { background: var(--white); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px; border-top: 3px solid var(--accent); }
     .stat-label { font-size: 10px; font-weight: 600; color: var(--text3); text-transform: uppercase; letter-spacing: .7px; margin-bottom: 6px; }
     .stat-value { font-size: 22px; font-weight: 700; color: var(--text); letter-spacing: -.4px; }
     .stat-value.sm { font-size: 16px; }
-
-    /* ── STATUS BADGE ── */
-    .badge {
-      display: inline-flex; align-items: center; gap: 5px;
-      padding: 3px 9px; border-radius: 20px;
-      font-size: 11px; font-weight: 700;
-    }
+    .badge { display: inline-flex; align-items: center; gap: 5px; padding: 3px 9px; border-radius: 20px; font-size: 11px; font-weight: 700; }
     .badge-dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
     .badge-pending  { background: #FEF3C7; color: #B45309; }
     .badge-done     { background: #DBEAFE; color: #1D4ED8; }
     .badge-waiting  { background: #EDE9FE; color: #6D28D9; }
     .badge-paid     { background: #D1FAE5; color: #065F46; }
-
-    /* ── PROGRESS BAR ── */
     .progress-strip { display: flex; height: 3px; }
     .progress-strip span { flex: 1; background: #F3F4F6; transition: background .3s; }
-
-    /* ── DEMAND ROWS ── */
-    .demand-row {
-      padding: 14px 16px; cursor: pointer;
-      border-bottom: 1px solid var(--border2);
-      display: flex; justify-content: space-between; align-items: flex-start; gap: 10px;
-      transition: background .12s;
-    }
+    .demand-row { padding: 14px 16px; cursor: pointer; border-bottom: 1px solid var(--border2); display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; transition: background .12s; }
     .demand-row:last-child { border-bottom: none; }
     .demand-row:active { background: #FAFAFA; }
     .demand-title { font-size: 14px; font-weight: 600; color: var(--text); margin-bottom: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 200px; }
     .demand-meta { font-size: 11px; color: var(--text3); line-height: 1.6; }
     .demand-right { display: flex; flex-direction: column; align-items: flex-end; gap: 5px; flex-shrink: 0; }
     .demand-value { font-size: 14px; font-weight: 700; color: var(--green); }
-
-    /* ── FILTERS ── */
     .filters { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 16px; }
-    .filter-btn {
-      background: var(--white); border: 1px solid var(--border);
-      color: var(--text2); padding: 5px 12px; border-radius: 20px;
-      font-size: 12px; font-weight: 500; cursor: pointer;
-      transition: all .15s; font-family: inherit;
-    }
-    .filter-btn:active, .filter-btn.active {
-      background: var(--accent); border-color: var(--accent); color: #fff;
-    }
+    .filter-btn { background: var(--white); border: 1px solid var(--border); color: var(--text2); padding: 5px 12px; border-radius: 20px; font-size: 12px; font-weight: 500; cursor: pointer; transition: all .15s; font-family: inherit; }
+    .filter-btn.active { background: var(--accent); border-color: var(--accent); color: #fff; }
     .filter-divider { width: 1px; background: var(--border); }
-
-    /* ── SECTION TITLE ── */
-    .section-title {
-      font-size: 10px; font-weight: 700; color: var(--text3);
-      text-transform: uppercase; letter-spacing: .8px; margin-bottom: 12px;
-    }
-
-    /* ── FORM ── */
+    .section-title { font-size: 10px; font-weight: 700; color: var(--text3); text-transform: uppercase; letter-spacing: .8px; margin-bottom: 12px; }
     .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
     @media (max-width: 520px) { .form-grid { grid-template-columns: 1fr; } }
     .form-full { grid-column: 1 / -1; }
     .field { display: flex; flex-direction: column; gap: 5px; }
     .field label { font-size: 11px; font-weight: 600; color: var(--text3); text-transform: uppercase; letter-spacing: .6px; }
-    .field input, .field select, .field textarea {
-      background: #F9FAFB; border: 1px solid var(--border);
-      border-radius: 8px; padding: 9px 12px; color: var(--text);
-      font-size: 13px; font-family: inherit; width: 100%;
-      transition: border-color .15s;
-    }
-    .field input:focus, .field select:focus, .field textarea:focus {
-      outline: none; border-color: var(--accent);
-      box-shadow: 0 0 0 3px rgba(139,92,246,.1);
-    }
+    .field input, .field select, .field textarea { background: #F9FAFB; border: 1px solid var(--border); border-radius: 8px; padding: 9px 12px; color: var(--text); font-size: 13px; font-family: inherit; width: 100%; transition: border-color .15s; }
+    .field input:focus, .field select:focus, .field textarea:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px rgba(139,92,246,.1); }
     .field textarea { min-height: 72px; resize: vertical; }
     select option { background: #fff; color: var(--text); }
     input::placeholder, textarea::placeholder { color: #C4C8D2; }
-
-    /* ── BUTTONS ── */
     .btn { padding: 10px 18px; border-radius: 9px; font-weight: 600; font-size: 13px; cursor: pointer; font-family: inherit; transition: all .15s; border: none; }
     .btn-primary { background: var(--accent); color: #fff; }
     .btn-primary:active { opacity: .85; }
@@ -218,55 +166,24 @@
     .btn-danger { background: #FEF2F2; color: var(--red); border: 1px solid #FECACA; }
     .btn-back { background: none; border: none; color: var(--text2); font-size: 13px; font-weight: 500; cursor: pointer; font-family: inherit; padding: 4px 0; display: flex; align-items: center; gap: 6px; }
     .btn-row { display: flex; gap: 10px; justify-content: flex-end; flex-wrap: wrap; }
-
-    /* ── DETAIL ROWS ── */
-    .detail-row {
-      display: flex; justify-content: space-between; align-items: center;
-      padding: 11px 0; border-bottom: 1px solid var(--border2);
-    }
+    .detail-row { display: flex; justify-content: space-between; align-items: center; padding: 11px 0; border-bottom: 1px solid var(--border2); }
     .detail-row:last-child { border-bottom: none; }
     .detail-label { font-size: 12px; color: var(--text3); font-weight: 500; }
     .detail-value { font-size: 13px; color: var(--text); font-weight: 500; text-align: right; }
-
-    /* ── PROGRESS STEPS ── */
     .steps { display: flex; gap: 5px; padding: 14px 20px; border-bottom: 1px solid var(--border2); }
     .step { flex: 1; text-align: center; }
     .step-bar { height: 4px; border-radius: 2px; background: #F3F4F6; margin-bottom: 5px; }
     .step-label { font-size: 10px; color: var(--text3); font-weight: 500; }
-
-    /* ── PROGRESS BAR (analytics) ── */
     .bar-track { background: #F3F4F6; border-radius: 4px; height: 5px; overflow: hidden; }
     .bar-fill { height: 100%; border-radius: 4px; transition: width .5s ease; }
-
-    /* ── EMPTY STATE ── */
     .empty { text-align: center; padding: 50px 20px; color: var(--text3); }
     .empty-icon { font-size: 36px; margin-bottom: 10px; }
     .empty-title { font-size: 15px; font-weight: 600; margin-bottom: 6px; }
-    .empty-sub { font-size: 12px; margin-bottom: 20px; color: var(--text3); }
-
-    /* ── TOAST ── */
-    #toast {
-      position: fixed; bottom: calc(24px + env(safe-area-inset-bottom));
-      left: 50%; transform: translateX(-50%) translateY(80px);
-      background: #1A1A2E; color: #fff; padding: 11px 20px;
-      border-radius: 20px; font-size: 13px; font-weight: 600;
-      z-index: 999; transition: transform .25s cubic-bezier(.34,1.56,.64,1);
-      white-space: nowrap; box-shadow: 0 8px 24px rgba(0,0,0,.2);
-    }
-    #toast.show { transform: translateX(-50%) translateY(0); }
-    #toast.err { background: #991B1B; }
-    #toast.ok { background: #14532D; }
-    #toast.info { background: #1E3A5F; }
-
-    /* ── HR ── */
+    .empty-sub { font-size: 12px; margin-bottom: 20px; }
     hr.divider { border: none; border-top: 1px solid var(--border); margin: 18px 0; }
-
-    /* ── DETAIL HEADER ── */
     .detail-header { padding: 20px 20px 16px; border-bottom: 1px solid var(--border2); display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; flex-wrap: wrap; }
     .detail-title { font-size: 17px; font-weight: 700; color: var(--text); letter-spacing: -.2px; margin-bottom: 8px; }
     .detail-value-big { font-size: 24px; font-weight: 700; color: var(--green); letter-spacing: -.4px; }
-
-    /* ── REPORT ── */
     .report-mini-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
     @media (min-width: 640px) { .report-mini-grid { grid-template-columns: repeat(4,1fr); } }
     .mini-stat { background: var(--white); border: 1px solid var(--border); border-radius: 10px; padding: 14px 16px; border-top: 3px solid var(--accent); }
@@ -278,15 +195,54 @@
     .mini-row { display: flex; justify-content: space-between; margin-bottom: 6px; }
     .mini-row span:first-child { font-size: 12px; color: var(--text3); }
     .mini-row span:last-child { font-size: 12px; font-weight: 600; }
-
-    /* ── WA LINK ── */
     .wa-link { color: #25D366; font-weight: 600; font-size: 13px; text-decoration: none; display: flex; align-items: center; gap: 4px; }
+
+    /* LOADING */
+    #loading-screen { position: fixed; inset: 0; background: var(--bg); display: flex; align-items: center; justify-content: center; z-index: 998; flex-direction: column; gap: 16px; }
+    #loading-screen.hidden { display: none; }
+    .spinner { width: 32px; height: 32px; border: 3px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin .7s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    #toast { position: fixed; bottom: calc(24px + env(safe-area-inset-bottom)); left: 50%; transform: translateX(-50%) translateY(80px); background: #1A1A2E; color: #fff; padding: 11px 20px; border-radius: 20px; font-size: 13px; font-weight: 600; z-index: 999; transition: transform .25s cubic-bezier(.34,1.56,.64,1); white-space: nowrap; box-shadow: 0 8px 24px rgba(0,0,0,.2); }
+    #toast.show { transform: translateX(-50%) translateY(0); }
+    #toast.err { background: #991B1B; }
+    #toast.ok { background: #14532D; }
+    #toast.info { background: #1E3A5F; }
   </style>
 </head>
 <body>
-<div id="app">
 
-  <!-- HEADER -->
+<!-- LOADING -->
+<div id="loading-screen">
+  <div style="width:40px;height:40px;border-radius:10px;background:linear-gradient(135deg,#7C3AED,#5B21B6);display:flex;align-items:center;justify-content:center;font-size:20px">⚖️</div>
+  <div class="spinner"></div>
+</div>
+
+<!-- LOGIN -->
+<div id="login-screen" class="hidden">
+  <div class="login-box">
+    <div class="login-logo">
+      <div class="login-logo-icon">⚖️</div>
+    </div>
+    <div style="text-align:center;margin-bottom:6px">
+      <div class="login-title">Escritório Naiarha</div>
+    </div>
+    <div class="login-sub">Gestão de Diligências</div>
+    <div class="login-field">
+      <label>E-mail</label>
+      <input type="email" id="login-email" placeholder="seu@email.com" autocomplete="email"/>
+    </div>
+    <div class="login-field">
+      <label>Senha</label>
+      <input type="password" id="login-senha" placeholder="••••••••" autocomplete="current-password"/>
+    </div>
+    <div class="login-err" id="login-err"></div>
+    <button class="login-btn" onclick="doLogin()">Entrar</button>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="app" class="hidden">
   <header id="header">
     <div style="display:flex;align-items:center;gap:10px">
       <button id="menu-btn" onclick="toggleSidebar()">
@@ -300,13 +256,17 @@
         </div>
       </div>
     </div>
-    <button id="new-btn" onclick="goPage('novo')">+ Nova</button>
+    <div style="display:flex;align-items:center;gap:8px">
+      <div class="user-chip" onclick="toggleSidebar()">
+        <div class="user-avatar" id="user-avatar">?</div>
+        <div class="user-name" id="user-name">...</div>
+      </div>
+      <button id="new-btn" onclick="goPage('novo')">+ Nova</button>
+    </div>
   </header>
 
-  <!-- OVERLAY -->
   <div id="overlay" onclick="toggleSidebar()"></div>
 
-  <!-- SIDEBAR -->
   <nav id="sidebar">
     <div class="sidebar-logo">
       <div class="logo-icon" style="width:32px;height:32px;font-size:15px">⚖️</div>
@@ -316,28 +276,25 @@
       </div>
     </div>
     <div class="sidebar-section-label">Menu</div>
-    <button class="nav-item active" id="nav-dashboard" onclick="goPage('dashboard')">
-      <span class="nav-icon">⊞</span> Dashboard
-    </button>
-    <button class="nav-item" id="nav-demandas" onclick="goPage('demandas')">
-      <span class="nav-icon">≡</span> Demandas
-    </button>
-    <button class="nav-item" id="nav-relatorio" onclick="goPage('relatorio')">
-      <span class="nav-icon">↗</span> Relatório
-    </button>
+    <button class="nav-item active" id="nav-dashboard" onclick="goPage('dashboard')"><span class="nav-icon">⊞</span> Dashboard</button>
+    <button class="nav-item" id="nav-demandas" onclick="goPage('demandas')"><span class="nav-icon">≡</span> Demandas</button>
+    <button class="nav-item" id="nav-relatorio" onclick="goPage('relatorio')"><span class="nav-icon">↗</span> Relatório</button>
     <div class="sidebar-footer">
-      <p>v1.0 · MVP<br>Em breve: receitas gerais</p>
+      <p style="font-size:10px;color:var(--text3);margin-bottom:10px">v1.1 · Com Supabase<br>Em breve: receitas gerais</p>
+      <button class="logout-btn" onclick="doLogout()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16,17 21,12 16,7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+        Sair da conta
+      </button>
     </div>
   </nav>
 
-  <!-- BODY -->
   <div id="body">
     <div id="main">
 
-      <!-- ── PAGE: DASHBOARD ── -->
+      <!-- DASHBOARD -->
       <div id="page-dashboard" class="page active">
         <div style="margin-bottom:22px">
-          <div class="page-title">Visão Geral 👋</div>
+          <div class="page-title" id="dash-greeting">Visão Geral 👋</div>
           <div class="page-sub">Resumo de todas as diligências</div>
         </div>
         <div class="stats-grid" id="dash-stats"></div>
@@ -346,7 +303,7 @@
         <div class="card" id="dash-recent"></div>
       </div>
 
-      <!-- ── PAGE: DEMANDAS ── -->
+      <!-- DEMANDAS -->
       <div id="page-demandas" class="page">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
           <div>
@@ -358,7 +315,7 @@
         <div class="card" id="demand-list"></div>
       </div>
 
-      <!-- ── PAGE: NOVO / EDITAR ── -->
+      <!-- NOVO / EDITAR -->
       <div id="page-novo" class="page">
         <div style="display:flex;align-items:center;gap:10px;margin-bottom:20px">
           <button class="btn-back" onclick="goPage('demandas')">
@@ -408,12 +365,12 @@
           <hr class="divider"/>
           <div class="btn-row">
             <button class="btn btn-secondary" onclick="goPage('demandas')">Cancelar</button>
-            <button class="btn btn-primary" onclick="submitForm()">Cadastrar Demanda</button>
+            <button class="btn btn-primary" id="form-submit-btn" onclick="submitForm()">Cadastrar Demanda</button>
           </div>
         </div>
       </div>
 
-      <!-- ── PAGE: DETAIL ── -->
+      <!-- DETAIL -->
       <div id="page-detail" class="page">
         <div style="margin-bottom:20px">
           <button class="btn-back" onclick="goPage('demandas')">
@@ -424,7 +381,7 @@
         <div class="card" id="detail-content"></div>
       </div>
 
-      <!-- ── PAGE: RELATÓRIO ── -->
+      <!-- RELATÓRIO -->
       <div id="page-relatorio" class="page">
         <div style="margin-bottom:22px">
           <div class="page-title">Relatório Financeiro</div>
@@ -438,18 +395,24 @@
         </div>
         <div class="report-mini-grid" id="report-stats" style="margin-bottom:16px"></div>
         <div class="resp-grid" id="report-resp"></div>
-        <div class="card" style="padding:18px 20px;margin-bottom:14px" id="report-plataformas"></div>
+        <div class="card card-pad" style="margin-bottom:14px" id="report-plataformas"></div>
         <div class="card" id="report-list"></div>
       </div>
 
-    </div><!-- /main -->
-  </div><!-- /body -->
-</div><!-- /app -->
+    </div>
+  </div>
+</div>
 
 <div id="toast"></div>
 
 <script>
-// ── DATA ──
+// ── SUPABASE ──
+const SUPA_URL = 'https://ggyngtqknonwnohbzkyj.supabase.co';
+const SUPA_KEY = 'sb_publishable_WJOo1uEpdSXTPoPDlErTJw_vPSe5x1S';
+const { createClient } = supabase;
+const sb = createClient(SUPA_URL, SUPA_KEY);
+
+// ── CONFIG ──
 const STATUS = {
   aguardando_cumprimento: { label:'Aguardando Cumprimento', short:'Pendente',  cls:'badge-pending', dot:'#F59E0B' },
   realizado:              { label:'Realizado',              short:'Realizado', cls:'badge-done',    dot:'#3B82F6' },
@@ -464,396 +427,211 @@ let demands = [];
 let editId = null;
 let filterStatus = 'all';
 let filterResp = 'all';
-let currentPage = 'dashboard';
-
-// ── STORAGE ──
-function load() {
-  try { demands = JSON.parse(localStorage.getItem('diligencias_v1') || '[]'); } catch { demands = []; }
-}
-function save() {
-  try { localStorage.setItem('diligencias_v1', JSON.stringify(demands)); } catch {}
-}
+let currentUser = null;
 
 // ── UTILS ──
-function fmt(v) {
-  const n = parseFloat(String(v||0).replace(',','.'));
-  if(isNaN(n)) return '—';
-  return n.toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
-}
-function fmtDate(s) {
-  if(!s) return '—';
-  const [y,m,d] = s.split('-');
-  return `${d}/${m}/${y}`;
-}
-function fmtMonth(s) {
-  if(!s) return '';
-  const [y,m] = s.split('-');
-  const months = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
-  return `${months[parseInt(m)-1]} ${y}`;
-}
-function badge(status) {
-  const s = STATUS[status];
-  return `<span class="badge ${s.cls}"><span class="badge-dot" style="background:${s.dot}"></span>${s.short}</span>`;
-}
-function badgeFull(status) {
-  const s = STATUS[status];
-  return `<span class="badge ${s.cls}"><span class="badge-dot" style="background:${s.dot}"></span>${s.label}</span>`;
-}
-function progressStrip(status) {
-  const ci = STATUS_FLOW.indexOf(status);
-  const dot = STATUS[status].dot;
-  return `<div class="progress-strip">${STATUS_FLOW.map((_,i)=>`<span style="background:${i<=ci?dot:'#F3F4F6'}"></span>`).join('')}</div>`;
-}
-function showToast(msg, type='ok') {
-  const t = document.getElementById('toast');
-  t.textContent = msg; t.className = type;
-  t.classList.add('show');
-  setTimeout(()=>t.classList.remove('show'), 2800);
-}
-function id(x){ return document.getElementById(x); }
+const fmt = v => { const n=parseFloat(String(v||0).replace(',','.')); return isNaN(n)?'—':n.toLocaleString('pt-BR',{style:'currency',currency:'BRL'}); };
+const fmtDate = s => { if(!s) return '—'; const [y,m,d]=s.split('T')[0].split('-'); return `${d}/${m}/${y}`; };
+const fmtMonth = s => { if(!s) return ''; const [y,m]=s.split('-'); return ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'][parseInt(m)-1]+' '+y; };
+const id = x => document.getElementById(x);
+const badge = s => `<span class="badge ${STATUS[s].cls}"><span class="badge-dot" style="background:${STATUS[s].dot}"></span>${STATUS[s].short}</span>`;
+const badgeFull = s => `<span class="badge ${STATUS[s].cls}"><span class="badge-dot" style="background:${STATUS[s].dot}"></span>${STATUS[s].label}</span>`;
+const progressStrip = s => { const ci=STATUS_FLOW.indexOf(s); const dot=STATUS[s].dot; return `<div class="progress-strip">${STATUS_FLOW.map((_,i)=>`<span style="background:${i<=ci?dot:'#F3F4F6'}"></span>`).join('')}</div>`; };
 
-// ── SIDEBAR ──
-function toggleSidebar() {
-  id('sidebar').classList.toggle('open');
-  id('overlay').classList.toggle('open');
+function showToast(msg, type='ok') {
+  const t=id('toast'); t.textContent=msg; t.className=type; t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),2800);
+}
+
+// ── AUTH ──
+async function doLogin() {
+  const email = id('login-email').value.trim();
+  const senha = id('login-senha').value;
+  id('login-err').textContent = '';
+  if(!email||!senha) { id('login-err').textContent='Preencha e-mail e senha.'; return; }
+  const btn = document.querySelector('.login-btn');
+  btn.textContent = 'Entrando...'; btn.disabled = true;
+  const { error } = await sb.auth.signInWithPassword({ email, password: senha });
+  btn.textContent = 'Entrar'; btn.disabled = false;
+  if(error) { id('login-err').textContent = 'E-mail ou senha incorretos.'; }
+}
+
+async function doLogout() {
+  await sb.auth.signOut();
+}
+
+// ── SESSION ──
+sb.auth.onAuthStateChange(async (event, session) => {
+  id('loading-screen').classList.add('hidden');
+  if(session?.user) {
+    currentUser = session.user;
+    const name = session.user.email.split('@')[0];
+    const displayName = name.charAt(0).toUpperCase() + name.slice(1);
+    id('user-name').textContent = displayName;
+    id('user-avatar').textContent = displayName.charAt(0).toUpperCase();
+    id('dash-greeting').textContent = `Olá, ${displayName}! 👋`;
+    id('login-screen').classList.add('hidden');
+    id('app').classList.remove('hidden');
+    await loadDemands();
+    renderDashboard();
+  } else {
+    currentUser = null;
+    demands = [];
+    id('app').classList.add('hidden');
+    id('login-screen').classList.remove('hidden');
+  }
+});
+
+// ── DATA ──
+async function loadDemands() {
+  const { data, error } = await sb.from('demandas').select('*').order('created_at', { ascending: false });
+  if(!error && data) demands = data;
+}
+
+async function saveDemand(form) {
+  if(editId) {
+    const { error } = await sb.from('demandas').update(form).eq('id', editId);
+    if(error) { showToast('Erro ao salvar.','err'); return false; }
+  } else {
+    const { error } = await sb.from('demandas').insert([form]);
+    if(error) { showToast('Erro ao cadastrar.','err'); return false; }
+  }
+  await loadDemands();
+  return true;
+}
+
+async function updateStatus(did, newStatus) {
+  const { error } = await sb.from('demandas').update({ status: newStatus }).eq('id', did);
+  if(error) { showToast('Erro ao atualizar.','err'); return false; }
+  await loadDemands();
+  return true;
+}
+
+async function deleteDemandDB(did) {
+  const { error } = await sb.from('demandas').delete().eq('id', did);
+  if(error) { showToast('Erro ao remover.','err'); return false; }
+  await loadDemands();
+  return true;
 }
 
 // ── NAVIGATION ──
+function toggleSidebar() { id('sidebar').classList.toggle('open'); id('overlay').classList.toggle('open'); }
+
 function goPage(page, demandId) {
-  // Hide all
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
   document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
-
-  // Show target
-  const pg = id('page-'+page);
-  if(pg) { pg.classList.add('active'); pg.scrollIntoView? void 0 : null; }
-  const nav = id('nav-'+page) || id('nav-demandas');
-  if(nav) nav.classList.add('active');
-
-  currentPage = page;
-  id('sidebar').classList.remove('open');
-  id('overlay').classList.remove('open');
+  const pg = id('page-'+page); if(pg) pg.classList.add('active');
+  const nav = id('nav-'+page)||id('nav-demandas'); if(nav) nav.classList.add('active');
+  id('sidebar').classList.remove('open'); id('overlay').classList.remove('open');
   id('main').scrollTop = 0;
-
-  if(page==='dashboard')  renderDashboard();
-  if(page==='demandas')   renderDemandas();
-  if(page==='detail')     renderDetail(demandId);
-  if(page==='relatorio')  renderRelatorio();
-  if(page==='novo' && !demandId) {
-    editId = null;
-    id('form-title').textContent = 'Nova Demanda';
-    document.querySelector('#page-novo .btn-primary').textContent = 'Cadastrar Demanda';
-    clearForm();
-  }
+  if(page==='dashboard') renderDashboard();
+  if(page==='demandas')  renderDemandas();
+  if(page==='detail')    renderDetail(demandId);
+  if(page==='relatorio') renderRelatorio();
+  if(page==='novo' && !demandId) { editId=null; id('form-title').textContent='Nova Demanda'; id('form-submit-btn').textContent='Cadastrar Demanda'; clearForm(); }
   if(page==='novo' && demandId) {
-    const d = demands.find(x=>x.id===demandId);
-    if(d) { editId=demandId; fillForm(d); id('form-title').textContent='Editar Demanda'; document.querySelector('#page-novo .btn-primary').textContent='Salvar Alterações'; }
+    const d=demands.find(x=>x.id===demandId);
+    if(d){ editId=demandId; fillForm(d); id('form-title').textContent='Editar Demanda'; id('form-submit-btn').textContent='Salvar Alterações'; }
   }
 }
 
 // ── DASHBOARD ──
 function renderDashboard() {
-  const total = demands.length;
-  const pendentes = demands.filter(d=>d.status==='aguardando_cumprimento').length;
-  const totalPago = demands.filter(d=>d.status==='pago').reduce((s,d)=>s+parseFloat(d.valor||0),0);
-  const totalAR   = demands.filter(d=>d.status==='aguardando_pagamento').reduce((s,d)=>s+parseFloat(d.valor||0),0);
-
-  id('dash-stats').innerHTML = `
+  const total=demands.length;
+  const pendentes=demands.filter(d=>d.status==='aguardando_cumprimento').length;
+  const totalPago=demands.filter(d=>d.status==='pago').reduce((s,d)=>s+parseFloat(d.valor||0),0);
+  const totalAR=demands.filter(d=>d.status==='aguardando_pagamento').reduce((s,d)=>s+parseFloat(d.valor||0),0);
+  id('dash-stats').innerHTML=`
     <div class="stat-card" style="border-top-color:#7C3AED"><div class="stat-label">📋 Total</div><div class="stat-value">${total}</div></div>
     <div class="stat-card" style="border-top-color:#D97706"><div class="stat-label">⏳ Pendentes</div><div class="stat-value">${pendentes}</div></div>
     <div class="stat-card" style="border-top-color:#7C3AED"><div class="stat-label">💳 A Receber</div><div class="stat-value sm">${fmt(totalAR)}</div></div>
     <div class="stat-card" style="border-top-color:#059669"><div class="stat-label">✅ Recebido</div><div class="stat-value sm">${fmt(totalPago)}</div></div>
   `;
-
-  // Status bars
-  let statusHtml = STATUS_FLOW.map(s=>{
-    const c = demands.filter(d=>d.status===s).length;
-    const pct = total ? Math.round((c/total)*100) : 0;
-    const dot = STATUS[s].dot;
-    return `<div style="margin-bottom:10px">
-      <div style="display:flex;justify-content:space-between;margin-bottom:4px">
-        <span style="font-size:12px;color:var(--text)">${STATUS[s].label}</span>
-        <span style="font-size:12px;font-weight:700;color:${dot}">${c}</span>
-      </div>
-      <div class="bar-track"><div class="bar-fill" style="width:${pct}%;background:${dot}"></div></div>
-    </div>`;
-  }).join('');
-
-  // Resp panels
-  let respHtml = RESPONSAVEIS.map(r=>{
-    const rd = demands.filter(d=>d.responsavel===r);
-    const rv = rd.reduce((s,d)=>s+parseFloat(d.valor||0),0);
-    return `<div style="margin-bottom:12px;padding-bottom:12px;border-bottom:1px solid var(--border2)">
-      <div style="font-size:13px;font-weight:600;color:var(--text);margin-bottom:5px">👤 ${r}</div>
-      <div style="display:flex;gap:12px">
-        <span style="font-size:12px;color:var(--text3)">${rd.length} dem.</span>
-        <span style="font-size:12px;font-weight:600;color:var(--accent)">${fmt(rv)}</span>
-      </div>
-    </div>`;
-  }).join('');
-
-  id('dash-panels').innerHTML = `
-    <div class="card card-pad">
-      <div class="section-title">Por Status</div>
-      ${statusHtml}
-    </div>
-    <div class="card card-pad">
-      <div class="section-title">Por Responsável</div>
-      ${respHtml}
-    </div>
-  `;
-
-  if(!demands.length) {
-    id('dash-recent').innerHTML = `<div class="empty"><div class="empty-icon">📂</div><div class="empty-title">Nenhuma demanda ainda</div><div class="empty-sub">Cadastre sua primeira</div><button class="btn btn-primary" onclick="goPage('novo')">+ Nova Demanda</button></div>`;
-    return;
-  }
-
-  id('dash-recent').innerHTML = demands.slice(0,5).map(d=>`
-    <div class="demand-row" onclick="goPage('detail','${d.id}')">
-      <div style="flex:1;min-width:0">
-        <div class="demand-title">${d.descricao}</div>
-        <div class="demand-meta">${fmtDate(d.data)} · ${d.local}<br>${d.responsavel}</div>
-      </div>
-      <div class="demand-right">
-        ${badge(d.status)}
-        <div class="demand-value">${fmt(d.valor)}</div>
-      </div>
-    </div>
-  `).join('');
+  const statusHtml=STATUS_FLOW.map(s=>{ const c=demands.filter(d=>d.status===s).length; const pct=total?Math.round((c/total)*100):0; return `<div style="margin-bottom:10px"><div style="display:flex;justify-content:space-between;margin-bottom:4px"><span style="font-size:12px;color:var(--text)">${STATUS[s].label}</span><span style="font-size:12px;font-weight:700;color:${STATUS[s].dot}">${c}</span></div><div class="bar-track"><div class="bar-fill" style="width:${pct}%;background:${STATUS[s].dot}"></div></div></div>`; }).join('');
+  const respHtml=RESPONSAVEIS.map(r=>{ const rd=demands.filter(d=>d.responsavel===r); const rv=rd.reduce((s,d)=>s+parseFloat(d.valor||0),0); return `<div style="margin-bottom:12px;padding-bottom:12px;border-bottom:1px solid var(--border2)"><div style="font-size:13px;font-weight:600;color:var(--text);margin-bottom:5px">👤 ${r}</div><div style="display:flex;gap:12px"><span style="font-size:12px;color:var(--text3)">${rd.length} dem.</span><span style="font-size:12px;font-weight:600;color:var(--accent)">${fmt(rv)}</span></div></div>`; }).join('');
+  id('dash-panels').innerHTML=`<div class="card card-pad"><div class="section-title">Por Status</div>${statusHtml}</div><div class="card card-pad"><div class="section-title">Por Responsável</div>${respHtml}</div>`;
+  if(!demands.length){ id('dash-recent').innerHTML=`<div class="empty"><div class="empty-icon">📂</div><div class="empty-title">Nenhuma demanda ainda</div><div class="empty-sub">Cadastre sua primeira</div><button class="btn btn-primary" onclick="goPage('novo')">+ Nova Demanda</button></div>`; return; }
+  id('dash-recent').innerHTML=demands.slice(0,5).map(d=>`<div class="demand-row" onclick="goPage('detail','${d.id}')"><div style="flex:1;min-width:0"><div class="demand-title">${d.descricao}</div><div class="demand-meta">${fmtDate(d.data)} · ${d.local}<br>${d.responsavel}</div></div><div class="demand-right">${badge(d.status)}<div class="demand-value">${fmt(d.valor)}</div></div></div>`).join('');
 }
 
 // ── DEMANDAS ──
 function renderDemandas() {
-  // Filters
-  const statusBtns = ['all',...STATUS_FLOW].map(s=>{
-    const lbl = s==='all'?'Todos':STATUS[s].short;
-    return `<button class="filter-btn${filterStatus===s?' active':''}" onclick="setFilter('status','${s}')">${lbl}</button>`;
-  }).join('');
-  const respBtns = RESPONSAVEIS.map(r=>`<button class="filter-btn${filterResp===r?' active':''}" onclick="setFilter('resp','${r}')">${r}</button>`).join('');
-  id('filters').innerHTML = statusBtns + `<div class="filter-divider"></div>` + respBtns;
-
-  const filtered = demands.filter(d=>{
-    if(filterStatus!=='all' && d.status!==filterStatus) return false;
-    if(filterResp!=='all' && d.responsavel!==filterResp) return false;
-    return true;
-  });
-
-  id('demand-count').textContent = `${filtered.length} resultado(s)`;
-
-  if(!filtered.length) {
-    id('demand-list').innerHTML = `<div class="empty"><div class="empty-icon">📂</div><div class="empty-title">Nenhuma demanda</div><div class="empty-sub">Tente outros filtros ou cadastre uma nova</div><button class="btn btn-primary" onclick="goPage('novo')">+ Nova Demanda</button></div>`;
-    return;
-  }
-
-  id('demand-list').innerHTML = filtered.map(d=>`
-    <div onclick="goPage('detail','${d.id}')">
-      <div class="demand-row">
-        <div style="flex:1;min-width:0">
-          <div class="demand-title">${d.descricao}</div>
-          <div class="demand-meta">${d.plataforma} · ${d.responsavel}<br>${fmtDate(d.data)} · 📍 ${d.local}</div>
-        </div>
-        <div class="demand-right">
-          ${badgeFull(d.status)}
-          <div class="demand-value">${fmt(d.valor)}</div>
-          ${d.previsao_pagamento?`<div style="font-size:11px;color:var(--text3)">Pgto: ${fmtDate(d.previsao_pagamento)}</div>`:''}
-        </div>
-      </div>
-      ${progressStrip(d.status)}
-    </div>
-  `).join('');
+  const statusBtns=['all',...STATUS_FLOW].map(s=>{ const lbl=s==='all'?'Todos':STATUS[s].short; return `<button class="filter-btn${filterStatus===s?' active':''}" onclick="setFilter('status','${s}')">${lbl}</button>`; }).join('');
+  const respBtns=RESPONSAVEIS.map(r=>`<button class="filter-btn${filterResp===r?' active':''}" onclick="setFilter('resp','${r}')">${r}</button>`).join('');
+  id('filters').innerHTML=statusBtns+`<div class="filter-divider"></div>`+respBtns;
+  const filtered=demands.filter(d=>{ if(filterStatus!=='all'&&d.status!==filterStatus) return false; if(filterResp!=='all'&&d.responsavel!==filterResp) return false; return true; });
+  id('demand-count').textContent=`${filtered.length} resultado(s)`;
+  if(!filtered.length){ id('demand-list').innerHTML=`<div class="empty"><div class="empty-icon">📂</div><div class="empty-title">Nenhuma demanda</div><div class="empty-sub">Tente outros filtros ou cadastre uma nova</div><button class="btn btn-primary" onclick="goPage('novo')">+ Nova Demanda</button></div>`; return; }
+  id('demand-list').innerHTML=filtered.map(d=>`<div onclick="goPage('detail','${d.id}')"><div class="demand-row"><div style="flex:1;min-width:0"><div class="demand-title">${d.descricao}</div><div class="demand-meta">${d.plataforma} · ${d.responsavel}<br>${fmtDate(d.data)} · 📍 ${d.local}</div></div><div class="demand-right">${badgeFull(d.status)}<div class="demand-value">${fmt(d.valor)}</div>${d.previsao_pagamento?`<div style="font-size:11px;color:var(--text3)">Pgto: ${fmtDate(d.previsao_pagamento)}</div>`:''}</div></div>${progressStrip(d.status)}</div>`).join('');
 }
 
 function setFilter(type, val) {
-  if(type==='status') filterStatus = filterStatus===val && val!=='all' ? 'all' : val;
-  if(type==='resp')   filterResp   = filterResp===val ? 'all' : val;
+  if(type==='status') filterStatus=filterStatus===val&&val!=='all'?'all':val;
+  if(type==='resp')   filterResp=filterResp===val?'all':val;
   renderDemandas();
 }
 
 // ── DETAIL ──
 function renderDetail(did) {
-  const d = demands.find(x=>x.id===did);
-  if(!d) { goPage('demandas'); return; }
-
-  const ci = STATUS_FLOW.indexOf(d.status);
-  const dot = STATUS[d.status].dot;
-
-  const steps = STATUS_FLOW.map((s,i)=>`
-    <div class="step">
-      <div class="step-bar" style="background:${i<=ci?dot:'#F3F4F6'};opacity:${i===ci?1:i<ci?.5:.15}"></div>
-      <div class="step-label" style="color:${i===ci?dot:'var(--text3)'};font-weight:${i===ci?700:400}">${STATUS[s].short}</div>
-    </div>
-  `).join('');
-
-  const waBtn = d.contratante_whatsapp
-    ? `<a href="https://wa.me/55${d.contratante_whatsapp.replace(/\D/g,'')}" target="_blank" class="wa-link">
-        <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
-        ${d.contratante_whatsapp}
-      </a>`
-    : '<span style="color:var(--text3)">—</span>';
-
-  const advanceBtn = d.status !== 'pago'
-    ? `<button class="btn btn-primary" onclick="advanceStatus('${d.id}')">Avançar Status →</button>`
-    : '';
-
-  id('detail-content').innerHTML = `
-    <div class="detail-header">
-      <div>
-        <div class="detail-title">${d.descricao}</div>
-        ${badgeFull(d.status)}
-      </div>
-      <div class="detail-value-big">${fmt(d.valor)}</div>
-    </div>
-    <div class="steps">${steps}</div>
-    <div style="padding:0 20px">
-      <div class="detail-row"><span class="detail-label">📅 Data</span><span class="detail-value">${fmtDate(d.data)}</span></div>
-      <div class="detail-row"><span class="detail-label">📍 Local</span><span class="detail-value">${d.local}</span></div>
-      <div class="detail-row"><span class="detail-label">🏢 Plataforma</span><span class="detail-value">${d.plataforma}</span></div>
-      <div class="detail-row"><span class="detail-label">👤 Responsável</span><span class="detail-value">${d.responsavel}</span></div>
-      <div class="detail-row"><span class="detail-label">💳 Previsão Pgto</span><span class="detail-value">${fmtDate(d.previsao_pagamento)}</span></div>
-      <div class="detail-row"><span class="detail-label">🙋 Contratante</span><span class="detail-value">${d.contratante_nome||'—'}</span></div>
-      <div class="detail-row" style="border-bottom:none"><span class="detail-label">📱 WhatsApp</span>${waBtn}</div>
-    </div>
-    <div style="padding:14px 20px;border-top:1px solid var(--border2);display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px">
-      <button class="btn btn-danger" onclick="deleteDemand('${d.id}')">Remover</button>
-      <div style="display:flex;gap:10px">
-        <button class="btn btn-secondary" onclick="goPage('novo','${d.id}')">Editar</button>
-        ${advanceBtn}
-      </div>
-    </div>
-  `;
+  const d=demands.find(x=>x.id===did); if(!d){ goPage('demandas'); return; }
+  const ci=STATUS_FLOW.indexOf(d.status); const dot=STATUS[d.status].dot;
+  const steps=STATUS_FLOW.map((s,i)=>`<div class="step"><div class="step-bar" style="background:${i<=ci?dot:'#F3F4F6'};opacity:${i===ci?1:i<ci?.5:.15}"></div><div class="step-label" style="color:${i===ci?dot:'var(--text3)'};font-weight:${i===ci?700:400}">${STATUS[s].short}</div></div>`).join('');
+  const waBtn=d.contratante_whatsapp?`<a href="https://wa.me/55${d.contratante_whatsapp.replace(/\D/g,'')}" target="_blank" class="wa-link"><svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>${d.contratante_whatsapp}</a>`:'<span style="color:var(--text3)">—</span>';
+  const advBtn=d.status!=='pago'?`<button class="btn btn-primary" onclick="advanceStatus('${d.id}')">Avançar Status →</button>`:'';
+  id('detail-content').innerHTML=`<div class="detail-header"><div><div class="detail-title">${d.descricao}</div>${badgeFull(d.status)}</div><div class="detail-value-big">${fmt(d.valor)}</div></div><div class="steps">${steps}</div><div style="padding:0 20px"><div class="detail-row"><span class="detail-label">📅 Data</span><span class="detail-value">${fmtDate(d.data)}</span></div><div class="detail-row"><span class="detail-label">📍 Local</span><span class="detail-value">${d.local}</span></div><div class="detail-row"><span class="detail-label">🏢 Plataforma</span><span class="detail-value">${d.plataforma}</span></div><div class="detail-row"><span class="detail-label">👤 Responsável</span><span class="detail-value">${d.responsavel}</span></div><div class="detail-row"><span class="detail-label">💳 Previsão Pgto</span><span class="detail-value">${fmtDate(d.previsao_pagamento)}</span></div><div class="detail-row"><span class="detail-label">🙋 Contratante</span><span class="detail-value">${d.contratante_nome||'—'}</span></div><div class="detail-row" style="border-bottom:none"><span class="detail-label">📱 WhatsApp</span>${waBtn}</div></div><div style="padding:14px 20px;border-top:1px solid var(--border2);display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px"><button class="btn btn-danger" onclick="deleteDemand('${d.id}')">Remover</button><div style="display:flex;gap:10px"><button class="btn btn-secondary" onclick="goPage('novo','${d.id}')">Editar</button>${advBtn}</div></div>`;
 }
 
 // ── RELATÓRIO ──
 function renderRelatorio() {
-  const month = id('report-month').value;
-  id('report-month-label').textContent = fmtMonth(month);
-
-  const rd = month
-    ? demands.filter(d=>d.previsao_pagamento?.startsWith(month)||d.data?.startsWith(month))
-    : demands;
-
-  const total    = rd.reduce((s,d)=>s+parseFloat(d.valor||0),0);
-  const pago     = rd.filter(d=>d.status==='pago').reduce((s,d)=>s+parseFloat(d.valor||0),0);
-  const areceber = rd.filter(d=>d.status==='aguardando_pagamento').reduce((s,d)=>s+parseFloat(d.valor||0),0);
-
-  id('report-stats').innerHTML = [
-    {label:'Volume Total', value:fmt(total),    accent:'#7C3AED'},
-    {label:'Recebido',     value:fmt(pago),     accent:'#059669'},
-    {label:'A Receber',    value:fmt(areceber), accent:'#D97706'},
-    {label:'Demandas',     value:rd.length,     accent:'#2563EB'},
-  ].map(s=>`<div class="mini-stat" style="border-top-color:${s.accent}"><div class="label">${s.label}</div><div class="value">${s.value}</div></div>`).join('');
-
-  id('report-resp').innerHTML = RESPONSAVEIS.map(r=>{
-    const rr = rd.filter(d=>d.responsavel===r);
-    const rv = rr.reduce((s,d)=>s+parseFloat(d.valor||0),0);
-    const rp = rr.filter(d=>d.status==='pago').reduce((s,d)=>s+parseFloat(d.valor||0),0);
-    const rar= rr.filter(d=>d.status==='aguardando_pagamento').reduce((s,d)=>s+parseFloat(d.valor||0),0);
-    return `<div class="resp-card">
-      <div class="resp-name">👤 ${r}</div>
-      <div class="mini-row"><span>Demandas</span><span>${rr.length}</span></div>
-      <div class="mini-row"><span>Volume</span><span style="color:#7C3AED">${fmt(rv)}</span></div>
-      <div class="mini-row"><span>Recebido</span><span style="color:#059669">${fmt(rp)}</span></div>
-      <div class="mini-row"><span>A Receber</span><span style="color:#D97706">${fmt(rar)}</span></div>
-    </div>`;
-  }).join('');
-
-  const pltHtml = PLATAFORMAS.map(p=>{
-    const pd = rd.filter(d=>d.plataforma===p);
-    const pv = pd.reduce((s,d)=>s+parseFloat(d.valor||0),0);
-    const pct= total ? Math.round((pv/total)*100) : 0;
-    return `<div style="margin-bottom:12px">
-      <div style="display:flex;justify-content:space-between;margin-bottom:4px">
-        <span style="font-size:13px;color:var(--text)">${p}</span>
-        <span style="font-size:12px;font-weight:600;color:var(--accent)">${fmt(pv)} · ${pd.length} dem.</span>
-      </div>
-      <div class="bar-track"><div class="bar-fill" style="width:${pct}%;background:var(--accent)"></div></div>
-    </div>`;
-  }).join('');
-  id('report-plataformas').innerHTML = `<div class="section-title" style="margin-bottom:14px">Por Plataforma</div>${pltHtml}`;
-
-  if(!rd.length) { id('report-list').innerHTML=''; return; }
-  id('report-list').innerHTML = `
-    <div style="padding:12px 18px;border-bottom:1px solid var(--border2)">
-      <div class="section-title" style="margin:0">Detalhamento · ${rd.length} demanda(s)</div>
-    </div>
-    ${rd.map((d,i)=>`
-      <div class="demand-row" onclick="goPage('detail','${d.id}')">
-        <div style="flex:1;min-width:0">
-          <div class="demand-title">${d.descricao}</div>
-          <div class="demand-meta">${fmtDate(d.data)} · ${d.responsavel} · ${d.plataforma}</div>
-        </div>
-        <div class="demand-right">
-          ${badge(d.status)}
-          <div class="demand-value">${fmt(d.valor)}</div>
-        </div>
-      </div>
-    `).join('')}
-  `;
+  const month=id('report-month').value; id('report-month-label').textContent=fmtMonth(month);
+  const rd=month?demands.filter(d=>d.previsao_pagamento?.startsWith(month)||d.data?.startsWith(month)):demands;
+  const total=rd.reduce((s,d)=>s+parseFloat(d.valor||0),0);
+  const pago=rd.filter(d=>d.status==='pago').reduce((s,d)=>s+parseFloat(d.valor||0),0);
+  const ar=rd.filter(d=>d.status==='aguardando_pagamento').reduce((s,d)=>s+parseFloat(d.valor||0),0);
+  id('report-stats').innerHTML=[{label:'Volume Total',value:fmt(total),accent:'#7C3AED'},{label:'Recebido',value:fmt(pago),accent:'#059669'},{label:'A Receber',value:fmt(ar),accent:'#D97706'},{label:'Demandas',value:rd.length,accent:'#2563EB'}].map(s=>`<div class="mini-stat" style="border-top-color:${s.accent}"><div class="label">${s.label}</div><div class="value">${s.value}</div></div>`).join('');
+  id('report-resp').innerHTML=RESPONSAVEIS.map(r=>{ const rr=rd.filter(d=>d.responsavel===r); const rv=rr.reduce((s,d)=>s+parseFloat(d.valor||0),0); const rp=rr.filter(d=>d.status==='pago').reduce((s,d)=>s+parseFloat(d.valor||0),0); const rar=rr.filter(d=>d.status==='aguardando_pagamento').reduce((s,d)=>s+parseFloat(d.valor||0),0); return `<div class="resp-card"><div class="resp-name">👤 ${r}</div><div class="mini-row"><span>Demandas</span><span>${rr.length}</span></div><div class="mini-row"><span>Volume</span><span style="color:#7C3AED">${fmt(rv)}</span></div><div class="mini-row"><span>Recebido</span><span style="color:#059669">${fmt(rp)}</span></div><div class="mini-row"><span>A Receber</span><span style="color:#D97706">${fmt(rar)}</span></div></div>`; }).join('');
+  const pltHtml=PLATAFORMAS.map(p=>{ const pd=rd.filter(d=>d.plataforma===p); const pv=pd.reduce((s,d)=>s+parseFloat(d.valor||0),0); const pct=total?Math.round((pv/total)*100):0; return `<div style="margin-bottom:12px"><div style="display:flex;justify-content:space-between;margin-bottom:4px"><span style="font-size:13px;color:var(--text)">${p}</span><span style="font-size:12px;font-weight:600;color:var(--accent)">${fmt(pv)} · ${pd.length} dem.</span></div><div class="bar-track"><div class="bar-fill" style="width:${pct}%;background:var(--accent)"></div></div></div>`; }).join('');
+  id('report-plataformas').innerHTML=`<div class="section-title" style="margin-bottom:14px">Por Plataforma</div>${pltHtml}`;
+  if(!rd.length){ id('report-list').innerHTML=''; return; }
+  id('report-list').innerHTML=`<div style="padding:12px 18px;border-bottom:1px solid var(--border2)"><div class="section-title" style="margin:0">Detalhamento · ${rd.length} demanda(s)</div></div>${rd.map(d=>`<div class="demand-row" onclick="goPage('detail','${d.id}')"><div style="flex:1;min-width:0"><div class="demand-title">${d.descricao}</div><div class="demand-meta">${fmtDate(d.data)} · ${d.responsavel} · ${d.plataforma}</div></div><div class="demand-right">${badge(d.status)}<div class="demand-value">${fmt(d.valor)}</div></div></div>`).join('')}`;
 }
 
 // ── FORM ──
-function clearForm() {
-  ['f-data','f-local','f-descricao','f-valor','f-previsao','f-nome','f-whatsapp'].forEach(x=>id(x).value='');
-  id('f-plataforma').value=''; id('f-responsavel').value=''; id('f-status').value='aguardando_cumprimento';
-}
-function fillForm(d) {
-  id('f-data').value=d.data||''; id('f-local').value=d.local||'';
-  id('f-descricao').value=d.descricao||''; id('f-valor').value=d.valor||'';
-  id('f-plataforma').value=d.plataforma||''; id('f-responsavel').value=d.responsavel||'';
-  id('f-status').value=d.status||'aguardando_cumprimento'; id('f-previsao').value=d.previsao_pagamento||'';
-  id('f-nome').value=d.contratante_nome||''; id('f-whatsapp').value=d.contratante_whatsapp||'';
-}
-function getForm() {
-  return {
-    data: id('f-data').value, local: id('f-local').value,
-    descricao: id('f-descricao').value, valor: id('f-valor').value,
-    plataforma: id('f-plataforma').value, responsavel: id('f-responsavel').value,
-    status: id('f-status').value, previsao_pagamento: id('f-previsao').value,
-    contratante_nome: id('f-nome').value, contratante_whatsapp: id('f-whatsapp').value,
-  };
-}
-function submitForm() {
-  const f = getForm();
-  if(!f.data||!f.local||!f.descricao||!f.valor||!f.plataforma||!f.responsavel)
-    return showToast('Preencha os campos obrigatórios.','err');
-  if(editId) {
-    demands = demands.map(d=>d.id===editId?{...f,id:editId}:d);
-    showToast('Demanda atualizada!');
-  } else {
-    demands.unshift({...f, id:Date.now().toString()});
-    showToast('Demanda cadastrada!');
-  }
-  save(); editId=null; goPage('demandas');
+function clearForm() { ['f-data','f-local','f-descricao','f-valor','f-previsao','f-nome','f-whatsapp'].forEach(x=>id(x).value=''); id('f-plataforma').value=''; id('f-responsavel').value=''; id('f-status').value='aguardando_cumprimento'; }
+function fillForm(d) { id('f-data').value=d.data?.split('T')[0]||''; id('f-local').value=d.local||''; id('f-descricao').value=d.descricao||''; id('f-valor').value=d.valor||''; id('f-plataforma').value=d.plataforma||''; id('f-responsavel').value=d.responsavel||''; id('f-status').value=d.status||'aguardando_cumprimento'; id('f-previsao').value=d.previsao_pagamento?.split('T')[0]||''; id('f-nome').value=d.contratante_nome||''; id('f-whatsapp').value=d.contratante_whatsapp||''; }
+function getForm() { return { data:id('f-data').value||null, local:id('f-local').value, descricao:id('f-descricao').value, valor:parseFloat(id('f-valor').value)||null, plataforma:id('f-plataforma').value, responsavel:id('f-responsavel').value, status:id('f-status').value, previsao_pagamento:id('f-previsao').value||null, contratante_nome:id('f-nome').value, contratante_whatsapp:id('f-whatsapp').value }; }
+
+async function submitForm() {
+  const f=getForm();
+  if(!f.data||!f.local||!f.descricao||!f.valor||!f.plataforma||!f.responsavel) return showToast('Preencha os campos obrigatórios.','err');
+  const btn=id('form-submit-btn'); btn.textContent='Salvando...'; btn.disabled=true;
+  const ok=await saveDemand(f);
+  btn.disabled=false; btn.textContent=editId?'Salvar Alterações':'Cadastrar Demanda';
+  if(ok){ showToast(editId?'Demanda atualizada!':'Demanda cadastrada!'); editId=null; goPage('demandas'); }
 }
 
-// ── ADVANCE STATUS ──
-function advanceStatus(did) {
-  const d = demands.find(x=>x.id===did); if(!d) return;
-  const i = STATUS_FLOW.indexOf(d.status);
-  if(i===STATUS_FLOW.length-1) return;
-  d.status = STATUS_FLOW[i+1];
-  save(); showToast(`Status: ${STATUS[d.status].label}`);
-  renderDetail(did);
+async function advanceStatus(did) {
+  const d=demands.find(x=>x.id===did); if(!d) return;
+  const i=STATUS_FLOW.indexOf(d.status); if(i===STATUS_FLOW.length-1) return;
+  const newStatus=STATUS_FLOW[i+1];
+  const ok=await updateStatus(did,newStatus);
+  if(ok){ showToast(`Status: ${STATUS[newStatus].label}`); renderDetail(did); }
 }
 
-// ── DELETE ──
-function deleteDemand(did) {
+async function deleteDemand(did) {
   if(!confirm('Remover esta demanda?')) return;
-  demands = demands.filter(d=>d.id!==did);
-  save(); showToast('Removida.','info'); goPage('demandas');
+  const ok=await deleteDemandDB(did);
+  if(ok){ showToast('Removida.','info'); goPage('demandas'); }
 }
 
-// ── INIT ──
-load();
-renderDashboard();
+// Enter no login
+document.getElementById('login-senha').addEventListener('keydown', e=>{ if(e.key==='Enter') doLogin(); });
+document.getElementById('login-email').addEventListener('keydown', e=>{ if(e.key==='Enter') document.getElementById('login-senha').focus(); });
 </script>
 
-<!-- SERVICE WORKER -->
 <script>
 if('serviceWorker' in navigator) {
-  window.addEventListener('load', ()=>{
-    navigator.serviceWorker.register('sw.js').catch(()=>{});
-  });
+  window.addEventListener('load',()=>{ navigator.serviceWorker.register('sw.js').catch(()=>{}); });
 }
 </script>
 </body>
