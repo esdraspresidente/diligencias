@@ -125,8 +125,14 @@
       return q;
     }
 
-    // Expõe init para ser chamado manualmente após listeners registrados
-    return { auth, from, init };
+    // Inicia restauração de sessão após DOM estar pronto
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', init);
+    } else {
+      setTimeout(init, 0);
+    }
+
+    return { auth, from };
   })();
   </script>
   <style>
@@ -223,9 +229,10 @@
 
     #main { flex: 1; padding: 24px 16px; padding-bottom: calc(24px + env(safe-area-inset-bottom)); }
     @media (min-width: 768px) {
-      #sidebar { position: sticky; top: var(--header-h); height: calc(100vh - var(--header-h)); transform: none !important; }
+      #sidebar { position: sticky; top: var(--header-h); height: calc(100vh - var(--header-h)); transform: none !important; flex-shrink: 0; width: var(--sidebar-w); }
       #overlay { display: none !important; }
-      #main { padding: 28px 28px; }
+      #main { padding: 28px 28px; flex: 1; min-width: 0; overflow-y: auto; }
+      #body { overflow: hidden; }
     }
 
     .page { display: none; animation: fadeUp .2s ease; }
@@ -394,7 +401,7 @@
     <button class="nav-item" id="nav-demandas" onclick="goPage('demandas')"><span class="nav-icon">≡</span> Demandas</button>
     <button class="nav-item" id="nav-relatorio" onclick="goPage('relatorio')"><span class="nav-icon">↗</span> Relatório</button>
     <div class="sidebar-footer">
-      <p style="font-size:10px;color:var(--text3);margin-bottom:10px">v1.4 · Com Supabase</p>
+      <p style="font-size:10px;color:var(--text3);margin-bottom:10px">v1.5 · Com Supabase</p>
       <button class="logout-btn" onclick="doLogout()">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16,17 21,12 16,7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
         Sair da conta
@@ -572,7 +579,6 @@ async function doLogout() {
 }
 
 // ── SESSION ──
-// Inicia verificação de sessão APÓS o listener estar registrado
 sb.auth.onAuthStateChange(async (event, session) => {
   id('loading-screen').classList.add('hidden');
   if(session?.user) {
@@ -603,9 +609,6 @@ sb.auth.onAuthStateChange(async (event, session) => {
     id('login-screen').classList.remove('hidden');
   }
 });
-
-// Inicia verificação de sessão agora que o listener está registrado
-sb.init();
 
 // ── DATA ──
 async function loadDemands() {
