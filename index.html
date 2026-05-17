@@ -15,82 +15,125 @@
   <link rel="preconnect" href="https://fonts.googleapis.com"/>
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600;9..40,700&display=swap" rel="stylesheet"/>
   <script>
-  // Mini cliente Supabase REST puro — sem eval, funciona no GitHub Pages
   const supabase = (() => {
     const url = 'https://ggyngtqknonwnohbzkyj.supabase.co';
     const key = 'sb_publishable_WJOo1uEpdSXTPoPDlErTJw_vPSe5x1S';
     let _session = null;
     let _listeners = [];
+    let _ready = false;
 
     function hdrs(extra) {
       const h = {'Content-Type':'application/json','apikey':key,...(extra||{})};
       if(_session?.access_token) h['Authorization']='Bearer '+_session.access_token;
       return h;
     }
-    function notify(ev,s){ _listeners.forEach(fn=>{try{fn(ev,s);}catch{}}); }
 
-    // Restaura sessão salva
-    (async()=>{
-      try{
-        const raw=localStorage.getItem('supa_sess');
-        if(raw){
-          const s=JSON.parse(raw);
-          if(s?.access_token){
-            const r=await fetch(url+'/auth/v1/user',{headers:{'apikey':key,'Authorization':'Bearer '+s.access_token}});
-            if(r.ok){_session=s;notify('SIGNED_IN',s);return;}
+    function notify(ev, s) {
+      _listeners.forEach(fn => { try { fn(ev, s); } catch(e){} });
+    }
+
+    function init() {
+      try {
+        const raw = localStorage.getItem('supa_sess');
+        if (raw) {
+          const s = JSON.parse(raw);
+          if (s?.access_token) {
+            // Valida token no servidor
+            fetch(url+'/auth/v1/user', {
+              headers: {'apikey':key,'Authorization':'Bearer '+s.access_token}
+            }).then(r => {
+              if (r.ok) {
+                _session = s;
+                notify('SIGNED_IN', s);
+              } else {
+                localStorage.removeItem('supa_sess');
+                notify('SIGNED_OUT', null);
+              }
+            }).catch(() => {
+              localStorage.removeItem('supa_sess');
+              notify('SIGNED_OUT', null);
+            });
+            return;
           }
         }
-      }catch{}
-      notify('SIGNED_OUT',null);
-    })();
+      } catch(e) {}
+      notify('SIGNED_OUT', null);
+    }
 
-    const auth={
-      onAuthStateChange(fn){_listeners.push(fn);},
-      async signInWithPassword({email,password}){
-        const r=await fetch(url+'/auth/v1/token?grant_type=password',{method:'POST',headers:{'Content-Type':'application/json','apikey':key},body:JSON.stringify({email,password})});
-        const d=await r.json();
-        if(!r.ok)return{error:d};
-        _session=d;localStorage.setItem('supa_sess',JSON.stringify(d));notify('SIGNED_IN',d);
-        return{data:d,error:null};
+    const auth = {
+      onAuthStateChange(fn) { _listeners.push(fn); },
+      async signInWithPassword({email, password}) {
+        const r = await fetch(url+'/auth/v1/token?grant_type=password', {
+          method: 'POST',
+          headers: {'Content-Type':'application/json','apikey':key},
+          body: JSON.stringify({email, password})
+        });
+        const d = await r.json();
+        if (!r.ok) return { error: d };
+        _session = d;
+        localStorage.setItem('supa_sess', JSON.stringify(d));
+        notify('SIGNED_IN', d);
+        return { data: d, error: null };
       },
-      async signOut(){
-        try{await fetch(url+'/auth/v1/logout',{method:'POST',headers:hdrs()});}catch{}
-        _session=null;localStorage.removeItem('supa_sess');notify('SIGNED_OUT',null);
+      async signOut() {
+        try { await fetch(url+'/auth/v1/logout', {method:'POST', headers:hdrs()}); } catch(e) {}
+        _session = null;
+        localStorage.removeItem('supa_sess');
+        notify('SIGNED_OUT', null);
       }
     };
 
-    function from(table){
-      let _eqCol,_eqVal,_orderCol,_orderAsc=true;
-      const q={
-        select(){return q;},
-        eq(c,v){_eqCol=c;_eqVal=v;return q;},
-        order(c,{ascending=true}={}){_orderCol=c;_orderAsc=ascending;return q;},
-        async insert(rows){
-          const body=Array.isArray(rows)?rows[0]:rows;
-          const r=await fetch(url+'/rest/v1/'+table,{method:'POST',headers:{...hdrs(),'Prefer':'return=representation'},body:JSON.stringify(body)});
-          const d=await r.json();return r.ok?{data:d,error:null}:{data:null,error:d};
+    function from(table) {
+      let _eqCol, _eqVal, _orderCol, _orderAsc = true;
+      const q = {
+        select() { return q; },
+        eq(c, v) { _eqCol = c; _eqVal = v; return q; },
+        order(c, {ascending=true}={}) { _orderCol = c; _orderAsc = ascending; return q; },
+        async insert(rows) {
+          const body = Array.isArray(rows) ? rows[0] : rows;
+          const r = await fetch(url+'/rest/v1/'+table, {
+            method: 'POST',
+            headers: {...hdrs(), 'Prefer':'return=representation'},
+            body: JSON.stringify(body)
+          });
+          const d = await r.json();
+          return r.ok ? {data:d,error:null} : {data:null,error:d};
         },
-        async update(obj){
-          const qs=_eqCol?'?'+_eqCol+'=eq.'+encodeURIComponent(_eqVal):'';
-          const r=await fetch(url+'/rest/v1/'+table+qs,{method:'PATCH',headers:{...hdrs(),'Prefer':'return=representation'},body:JSON.stringify(obj)});
-          const d=await r.json();return r.ok?{data:d,error:null}:{data:null,error:d};
+        async update(obj) {
+          const qs = _eqCol ? '?'+_eqCol+'=eq.'+encodeURIComponent(_eqVal) : '';
+          const r = await fetch(url+'/rest/v1/'+table+qs, {
+            method: 'PATCH',
+            headers: {...hdrs(), 'Prefer':'return=representation'},
+            body: JSON.stringify(obj)
+          });
+          const d = await r.json();
+          return r.ok ? {data:d,error:null} : {data:null,error:d};
         },
-        async delete(){
-          const qs=_eqCol?'?'+_eqCol+'=eq.'+encodeURIComponent(_eqVal):'';
-          const r=await fetch(url+'/rest/v1/'+table+qs,{method:'DELETE',headers:hdrs()});
-          return r.ok?{error:null}:{error:await r.json()};
+        async delete() {
+          const qs = _eqCol ? '?'+_eqCol+'=eq.'+encodeURIComponent(_eqVal) : '';
+          const r = await fetch(url+'/rest/v1/'+table+qs, {method:'DELETE', headers:hdrs()});
+          return r.ok ? {error:null} : {error: await r.json()};
         },
-        then(resolve){
-          let qs='?select=*';
-          if(_eqCol)qs+='&'+_eqCol+'=eq.'+encodeURIComponent(_eqVal);
-          if(_orderCol)qs+='&order='+_orderCol+'.'+((_orderAsc)?'asc':'desc');
-          fetch(url+'/rest/v1/'+table+qs,{headers:hdrs()})
-            .then(r=>r.json().then(d=>resolve(r.ok?{data:d,error:null}:{data:null,error:d})));
+        then(resolve) {
+          let qs = '?select=*';
+          if (_eqCol) qs += '&'+_eqCol+'=eq.'+encodeURIComponent(_eqVal);
+          if (_orderCol) qs += '&order='+_orderCol+'.'+(_orderAsc?'asc':'desc');
+          fetch(url+'/rest/v1/'+table+qs, {headers:hdrs()})
+            .then(r => r.json().then(d => resolve(r.ok ? {data:d,error:null} : {data:null,error:d})))
+            .catch(e => resolve({data:null, error:e}));
         }
       };
       return q;
     }
-    return{auth,from};
+
+    // Inicia restauração de sessão após DOM estar pronto
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', init);
+    } else {
+      setTimeout(init, 0);
+    }
+
+    return { auth, from };
   })();
   </script>
   <style>
