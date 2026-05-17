@@ -1,27 +1,16 @@
-// Service Worker minimalista — não intercepta requisições externas
-const CACHE = 'diligencias-v2';
+// Service worker v2 — limpa caches antigos e não intercepta nada
+const CACHE_VERSION = 'v2';
 
-self.addEventListener('install', e => {
+self.addEventListener('install', (event) => {
   self.skipWaiting();
 });
 
-self.addEventListener('activate', e => {
-  e.waitUntil(
+self.addEventListener('activate', (event) => {
+  event.waitUntil(
     caches.keys().then(keys =>
-      Promise.all(keys.map(k => caches.delete(k)))
-    )
+      Promise.all(keys.map(key => caches.delete(key)))
+    ).then(() => self.clients.claim())
   );
-  self.clients.claim();
 });
 
-// Não intercepta nada — deixa todas as requisições passarem normalmente
-self.addEventListener('fetch', e => {
-  // Só serve cache para arquivos locais do app
-  const url = new URL(e.request.url);
-  if (url.origin !== location.origin) return; // ignora requisições externas
-  if (e.request.method !== 'GET') return;
-  // Para arquivos locais, tenta rede primeiro
-  e.respondWith(
-    fetch(e.request).catch(() => caches.match(e.request))
-  );
-});
+// Não intercepta fetch — deixa tudo ir direto para a rede
