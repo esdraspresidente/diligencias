@@ -677,7 +677,7 @@ function renderDashboard() {
   const total=demands.length;
   const pendentes=demands.filter(d=>d.status==='aguardando_cumprimento').length;
   const totalPago=demands.filter(d=>d.status==='pago').reduce((s,d)=>s+parseFloat(d.valor||0),0);
-  const totalAR=demands.filter(d=>d.status==='aguardando_pagamento').reduce((s,d)=>s+parseFloat(d.valor||0),0);
+  const totalAR=demands.filter(d=>d.status!=='pago').reduce((s,d)=>s+parseFloat(d.valor||0),0);
   id('dash-stats').innerHTML=`
     <div class="stat-card" style="border-top-color:#7C3AED"><div class="stat-label">📋 Total</div><div class="stat-value">${total}</div></div>
     <div class="stat-card" style="border-top-color:#D97706"><div class="stat-label">⏳ Pendentes</div><div class="stat-value">${pendentes}</div></div>
@@ -724,9 +724,9 @@ function renderRelatorio() {
   const rd=month?demands.filter(d=>d.previsao_pagamento?.startsWith(month)||d.data?.startsWith(month)):demands;
   const total=rd.reduce((s,d)=>s+parseFloat(d.valor||0),0);
   const pago=rd.filter(d=>d.status==='pago').reduce((s,d)=>s+parseFloat(d.valor||0),0);
-  const ar=rd.filter(d=>d.status==='aguardando_pagamento').reduce((s,d)=>s+parseFloat(d.valor||0),0);
+  const ar=rd.filter(d=>d.status!=='pago').reduce((s,d)=>s+parseFloat(d.valor||0),0);
   id('report-stats').innerHTML=[{label:'Volume Total',value:fmt(total),accent:'#7C3AED'},{label:'Recebido',value:fmt(pago),accent:'#059669'},{label:'A Receber',value:fmt(ar),accent:'#D97706'},{label:'Demandas',value:rd.length,accent:'#2563EB'}].map(s=>`<div class="mini-stat" style="border-top-color:${s.accent}"><div class="label">${s.label}</div><div class="value">${s.value}</div></div>`).join('');
-  id('report-resp').innerHTML=RESPONSAVEIS.map(r=>{ const rr=rd.filter(d=>d.responsavel===r); const rv=rr.reduce((s,d)=>s+parseFloat(d.valor||0),0); const rp=rr.filter(d=>d.status==='pago').reduce((s,d)=>s+parseFloat(d.valor||0),0); const rar=rr.filter(d=>d.status==='aguardando_pagamento').reduce((s,d)=>s+parseFloat(d.valor||0),0); return `<div class="resp-card"><div class="resp-name">👤 ${r}</div><div class="mini-row"><span>Demandas</span><span>${rr.length}</span></div><div class="mini-row"><span>Volume</span><span style="color:#7C3AED">${fmt(rv)}</span></div><div class="mini-row"><span>Recebido</span><span style="color:#059669">${fmt(rp)}</span></div><div class="mini-row"><span>A Receber</span><span style="color:#D97706">${fmt(rar)}</span></div></div>`; }).join('');
+  id('report-resp').innerHTML=RESPONSAVEIS.map(r=>{ const rr=rd.filter(d=>d.responsavel===r); const rv=rr.reduce((s,d)=>s+parseFloat(d.valor||0),0); const rp=rr.filter(d=>d.status==='pago').reduce((s,d)=>s+parseFloat(d.valor||0),0); const rar=rr.filter(d=>d.status!=='pago').reduce((s,d)=>s+parseFloat(d.valor||0),0); return `<div class="resp-card"><div class="resp-name">👤 ${r}</div><div class="mini-row"><span>Demandas</span><span>${rr.length}</span></div><div class="mini-row"><span>Volume</span><span style="color:#7C3AED">${fmt(rv)}</span></div><div class="mini-row"><span>Recebido</span><span style="color:#059669">${fmt(rp)}</span></div><div class="mini-row"><span>A Receber</span><span style="color:#D97706">${fmt(rar)}</span></div></div>`; }).join('');
   const pltHtml=PLATAFORMAS.map(p=>{ const pd=rd.filter(d=>d.plataforma===p); const pv=pd.reduce((s,d)=>s+parseFloat(d.valor||0),0); const pct=total?Math.round((pv/total)*100):0; return `<div style="margin-bottom:12px"><div style="display:flex;justify-content:space-between;margin-bottom:4px"><span style="font-size:13px;color:var(--text)">${p}</span><span style="font-size:12px;font-weight:600;color:var(--accent)">${fmt(pv)} · ${pd.length} dem.</span></div><div class="bar-track"><div class="bar-fill" style="width:${pct}%;background:var(--accent)"></div></div></div>`; }).join('');
   id('report-plataformas').innerHTML=`<div class="section-title" style="margin-bottom:14px">Por Plataforma</div>${pltHtml}`;
   if(!rd.length){ id('report-list').innerHTML=''; return; }
