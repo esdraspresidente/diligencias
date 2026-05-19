@@ -625,6 +625,18 @@ async function loadDemands() {
   if(!error && data) demands = data;
 }
 
+async function criarEventoCalendar(form) {
+  try {
+    await fetch('https://ggyngtqknonwnohbzkyj.supabase.co/functions/v1/criar-evento-calendar', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'apikey': 'sb_publishable_WJOo1uEpdSXTPoPDlErTJw_vPSe5x1S' },
+      body: JSON.stringify(form)
+    });
+  } catch(e) {
+    console.warn('Evento Calendar não criado:', e);
+  }
+}
+
 async function saveDemand(form) {
   if(editId) {
     const { error } = await sb.from('demandas').update(form).eq('id', editId);
@@ -632,6 +644,7 @@ async function saveDemand(form) {
   } else {
     const { error } = await sb.from('demandas').insert([form]);
     if(error) { showToast('Erro ao cadastrar.','err'); return false; }
+    await criarEventoCalendar(form);
   }
   await loadDemands();
   return true;
