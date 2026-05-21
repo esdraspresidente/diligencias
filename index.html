@@ -10,7 +10,6 @@
   <meta name="theme-color" content="#5B21B6"/>
   <title>Diligências — Escritório Naiarha</title>
   <link rel="manifest" href="manifest.json"/>
-  <script src="push.js" defer></script>
   <link rel="apple-touch-icon" href="icon-192.png"/>
   <link rel="icon" href="icon-192.png"/>
   <!-- Usando fonte do sistema para evitar CSP -->
@@ -611,10 +610,6 @@ sb.auth.onAuthStateChange(async (event, session) => {
     id('dash-greeting').textContent = `Olá, ${displayName}! 👋`;
     id('login-screen').classList.add('hidden');
     id('app').classList.remove('hidden');
-    // Registra notificações push para este usuário
-    if(typeof registrarPush === 'function') {
-      registrarPush(session.user.email, session.user.id);
-    }
     await loadDemands();
     renderDashboard();
   } else {
@@ -645,37 +640,13 @@ async function criarEventoCalendar(form) {
 
 async function enviarNotificacao(form) {
   try {
-    const SUPABASE_URL = 'https://ggyngtqknonwnohbzkyj.supabase.co';
-    const SUPABASE_KEY = 'sb_publishable_WJOo1uEpdSXTPoPDlErTJw_vPSe5x1S';
-
-    // Busca todas as assinaturas push
-    const r = await fetch(`${SUPABASE_URL}/rest/v1/push_subscriptions?select=*`, {
-      headers: { 'apikey': SUPABASE_KEY }
-    });
-    const subs = await r.json();
-    if(!Array.isArray(subs) || !subs.length) return;
-
-    // Descobre qual assinatura pertence ao responsável
-    const responsavel = (form.responsavel||'').toLowerCase();
-    const subAlvo = subs.find(s => s.email && s.email.toLowerCase().includes(responsavel.split(' ')[0]));
-    if(!subAlvo) return;
-
-    // Envia push via Edge Function
-    await fetch(`${SUPABASE_URL}/functions/v1/notificacoes`, {
+    await fetch('https://ggyngtqknonwnohbzkyj.supabase.co/functions/v1/notificar-responsavel', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer ' + (JSON.parse(localStorage.getItem('supa_sess'))?.access_token || '')
-      },
-      body: JSON.stringify({
-        tipo: 'nova_diligencia',
-        subscription: subAlvo.subscription,
-        title: '📋 Nova diligência para você!',
-        body: form.descricao + (form.local ? ' — ' + form.local : '')
-      })
+      headers: { 'Content-Type': 'application/json', 'apikey': 'sb_publishable_WJOo1uEpdSXTPoPDlErTJw_vPSe5x1S' },
+      body: JSON.stringify(form)
     });
   } catch(e) {
-    console.warn('Notificação push não enviada:', e);
+    console.warn('Notificação não enviada:', e);
   }
 }
 
@@ -710,7 +681,7 @@ async function deleteDemandDB(did) {
 // ── NAVIGATION ──
 function toggleSidebar() { id('sidebar').classList.toggle('open'); id('overlay').classList.toggle('open'); }
 
-function goPage(page, demandId) {
+function goPage(page, demandId, filtroStatus) {
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
   document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
   const pg = id('page-'+page); if(pg) pg.classList.add('active');
@@ -718,7 +689,16 @@ function goPage(page, demandId) {
   id('sidebar').classList.remove('open'); id('overlay').classList.remove('open');
   id('main').scrollTop = 0;
   if(page==='dashboard') renderDashboard();
-  if(page==='demandas')  renderDemandas();
+  if(page==='demandas') {
+    if(filtroStatus==='a_receber') {
+      filterStatus='all'; filterResp='all';
+      renderDemandasFiltradas(demands.filter(d=>d.status!=='pago'), '💳 A Receber');
+    } else if(filtroStatus) {
+      filterStatus=filtroStatus; filterResp='all'; renderDemandas();
+    } else {
+      renderDemandas();
+    }
+  }
   if(page==='detail')    renderDetail(demandId);
   if(page==='relatorio') renderRelatorio();
   if(page==='novo' && !demandId) { editId=null; id('form-title').textContent='Nova Demanda'; id('form-submit-btn').textContent='Cadastrar Demanda'; clearForm(); }
@@ -735,16 +715,30 @@ function renderDashboard() {
   const totalPago=demands.filter(d=>d.status==='pago').reduce((s,d)=>s+parseFloat(d.valor||0),0);
   const totalAR=demands.filter(d=>d.status!=='pago').reduce((s,d)=>s+parseFloat(d.valor||0),0);
   id('dash-stats').innerHTML=`
-    <div class="stat-card" style="border-top-color:#7C3AED"><div class="stat-label">📋 Total</div><div class="stat-value">${total}</div></div>
-    <div class="stat-card" style="border-top-color:#D97706"><div class="stat-label">⏳ Pendentes</div><div class="stat-value">${pendentes}</div></div>
-    <div class="stat-card" style="border-top-color:#7C3AED"><div class="stat-label">💳 A Receber</div><div class="stat-value sm">${fmt(totalAR)}</div></div>
-    <div class="stat-card" style="border-top-color:#059669"><div class="stat-label">✅ Recebido</div><div class="stat-value sm">${fmt(totalPago)}</div></div>
+    <div class="stat-card" style="border-top-color:#7C3AED;cursor:pointer" onclick="goPage('demandas')"><div class="stat-label">📋 Total</div><div class="stat-value">${total}</div></div>
+    <div class="stat-card" style="border-top-color:#D97706;cursor:pointer" onclick="goPage('demandas',null,'aguardando_cumprimento')"><div class="stat-label">⏳ Pendentes</div><div class="stat-value">${pendentes}</div></div>
+    <div class="stat-card" style="border-top-color:#7C3AED;cursor:pointer" onclick="goPage('demandas',null,'a_receber')"><div class="stat-label">💳 A Receber</div><div class="stat-value sm">${fmt(totalAR)}</div></div>
+    <div class="stat-card" style="border-top-color:#059669;cursor:pointer" onclick="goPage('demandas',null,'pago')"><div class="stat-label">✅ Recebido</div><div class="stat-value sm">${fmt(totalPago)}</div></div>
   `;
   const statusHtml=STATUS_FLOW.map(s=>{ const c=demands.filter(d=>d.status===s).length; const pct=total?Math.round((c/total)*100):0; return `<div style="margin-bottom:10px"><div style="display:flex;justify-content:space-between;margin-bottom:4px"><span style="font-size:12px;color:var(--text)">${STATUS[s].label}</span><span style="font-size:12px;font-weight:700;color:${STATUS[s].dot}">${c}</span></div><div class="bar-track"><div class="bar-fill" style="width:${pct}%;background:${STATUS[s].dot}"></div></div></div>`; }).join('');
   const respHtml=RESPONSAVEIS.map(r=>{ const rd=demands.filter(d=>d.responsavel===r); const rv=rd.reduce((s,d)=>s+parseFloat(d.valor||0),0); return `<div style="margin-bottom:12px;padding-bottom:12px;border-bottom:1px solid var(--border2)"><div style="font-size:13px;font-weight:600;color:var(--text);margin-bottom:5px">👤 ${r}</div><div style="display:flex;gap:12px"><span style="font-size:12px;color:var(--text3)">${rd.length} dem.</span><span style="font-size:12px;font-weight:600;color:var(--accent)">${fmt(rv)}</span></div></div>`; }).join('');
   id('dash-panels').innerHTML=`<div class="card card-pad"><div class="section-title">Por Status</div>${statusHtml}</div><div class="card card-pad"><div class="section-title">Por Responsável</div>${respHtml}</div>`;
   if(!demands.length){ id('dash-recent').innerHTML=`<div class="empty"><div class="empty-icon">📂</div><div class="empty-title">Nenhuma demanda ainda</div><div class="empty-sub">Cadastre sua primeira</div><button class="btn btn-primary" onclick="goPage('novo')">+ Nova Demanda</button></div>`; return; }
   id('dash-recent').innerHTML=demands.slice(0,5).map(d=>`<div class="demand-row" onclick="goPage('detail','${d.id}')"><div style="flex:1;min-width:0"><div class="demand-title">${d.descricao}</div><div class="demand-meta">${fmtDate(d.data)} · ${d.local}<br>${d.responsavel}</div></div><div class="demand-right">${badge(d.status)}<div class="demand-value">${fmt(d.valor)}</div></div></div>`).join('');
+}
+
+// ── DEMANDAS FILTRADAS (chamada pelo dashboard) ──
+function renderDemandasFiltradas(lista, titulo) {
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  id('page-demandas').classList.add('active');
+  id('nav-demandas').classList.add('active');
+  id('sidebar').classList.remove('open'); id('overlay').classList.remove('open');
+  id('main').scrollTop = 0;
+  id('filters').innerHTML = `<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap"><span style="font-size:13px;font-weight:600;color:var(--accent)">${titulo}</span><button class="filter-btn" onclick="goPage('demandas')" style="font-size:11px">✕ Limpar filtro</button></div>`;
+  id('demand-count').textContent = lista.length + ' resultado(s)';
+  if(!lista.length){ id('demand-list').innerHTML=`<div class="empty"><div class="empty-icon">📂</div><div class="empty-title">Nenhuma demanda</div></div>`; return; }
+  id('demand-list').innerHTML=lista.map(d=>`<div onclick="goPage('detail','${d.id}')"><div class="demand-row"><div style="flex:1;min-width:0"><div class="demand-title">${d.descricao}</div><div class="demand-meta">${d.plataforma} · ${d.responsavel}<br>${fmtDate(d.data)} · 📍 ${d.local}</div></div><div class="demand-right">${badgeFull(d.status)}<div class="demand-value">${fmt(d.valor)}</div>${d.previsao_pagamento?`<div style="font-size:11px;color:var(--text3)">Pgto: ${fmtDate(d.previsao_pagamento)}</div>`:''}</div></div>${progressStrip(d.status)}</div>`).join('');
 }
 
 // ── DEMANDAS ──
