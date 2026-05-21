@@ -640,16 +640,33 @@ async function criarEventoCalendar(form) {
 
 async function enviarNotificacao(form) {
   try {
-    await fetch('https://ggyngtqknonwnohbzkyj.supabase.co/functions/v1/notificar-responsavel', {
+    const SUPABASE_URL = 'https://ggyngtqknonwnohbzkyj.supabase.co';
+    const SUPABASE_KEY = 'sb_publishable_WJOo1uEpdSXTPoPDlErTJw_vPSe5x1S';
+    const r = await fetch(`${SUPABASE_URL}/rest/v1/push_subscriptions?select=*`, {
+      headers: { 'apikey': SUPABASE_KEY }
+    });
+    const subs = await r.json();
+    if(!Array.isArray(subs) || !subs.length) return;
+    const responsavel = (form.responsavel||'').toLowerCase();
+    const subAlvo = subs.find(s => s.email && s.email.toLowerCase().includes(responsavel.split(' ')[0]));
+    if(!subAlvo) return;
+    await fetch(`${SUPABASE_URL}/functions/v1/notificacoes`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'apikey': 'sb_publishable_WJOo1uEpdSXTPoPDlErTJw_vPSe5x1S' },
-      body: JSON.stringify(form)
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + (JSON.parse(localStorage.getItem('supa_sess'))?.access_token || '')
+      },
+      body: JSON.stringify({
+        tipo: 'nova_diligencia',
+        subscription: subAlvo.subscription,
+        title: '📋 Nova diligência para você!',
+        body: form.descricao + (form.local ? ' — ' + form.local : '')
+      })
     });
   } catch(e) {
-    console.warn('Notificação não enviada:', e);
+    console.warn('Notificação push não enviada:', e);
   }
 }
-
 async function saveDemand(form) {
   if(editId) {
     const { error } = await sb.from('demandas').update(form).eq('id', editId);
