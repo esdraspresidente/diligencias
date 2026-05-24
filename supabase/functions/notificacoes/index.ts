@@ -32,8 +32,13 @@ async function enviarPush(subscription: object, title: string, body: string) {
   }
 }
 
-Deno.serve(async () => {
-  const hoje = new Date().toISOString().split('T')[0]; // "2025-06-15"
+Deno.serve(async (req) => {
+  if (req.method === 'OPTIONS') {
+    return new Response('ok', { headers: {
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+    }});
+  }  const hoje = new Date().toISOString().split('T')[0]; // "2025-06-15"
 
   // Busca todas as assinaturas push
   const assinaturas = await db('push_subscriptions?select=*');
@@ -86,7 +91,12 @@ Deno.serve(async () => {
     }
   }
 
-  return new Response(JSON.stringify({ ok: true, hoje }), {
-    headers: { 'Content-Type': 'application/json' }
-  });
+  const corsHeaders = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+};
+
+return new Response(JSON.stringify({ ok: true, hoje }), {
+  headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+});
 });
