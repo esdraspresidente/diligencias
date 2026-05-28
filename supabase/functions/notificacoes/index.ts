@@ -13,8 +13,7 @@ const VAPID_EMAIL       = 'mailto:esdraspresidente@gmail.com';
 // =============================================
 
 const SUPABASE_URL = 'https://ggyngtqknonwnohbzkyj.supabase.co';
-const SUPABASE_SERVICE_KEY = Deno.env.get('SUPABASE_SECRET_KEYS') ?? Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '';
-
+const SUPABASE_SERVICE_KEY = Deno.env.get('SERVICE_KEY') ?? '';
 webpush.setVapidDetails(VAPID_EMAIL, VAPID_PUBLIC_KEY, VAPID_PRIVATE_KEY);
 
 async function db(path: string) {
