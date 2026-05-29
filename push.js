@@ -1,6 +1,6 @@
 // =============================================
 // CHAVE VAPID PÚBLICA
-const VAPID_PUBLIC_KEY = 'BGR2CcH_T5bkMTcNWHZg7D7eAAJ-G9AQf26_Z87pMeX1iUg9Ms6l-7S8-dxCXnBk9MiWBeZWcX8pZ1WY2mBmzqc';
+const VAPID_PUBLIC_KEY = 'BLSVJl_y2B0PZAl62N-GbcRrNOtYEx2VBwdahwTjNLWc0MA167wEUwQV2D5u5MCKI6WMGecp1uUZ0oE2BWwnG8o';
 // =============================================
 
 const _PUSH_URL = 'https://ggyngtqknonwnohbzkyj.supabase.co';
@@ -13,79 +13,66 @@ function urlBase64ToUint8Array(base64String) {
   return new Uint8Array([...rawData].map(c => c.charCodeAt(0)));
 }
 
-// ── Chamada após login ──────────────────────────────────────
-// Guarda os dados do usuário e decide se mostra o botão
+// Chamada após login
 function verificarPush(userId, userEmail) {
-  window._pushUserId  = userId;
-  window._pushEmail   = userEmail;
+  window._pushUserId = userId;
+  window._pushEmail  = userEmail;
 
   if (!('serviceWorker' in navigator) || !('PushManager' in window)) return;
 
   if (Notification.permission === 'granted') {
-    // Já autorizou antes — registra silenciosamente em background
     _executarRegistroPush(userId, userEmail);
   } else {
-    // Mostra o botão para o usuário tocar
     const btn = document.getElementById('btn-ativar-notif');
     if (btn) btn.style.display = 'flex';
   }
 }
 
-// ── Chamada pelo clique do botão ────────────────────────────
-// IMPORTANTE: Chrome só aceita Notification.requestPermission()
-// quando vem de um toque/clique direto do usuário
+// Chamada pelo clique do botão
 async function ativarNotificacoes() {
   const btn = document.getElementById('btn-ativar-notif');
   if (btn) { btn.textContent = '⏳ Ativando...'; btn.disabled = true; }
-
   await _executarRegistroPush(window._pushUserId, window._pushEmail);
 }
 
-// ── Lógica principal (não chamar diretamente) ───────────────
 async function _executarRegistroPush(userId, userEmail) {
   const btn = document.getElementById('btn-ativar-notif');
   try {
     if (!userId) throw new Error('userId indefinido');
 
-    // Pede permissão (só funciona aqui pois veio de clique do usuário,
-    // ou porque já era 'granted')
     if (Notification.permission !== 'granted') {
       const perm = await Notification.requestPermission();
       if (perm !== 'granted') {
-        if (btn) {
-          btn.textContent = '🔕 Notificações bloqueadas';
-          btn.disabled = false;
-        }
+        if (btn) { btn.textContent = '🔕 Notificações bloqueadas'; btn.disabled = false; }
         return;
       }
     }
 
-    // Registra o Service Worker com o path correto para GitHub Pages
     const swReg = await navigator.serviceWorker.register('/diligencias/sw.js', {
       scope: '/diligencias/'
     });
     await navigator.serviceWorker.ready;
 
-    // Pega assinatura existente ou cria uma nova
-    let subscription = await swReg.pushManager.getSubscription();
-    if (!subscription) {
-      subscription = await swReg.pushManager.subscribe({
-        userVisibleOnly: true,
-        applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY)
-      });
-    }
+    // Cancela assinatura antiga para garantir chaves novas
+    const velha = await swReg.pushManager.getSubscription();
+    if (velha) await velha.unsubscribe();
 
-    // Monta o header de autenticação
+    // Cria assinatura nova com as chaves VAPID corretas
+    const subscription = await swReg.pushManager.subscribe({
+      userVisibleOnly: true,
+      applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY)
+    });
+
     const sess = JSON.parse(localStorage.getItem('supa_sess') || '{}');
     const authHeader = sess?.access_token ? 'Bearer ' + sess.access_token : 'Bearer ';
 
-    // Remove registro antigo deste usuário (evita duplicatas)
+    // Remove registro antigo deste usuário
     await fetch(`${_PUSH_URL}/rest/v1/push_subscriptions?user_id=eq.${encodeURIComponent(userId)}`, {
       method: 'DELETE',
       headers: { 'apikey': _PUSH_KEY, 'Authorization': authHeader }
     });
 
-    // Salva a nova assinatura no Supabase
+    // Salva nova assinatura
     const resp = await fetch(`${_PUSH_URL}/rest/v1/push_subscriptions`, {
       method: 'POST',
       headers: {
@@ -103,9 +90,8 @@ async function _executarRegistroPush(userId, userEmail) {
 
     if (!resp.ok) throw new Error('Supabase status ' + resp.status);
 
-    // Sucesso — esconde o botão
     if (btn) btn.style.display = 'none';
-    console.log('✅ Notificações push registradas com sucesso!');
+    console.log('✅ Push registrado com chaves novas!');
 
   } catch (err) {
     console.error('Erro ao registrar push:', err);
