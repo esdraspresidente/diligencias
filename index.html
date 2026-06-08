@@ -410,6 +410,7 @@
     <button class="nav-item active" id="nav-dashboard" onclick="goPage('dashboard')"><span class="nav-icon">⊞</span> Dashboard</button>
     <button class="nav-item" id="nav-demandas" onclick="goPage('demandas')"><span class="nav-icon">≡</span> Demandas</button>
     <button class="nav-item" id="nav-relatorio" onclick="goPage('relatorio')"><span class="nav-icon">↗</span> Relatório</button>
+    <button class="nav-item" id="nav-calculadora" onclick="goPage('calculadora')"><span class="nav-icon">🧮</span> Calculadora</button>
     <div class="sidebar-footer">
       <p style="font-size:10px;color:var(--text3);margin-bottom:10px">v2.3 · Com Supabase</p>
       <button class="logout-btn" onclick="doLogout()">
@@ -529,6 +530,105 @@
         <div class="resp-grid" id="report-resp"></div>
         <div class="card card-pad" style="margin-bottom:14px" id="report-plataformas"></div>
         <div class="card" id="report-list"></div>
+      </div>
+
+      <!-- CALCULADORA -->
+      <div id="page-calculadora" class="page">
+        <div style="margin-bottom:22px">
+          <div class="page-title">🧮 Calculadora</div>
+          <div class="page-sub">Simule o custo antes de aceitar uma diligência</div>
+        </div>
+
+        <div class="card card-pad" style="margin-bottom:14px">
+          <div class="section-title">Origem</div>
+          <div style="display:flex;gap:8px;margin-bottom:0" id="calc-origem-pills">
+            <button class="filter-btn active" id="calc-pill-base" onclick="calcSetOrigem('BASE')">📍 Base — Pinhais</button>
+            <button class="filter-btn" id="calc-pill-outro" onclick="calcSetOrigem('OUTRO')">📌 Outro endereço</button>
+          </div>
+          <div id="calc-outro-wrap" style="display:none;margin-top:12px">
+            <div class="field">
+              <label>Endereço de origem</label>
+              <input type="text" id="calc-origem-custom" placeholder="Rua, número, cidade…"/>
+            </div>
+          </div>
+        </div>
+
+        <div class="card card-pad" style="margin-bottom:14px">
+          <div class="section-title">Destino</div>
+          <div class="field" style="margin-bottom:12px">
+            <label>Endereço de destino</label>
+            <input type="text" id="calc-destino" placeholder="Ex: Fórum de Colombo, Rua X 200 Curitiba…"
+              onkeydown="if(event.key==='Enter') calcularRota()"/>
+          </div>
+          <button class="btn btn-primary" style="width:100%" onclick="calcularRota()" id="calc-btn">
+            Calcular rota
+          </button>
+        </div>
+
+        <div class="card card-pad" style="margin-bottom:14px">
+          <div style="display:flex;justify-content:space-between;align-items:center;cursor:pointer" onclick="calcToggleParams()">
+            <div class="section-title" style="margin:0">⚙ Parâmetros</div>
+            <span id="calc-params-chev" style="font-size:12px;color:var(--text3)">▼</span>
+          </div>
+          <div id="calc-params-body" style="display:none;margin-top:14px">
+            <div class="form-grid">
+              <div class="field">
+                <label>Consumo (km/L)</label>
+                <input type="number" id="calc-consumo" value="10.5" step="0.1"/>
+              </div>
+              <div class="field">
+                <label>Gasolina (R$/L)</label>
+                <input type="number" id="calc-gas" value="6.99" step="0.01"/>
+              </div>
+              <div class="field form-full">
+                <label>Lucro mínimo (R$)</label>
+                <input type="number" id="calc-lucro" value="50" step="1"/>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div id="calc-loading" style="display:none;text-align:center;padding:20px;color:var(--text3);font-size:13px">
+          <div class="spinner" style="margin:0 auto 10px"></div>
+          Pesquisando rota real…
+        </div>
+
+        <div id="calc-erro" style="display:none" class="card card-pad">
+          <p style="color:var(--red);font-size:13px" id="calc-erro-msg"></p>
+        </div>
+
+        <div id="calc-resultado" style="display:none">
+          <p id="calc-rota-desc" style="font-size:12px;color:var(--text3);margin-bottom:10px;padding:0 2px"></p>
+          <div class="stats-grid" style="margin-bottom:12px">
+            <div class="stat-card" style="border-top-color:var(--blue)">
+              <div class="stat-label">Distância (ida)</div>
+              <div class="stat-value sm" id="calc-r-km-ida">—</div>
+            </div>
+            <div class="stat-card" style="border-top-color:var(--blue)">
+              <div class="stat-label">Tempo (ida)</div>
+              <div class="stat-value sm" id="calc-r-min-ida">—</div>
+            </div>
+            <div class="stat-card" style="border-top-color:var(--accent)">
+              <div class="stat-label">Ida + volta</div>
+              <div class="stat-value sm" id="calc-r-km-total">—</div>
+            </div>
+            <div class="stat-card" style="border-top-color:var(--accent)">
+              <div class="stat-label">Tempo total</div>
+              <div class="stat-value sm" id="calc-r-min-total">—</div>
+            </div>
+          </div>
+          <div class="card card-pad" style="margin-bottom:12px;display:flex;justify-content:space-between;align-items:center">
+            <span style="font-size:13px;color:var(--text2)">⛽ Combustível (ida + volta)</span>
+            <span style="font-size:16px;font-weight:700;color:var(--text)" id="calc-r-comb">—</span>
+          </div>
+          <div class="card card-pad" style="background:var(--accent);border-color:var(--accent);display:flex;justify-content:space-between;align-items:center">
+            <div>
+              <div style="font-size:11px;font-weight:700;color:rgba(255,255,255,.7);text-transform:uppercase;letter-spacing:.5px">Valor mínimo sugerido</div>
+              <div id="calc-r-lucro-desc" style="font-size:11px;color:rgba(255,255,255,.5);margin-top:2px">—</div>
+            </div>
+            <div style="font-size:26px;font-weight:700;color:#fff" id="calc-r-min">—</div>
+          </div>
+        </div>
       </div>
 
     </div>
@@ -735,6 +835,7 @@ function goPage(page, demandId, filtroStatus) {
   }
   if(page==='detail')    renderDetail(demandId);
   if(page==='relatorio') renderRelatorio();
+  if(page==='calculadora') { /* página estática, sem render necessário */ }
   if(page==='novo' && !demandId) { editId=null; id('form-title').textContent='Nova Demanda'; id('form-submit-btn').textContent='Cadastrar Demanda'; clearForm(); }
   if(page==='novo' && demandId) {
     const d=demands.find(x=>x.id===demandId);
@@ -848,6 +949,100 @@ async function deleteDemand(did) {
 // Enter no login
 document.getElementById('login-senha').addEventListener('keydown', e=>{ if(e.key==='Enter') doLogin(); });
 document.getElementById('login-email').addEventListener('keydown', e=>{ if(e.key==='Enter') document.getElementById('login-senha').focus(); });
+
+// ── CALCULADORA ──
+const CALC_BASE = 'Jacob Macanhan, 481, Pinhais, PR, Brasil';
+let calcOrigemMode = 'BASE';
+
+function calcSetOrigem(modo) {
+  calcOrigemMode = modo;
+  id('calc-pill-base').classList.toggle('active', modo === 'BASE');
+  id('calc-pill-outro').classList.toggle('active', modo === 'OUTRO');
+  id('calc-outro-wrap').style.display = modo === 'OUTRO' ? 'block' : 'none';
+}
+
+function calcToggleParams() {
+  const body = id('calc-params-body');
+  const chev = id('calc-params-chev');
+  const open = body.style.display === 'block';
+  body.style.display = open ? 'none' : 'block';
+  chev.textContent = open ? '▼' : '▲';
+}
+
+function calcFmtMin(m) {
+  if (m < 60) return m + ' min';
+  const h = Math.floor(m / 60), r = m % 60;
+  return r > 0 ? h + 'h ' + r + 'min' : h + 'h';
+}
+
+async function calcularRota() {
+  const destino = (id('calc-destino').value || '').trim();
+  if (!destino) { showToast('Informe o endereço de destino.', 'err'); return; }
+  const origemCustom = (id('calc-origem-custom').value || '').trim();
+  if (calcOrigemMode === 'OUTRO' && !origemCustom) { showToast('Informe o endereço de origem.', 'err'); return; }
+
+  const origem = calcOrigemMode === 'BASE' ? CALC_BASE : origemCustom;
+  const consumo = parseFloat(id('calc-consumo').value) || 10.5;
+  const gas     = parseFloat(id('calc-gas').value) || 6.99;
+  const lucro   = parseFloat(id('calc-lucro').value) || 50;
+
+  id('calc-btn').textContent = 'Buscando…';
+  id('calc-btn').disabled = true;
+  id('calc-loading').style.display = 'block';
+  id('calc-resultado').style.display = 'none';
+  id('calc-erro').style.display = 'none';
+
+  try {
+    const prompt = `Pesquise a distância de carro entre "${origem}" e "${destino}" no Brasil.\nEncontre a distância em km e o tempo estimado em minutos pela rota mais comum.\nUse a ferramenta de busca para garantir dados reais e precisos.\nResponda APENAS com um JSON válido, sem texto antes ou depois, sem markdown:\n{"distancia_km": número, "tempo_minutos": número, "rota": "descrição breve da rota"}`;
+
+    const resp = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 1000,
+        tools: [{ type: 'web_search_20250305', name: 'web_search' }],
+        messages: [{ role: 'user', content: prompt }]
+      })
+    });
+
+    if (!resp.ok) throw new Error('Erro na API (' + resp.status + ')');
+    const data = await resp.json();
+    const textBlock = (data.content || []).find(b => b.type === 'text');
+    if (!textBlock) throw new Error('Sem resposta de texto.');
+
+    let txt = textBlock.text.trim().replace(/```json|```/g, '').trim();
+    const match = txt.match(/\{[\s\S]*\}/);
+    if (!match) throw new Error('Formato inesperado na resposta.');
+    const rota = JSON.parse(match[0]);
+    if (!rota.distancia_km || !rota.tempo_minutos) throw new Error('Dados de rota incompletos.');
+
+    const kmIda   = rota.distancia_km;
+    const minIda  = rota.tempo_minutos;
+    const kmTotal = kmIda * 2;
+    const minTotal = minIda * 2;
+    const comb    = (kmTotal / consumo) * gas;
+    const valMin  = comb + lucro;
+
+    id('calc-rota-desc').textContent   = rota.rota ? '🛣 ' + rota.rota : '';
+    id('calc-r-km-ida').textContent    = kmIda.toFixed(1) + ' km';
+    id('calc-r-min-ida').textContent   = calcFmtMin(minIda);
+    id('calc-r-km-total').textContent  = kmTotal.toFixed(1) + ' km';
+    id('calc-r-min-total').textContent = calcFmtMin(minTotal);
+    id('calc-r-comb').textContent      = fmt(comb);
+    id('calc-r-lucro-desc').textContent = 'combustível + R$ ' + lucro.toFixed(2) + ' lucro';
+    id('calc-r-min').textContent       = fmt(valMin);
+
+    id('calc-resultado').style.display = 'block';
+  } catch (e) {
+    id('calc-erro-msg').textContent = '⚠️ ' + (e.message || 'Erro inesperado.');
+    id('calc-erro').style.display = 'block';
+  } finally {
+    id('calc-loading').style.display = 'none';
+    id('calc-btn').textContent = 'Calcular rota';
+    id('calc-btn').disabled = false;
+  }
+}
 </script>
 
 <script>
