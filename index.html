@@ -975,13 +975,22 @@ function calcFmtMin(m) {
   return r > 0 ? h + 'h ' + r + 'min' : h + 'h';
 }
 
+async function calcGeocode(address) {
+  const url = 'https://nominatim.openstreetmap.org/search?q=' + encodeURIComponent(address) +
+    '&format=json&limit=1&countrycodes=br&accept-language=pt-BR';
+  const r = await fetch(url, { headers: { 'Accept': 'application/json' } });
+  const d = await r.json();
+  if (!d.length) throw new Error('Endereço não encontrado: "' + address + '". Tente incluir a cidade.');
+  return { lat: parseFloat(d[0].lat), lon: parseFloat(d[0].lon), label: d[0].display_name };
+}
+
 async function calcularRota() {
   const destino = (id('calc-destino').value || '').trim();
   if (!destino) { showToast('Informe o endereço de destino.', 'err'); return; }
   const origemCustom = (id('calc-origem-custom').value || '').trim();
   if (calcOrigemMode === 'OUTRO' && !origemCustom) { showToast('Informe o endereço de origem.', 'err'); return; }
 
-  const origem = calcOrigemMode === 'BASE' ? CALC_BASE : origemCustom;
+  const origemAddr = calcOrigemMode === 'BASE' ? CALC_BASE : origemCustom;
   const consumo = parseFloat(id('calc-consumo').value) || 10.5;
   const gas     = parseFloat(id('calc-gas').value) || 6.99;
   const lucro   = parseFloat(id('calc-lucro').value) || 50;
@@ -993,38 +1002,28 @@ async function calcularRota() {
   id('calc-erro').style.display = 'none';
 
   try {
-    const prompt = `Pesquise a distância de carro entre "${origem}" e "${destino}" no Brasil.\nEncontre a distância em km e o tempo estimado em minutos pela rota mais comum.\nUse a ferramenta de busca para garantir dados reais e precisos.\nResponda APENAS com um JSON válido, sem texto antes ou depois, sem markdown:\n{"distancia_km": número, "tempo_minutos": número, "rota": "descrição breve da rota"}`;
+    // 1. Geocodificar origem e destino
+    const [orig, dest] = await Promise.all([
+      calcGeocode(origemAddr),
+      calcGeocode(destino + ', Paraná, Brasil')
+    ]);
 
-    const resp = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        model: 'claude-sonnet-4-20250514',
-        max_tokens: 1000,
-        tools: [{ type: 'web_search_20250305', name: 'web_search' }],
-        messages: [{ role: 'user', content: prompt }]
-      })
-    });
+    // 2. Calcular rota real via OSRM (OpenStreetMap)
+    const osrmUrl = 'https://router.project-osrm.org/route/v1/driving/' +
+      orig.lon + ',' + orig.lat + ';' + dest.lon + ',' + dest.lat + '?overview=false';
+    const rr = await fetch(osrmUrl);
+    const rd = await rr.json();
+    if (rd.code !== 'Ok' || !rd.routes || !rd.routes.length)
+      throw new Error('Não foi possível calcular a rota entre os endereços.');
 
-    if (!resp.ok) throw new Error('Erro na API (' + resp.status + ')');
-    const data = await resp.json();
-    const textBlock = (data.content || []).find(b => b.type === 'text');
-    if (!textBlock) throw new Error('Sem resposta de texto.');
-
-    let txt = textBlock.text.trim().replace(/```json|```/g, '').trim();
-    const match = txt.match(/\{[\s\S]*\}/);
-    if (!match) throw new Error('Formato inesperado na resposta.');
-    const rota = JSON.parse(match[0]);
-    if (!rota.distancia_km || !rota.tempo_minutos) throw new Error('Dados de rota incompletos.');
-
-    const kmIda   = rota.distancia_km;
-    const minIda  = rota.tempo_minutos;
+    const kmIda   = rd.routes[0].distance / 1000;
+    const minIda  = Math.round(rd.routes[0].duration / 60);
     const kmTotal = kmIda * 2;
     const minTotal = minIda * 2;
     const comb    = (kmTotal / consumo) * gas;
     const valMin  = comb + lucro;
 
-    id('calc-rota-desc').textContent   = rota.rota ? '🛣 ' + rota.rota : '';
+    id('calc-rota-desc').textContent   = '📍 ' + orig.label.split(',').slice(0,3).join(',') + '  →  🏁 ' + dest.label.split(',').slice(0,3).join(',');
     id('calc-r-km-ida').textContent    = kmIda.toFixed(1) + ' km';
     id('calc-r-min-ida').textContent   = calcFmtMin(minIda);
     id('calc-r-km-total').textContent  = kmTotal.toFixed(1) + ' km';
