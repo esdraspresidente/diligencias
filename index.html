@@ -572,7 +572,7 @@
           </div>
           <div style="display:flex;gap:8px">
             <button class="filter-btn" id="calc-park-nao" onclick="calcSetParking(false)">Não</button>
-            <button class="filter-btn active" id="calc-park-sim" onclick="calcSetParking(true)">Sim</button>
+            <button class="filter-btn" id="calc-park-sim" onclick="calcSetParking(true)">Sim</button>
           </div>
         </div>
 
@@ -595,6 +595,9 @@
                 <label>Lucro mínimo (R$)</label>
                 <input type="number" id="calc-lucro" value="50" step="1"/>
               </div>
+            </div>
+            <div style="margin-top:12px;text-align:right">
+              <button class="btn btn-primary" style="font-size:12px;padding:8px 16px" onclick="calcSalvarParams()">💾 Salvar parâmetros</button>
             </div>
           </div>
         </div>
@@ -846,7 +849,7 @@ function goPage(page, demandId, filtroStatus) {
   }
   if(page==='detail')    renderDetail(demandId);
   if(page==='relatorio') renderRelatorio();
-  if(page==='calculadora') { /* página estática, sem render necessário */ }
+  if(page==='calculadora') { calcCarregarParams(); }
   if(page==='novo' && !demandId) { editId=null; id('form-title').textContent='Nova Demanda'; id('form-submit-btn').textContent='Cadastrar Demanda'; clearForm(); }
   if(page==='novo' && demandId) {
     const d=demands.find(x=>x.id===demandId);
@@ -964,7 +967,28 @@ document.getElementById('login-email').addEventListener('keydown', e=>{ if(e.key
 // ── CALCULADORA ──
 const CALC_BASE = 'Jacob Macanhan, 481, Pinhais, PR, Brasil';
 let calcOrigemMode = 'BASE';
-let calcParking = true;
+let calcParking = null;
+
+function calcSalvarParams() {
+  const p = {
+    consumo: id('calc-consumo').value,
+    gas:     id('calc-gas').value,
+    lucro:   id('calc-lucro').value
+  };
+  localStorage.setItem('calc_params', JSON.stringify(p));
+  showToast('Parâmetros salvos!', 'ok');
+}
+
+function calcCarregarParams() {
+  try {
+    const raw = localStorage.getItem('calc_params');
+    if (!raw) return;
+    const p = JSON.parse(raw);
+    if (p.consumo) id('calc-consumo').value = p.consumo;
+    if (p.gas)     id('calc-gas').value     = p.gas;
+    if (p.lucro)   id('calc-lucro').value   = p.lucro;
+  } catch(e) {}
+}
 
 function calcSetOrigem(modo) {
   calcOrigemMode = modo;
@@ -975,8 +999,8 @@ function calcSetOrigem(modo) {
 
 function calcSetParking(sim) {
   calcParking = sim;
-  id('calc-park-sim').classList.toggle('active', sim);
-  id('calc-park-nao').classList.toggle('active', !sim);
+  id('calc-park-sim').classList.toggle('active', sim === true);
+  id('calc-park-nao').classList.toggle('active', sim === false);
 }
 
 function calcToggleParams() {
@@ -1005,7 +1029,7 @@ async function calcGeocode(address) {
 async function calcularRota() {
   const destino = (id('calc-destino').value || '').trim();
   if (!destino) { showToast('Informe o endereço de destino.', 'err'); return; }
-  const origemCustom = (id('calc-origem-custom').value || '').trim();
+  if (calcParking === null) { showToast('Informe se haverá estacionamento.', 'err'); return; }
   if (calcOrigemMode === 'OUTRO' && !origemCustom) { showToast('Informe o endereço de origem.', 'err'); return; }
 
   const origemAddr = calcOrigemMode === 'BASE' ? CALC_BASE : origemCustom;
