@@ -565,6 +565,17 @@
           </button>
         </div>
 
+        <div class="card card-pad" style="margin-bottom:14px;display:flex;justify-content:space-between;align-items:center">
+          <div>
+            <div style="font-size:13px;font-weight:600;color:var(--text)">🅿️ Haverá estacionamento?</div>
+            <div style="font-size:11px;color:var(--text3);margin-top:2px">+ R$ 10,00 se sim</div>
+          </div>
+          <div style="display:flex;gap:8px">
+            <button class="filter-btn" id="calc-park-nao" onclick="calcSetParking(false)">Não</button>
+            <button class="filter-btn active" id="calc-park-sim" onclick="calcSetParking(true)">Sim</button>
+          </div>
+        </div>
+
         <div class="card card-pad" style="margin-bottom:14px">
           <div style="display:flex;justify-content:space-between;align-items:center;cursor:pointer" onclick="calcToggleParams()">
             <div class="section-title" style="margin:0">⚙ Parâmetros</div>
@@ -953,12 +964,19 @@ document.getElementById('login-email').addEventListener('keydown', e=>{ if(e.key
 // ── CALCULADORA ──
 const CALC_BASE = 'Jacob Macanhan, 481, Pinhais, PR, Brasil';
 let calcOrigemMode = 'BASE';
+let calcParking = true;
 
 function calcSetOrigem(modo) {
   calcOrigemMode = modo;
   id('calc-pill-base').classList.toggle('active', modo === 'BASE');
   id('calc-pill-outro').classList.toggle('active', modo === 'OUTRO');
   id('calc-outro-wrap').style.display = modo === 'OUTRO' ? 'block' : 'none';
+}
+
+function calcSetParking(sim) {
+  calcParking = sim;
+  id('calc-park-sim').classList.toggle('active', sim);
+  id('calc-park-nao').classList.toggle('active', !sim);
 }
 
 function calcToggleParams() {
@@ -1021,7 +1039,8 @@ async function calcularRota() {
     const kmTotal = kmIda * 2;
     const minTotal = minIda * 2;
     const comb    = (kmTotal / consumo) * gas;
-    const valMin  = comb + lucro;
+    const estac   = calcParking ? 10 : 0;
+    const valMin  = comb + estac + lucro;
 
     id('calc-rota-desc').textContent   = '📍 ' + orig.label.split(',').slice(0,3).join(',') + '  →  🏁 ' + dest.label.split(',').slice(0,3).join(',');
     id('calc-r-km-ida').textContent    = kmIda.toFixed(1) + ' km';
@@ -1029,7 +1048,7 @@ async function calcularRota() {
     id('calc-r-km-total').textContent  = kmTotal.toFixed(1) + ' km';
     id('calc-r-min-total').textContent = calcFmtMin(minTotal);
     id('calc-r-comb').textContent      = fmt(comb);
-    id('calc-r-lucro-desc').textContent = 'combustível + R$ ' + lucro.toFixed(2) + ' lucro';
+    id('calc-r-lucro-desc').textContent = 'combustível' + (estac ? ' + estac. R$10' : '') + ' + R$ ' + lucro.toFixed(2) + ' lucro';
     id('calc-r-min').textContent       = fmt(valMin);
 
     id('calc-resultado').style.display = 'block';
