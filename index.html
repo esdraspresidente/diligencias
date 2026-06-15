@@ -342,6 +342,7 @@
     /* MODAL DE CONFLITO */
     .modal-overlay { position: fixed; inset: 0; background: rgba(26,26,46,.45); z-index: 600; display: flex; align-items: center; justify-content: center; padding: 20px; }
     .modal-overlay.hidden { display: none; }
+    .hidden { display: none !important; }
     .modal-box { background: var(--white); border-radius: var(--radius); padding: 22px; max-width: 420px; width: 100%; box-shadow: 0 12px 40px rgba(0,0,0,.25); max-height: 80vh; overflow-y: auto; }
     .modal-icon { font-size: 30px; text-align: center; margin-bottom: 8px; }
     .modal-title { font-size: 15px; font-weight: 700; color: var(--text); text-align: center; margin-bottom: 4px; }
@@ -664,7 +665,7 @@
           <div class="page-sub">Dias/horários em que o Esdras está indisponível para diligências</div>
         </div>
         <div class="card card-pad" style="margin-bottom:16px">
-          <div class="section-title">Novo Bloqueio</div>
+          <div class="section-title" id="bl-form-title">Novo Bloqueio</div>
           <div class="form-grid">
             <div class="field"><label>Data *</label><input type="date" id="bl-data"/></div>
             <div class="field"><label>Motivo</label><input type="text" id="bl-motivo" placeholder="Ex: Compromisso pessoal"/></div>
@@ -675,7 +676,10 @@
             <input type="checkbox" id="bl-dia-inteiro" onchange="toggleBlDiaInteiro()" style="width:16px;height:16px"/>
             Bloquear o dia inteiro
           </label>
-          <button class="btn btn-primary" onclick="addBloqueio()">+ Adicionar Bloqueio</button>
+          <div class="btn-row" style="justify-content:flex-start">
+            <button class="btn btn-primary" id="bl-submit-btn" onclick="addBloqueio()">+ Adicionar Bloqueio</button>
+            <button class="btn btn-secondary hidden" id="bl-cancel-btn" onclick="cancelEditBloqueio()">Cancelar edição</button>
+          </div>
         </div>
         <div class="card" id="bloqueios-list"></div>
       </div>
@@ -737,6 +741,7 @@ let filterResp = 'all';
 let currentUser = null;
 let pendingForm = null;
 let pendingBloqueio = null;
+let editBloqueioId = null;
 
 // ── UTILS ──
 const fmt = v => { const n=parseFloat(String(v||0).replace(',','.')); return isNaN(n)?'—':n.toLocaleString('pt-BR',{style:'currency',currency:'BRL'}); };
@@ -1129,13 +1134,47 @@ async function addBloqueio() {
 }
 
 async function saveBloqueio(bloqueio) {
-  const { error } = await sb.from('bloqueios').insert([bloqueio]);
+  let error;
+  if(editBloqueioId) {
+    ({ error } = await sb.from('bloqueios').update(bloqueio).eq('id', editBloqueioId));
+  } else {
+    ({ error } = await sb.from('bloqueios').insert([bloqueio]));
+  }
   if(error) return showToast('Erro ao salvar bloqueio.','err');
-  id('bl-data').value=''; id('bl-motivo').value=''; id('bl-inicio').value=''; id('bl-fim').value=''; id('bl-dia-inteiro').checked=false;
-  toggleBlDiaInteiro();
+  const eraEdicao = !!editBloqueioId;
+  resetBloqueioForm();
   await loadBloqueios();
   renderBloqueios();
-  showToast('Bloqueio adicionado!');
+  showToast(eraEdicao ? 'Bloqueio atualizado!' : 'Bloqueio adicionado!');
+}
+
+function resetBloqueioForm() {
+  id('bl-data').value=''; id('bl-motivo').value=''; id('bl-inicio').value=''; id('bl-fim').value=''; id('bl-dia-inteiro').checked=false;
+  toggleBlDiaInteiro();
+  editBloqueioId = null;
+  id('bl-form-title').textContent = 'Novo Bloqueio';
+  id('bl-submit-btn').textContent = '+ Adicionar Bloqueio';
+  id('bl-cancel-btn').classList.add('hidden');
+}
+
+function editBloqueio(bid) {
+  const b = bloqueios.find(x=>x.id===bid); if(!b) return;
+  editBloqueioId = bid;
+  id('bl-data').value = (b.data||'').split('T')[0];
+  id('bl-motivo').value = b.motivo || '';
+  const diaInteiro = !b.horario_inicio && !b.horario_fim;
+  id('bl-dia-inteiro').checked = diaInteiro;
+  id('bl-inicio').value = (b.horario_inicio||'').slice(0,5);
+  id('bl-fim').value = (b.horario_fim||'').slice(0,5);
+  toggleBlDiaInteiro();
+  id('bl-form-title').textContent = 'Editar Bloqueio';
+  id('bl-submit-btn').textContent = 'Salvar Alterações';
+  id('bl-cancel-btn').classList.remove('hidden');
+  id('main').scrollTop = 0;
+}
+
+function cancelEditBloqueio() {
+  resetBloqueioForm();
 }
 
 // Verifica se o Esdras já tem diligências marcadas no período do bloqueio
@@ -1183,7 +1222,7 @@ function renderBloqueios() {
   if(!bloqueios.length) { id('bloqueios-list').innerHTML = `<div class="empty"><div class="empty-icon">🔓</div><div class="empty-title">Nenhum bloqueio cadastrado</div><div class="empty-sub">Adicione acima para avisar sobre a indisponibilidade do Esdras</div></div>`; return; }
   id('bloqueios-list').innerHTML = bloqueios.map(b => {
     const periodo = (!b.horario_inicio && !b.horario_fim) ? 'Dia inteiro' : `${(b.horario_inicio||'00:00').slice(0,5)} – ${(b.horario_fim||'23:59').slice(0,5)}`;
-    return `<div class="demand-row" style="cursor:default"><div style="flex:1;min-width:0"><div class="demand-title">${fmtDate(b.data)} · ${periodo}</div>${b.motivo?`<div class="demand-meta">${b.motivo}</div>`:''}</div><button class="btn btn-danger" style="padding:6px 12px;font-size:12px" onclick="removeBloqueio('${b.id}')">Remover</button></div>`;
+    return `<div class="demand-row" style="cursor:default"><div style="flex:1;min-width:0"><div class="demand-title">${fmtDate(b.data)} · ${periodo}</div>${b.motivo?`<div class="demand-meta">${b.motivo}</div>`:''}</div><div style="display:flex;gap:8px;flex-shrink:0"><button class="btn btn-secondary" style="padding:6px 12px;font-size:12px" onclick="editBloqueio('${b.id}')">Editar</button><button class="btn btn-danger" style="padding:6px 12px;font-size:12px" onclick="removeBloqueio('${b.id}')">Remover</button></div></div>`;
   }).join('');
 }
 
