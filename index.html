@@ -338,6 +338,16 @@
     #toast.show { transform: translateX(-50%) translateY(0); }
     #toast.err { background: #991B1B; }
     #toast.ok { background: #14532D; }
+
+    /* MODAL DE CONFLITO */
+    .modal-overlay { position: fixed; inset: 0; background: rgba(26,26,46,.45); z-index: 600; display: flex; align-items: center; justify-content: center; padding: 20px; }
+    .modal-overlay.hidden { display: none; }
+    .modal-box { background: var(--white); border-radius: var(--radius); padding: 22px; max-width: 420px; width: 100%; box-shadow: 0 12px 40px rgba(0,0,0,.25); max-height: 80vh; overflow-y: auto; }
+    .modal-icon { font-size: 30px; text-align: center; margin-bottom: 8px; }
+    .modal-title { font-size: 15px; font-weight: 700; color: var(--text); text-align: center; margin-bottom: 4px; }
+    .modal-sub { font-size: 12px; color: var(--text3); text-align: center; margin-bottom: 14px; }
+    .conflict-item { background: #FFFBEB; border: 1px solid #FDE68A; border-radius: 8px; padding: 10px 12px; margin-bottom: 8px; font-size: 12.5px; color: var(--text); line-height: 1.5; }
+    .conflict-item:last-child { margin-bottom: 0; }
     #toast.info { background: #1E3A5F; }
   </style>
 </head>
@@ -411,6 +421,7 @@
     <button class="nav-item" id="nav-demandas" onclick="goPage('demandas')"><span class="nav-icon">≡</span> Demandas</button>
     <button class="nav-item" id="nav-relatorio" onclick="goPage('relatorio')"><span class="nav-icon">↗</span> Relatório</button>
     <button class="nav-item" id="nav-calculadora" onclick="goPage('calculadora')"><span class="nav-icon">🧮</span> Calculadora</button>
+    <button class="nav-item" id="nav-bloqueios" onclick="goPage('bloqueios')"><span class="nav-icon">🔒</span> Bloqueios</button>
     <div class="sidebar-footer">
       <p style="font-size:10px;color:var(--text3);margin-bottom:10px">v2.3 · Com Supabase</p>
       <button class="logout-btn" onclick="doLogout()">
@@ -477,6 +488,7 @@
                 <option value="">Selecione...</option>
                 <option>Naiarha</option>
                 <option>Esdras</option>
+                <option>Terceiro</option>
               </select>
             </div>
             <div class="field"><label>Status</label>
@@ -645,11 +657,48 @@
         </div>
       </div>
 
+      <!-- BLOQUEIOS -->
+      <div id="page-bloqueios" class="page">
+        <div style="margin-bottom:22px">
+          <div class="page-title">Bloqueios de Agenda</div>
+          <div class="page-sub">Dias/horários em que o Esdras está indisponível para diligências</div>
+        </div>
+        <div class="card card-pad" style="margin-bottom:16px">
+          <div class="section-title">Novo Bloqueio</div>
+          <div class="form-grid">
+            <div class="field"><label>Data *</label><input type="date" id="bl-data"/></div>
+            <div class="field"><label>Motivo</label><input type="text" id="bl-motivo" placeholder="Ex: Compromisso pessoal"/></div>
+            <div class="field"><label>Início</label><input type="time" id="bl-inicio"/></div>
+            <div class="field"><label>Fim</label><input type="time" id="bl-fim"/></div>
+          </div>
+          <label style="display:flex;align-items:center;gap:8px;margin:14px 0;font-size:13px;color:var(--text2)">
+            <input type="checkbox" id="bl-dia-inteiro" onchange="toggleBlDiaInteiro()" style="width:16px;height:16px"/>
+            Bloquear o dia inteiro
+          </label>
+          <button class="btn btn-primary" onclick="addBloqueio()">+ Adicionar Bloqueio</button>
+        </div>
+        <div class="card" id="bloqueios-list"></div>
+      </div>
+
     </div>
   </div>
 </div>
 
 <div id="toast"></div>
+
+<!-- MODAL DE CONFLITO -->
+<div id="conflict-modal" class="modal-overlay hidden">
+  <div class="modal-box">
+    <div class="modal-icon">⚠️</div>
+    <div class="modal-title">Possível conflito de horário</div>
+    <div class="modal-sub">Confira antes de confirmar:</div>
+    <div id="conflict-modal-body"></div>
+    <div class="btn-row" style="margin-top:16px">
+      <button class="btn btn-secondary" onclick="closeConflictModal()">Revisar</button>
+      <button class="btn btn-primary" onclick="confirmSaveAnyway()">Salvar mesmo assim</button>
+    </div>
+  </div>
+</div>
 
 <script>
 // ── SUPABASE ──
@@ -664,13 +713,15 @@ const STATUS = {
 };
 const STATUS_FLOW = ['aguardando_cumprimento','realizado','aguardando_pagamento','pago'];
 const PLATAFORMAS = ['Correspondente Dinâmico','Jurídico Certo','Direto'];
-const RESPONSAVEIS = ['Naiarha','Esdras'];
+const RESPONSAVEIS = ['Naiarha','Esdras','Terceiro'];
 
 let demands = [];
+let bloqueios = [];
 let editId = null;
 let filterStatus = 'all';
 let filterResp = 'all';
 let currentUser = null;
+let pendingForm = null;
 
 // ── UTILS ──
 const fmt = v => { const n=parseFloat(String(v||0).replace(',','.')); return isNaN(n)?'—':n.toLocaleString('pt-BR',{style:'currency',currency:'BRL'}); };
@@ -726,6 +777,7 @@ sb.auth.onAuthStateChange(async (event, session) => {
     id('login-screen').classList.add('hidden');
     id('app').classList.remove('hidden');
     await loadDemands();
+    await loadBloqueios();
     renderDashboard();
   } else {
     currentUser = null;
@@ -739,6 +791,11 @@ sb.auth.onAuthStateChange(async (event, session) => {
 async function loadDemands() {
   const { data, error } = await sb.from('demandas').select('*').order('created_at', { ascending: false });
   if(!error && data) demands = data;
+}
+
+async function loadBloqueios() {
+  const { data, error } = await sb.from('bloqueios').select('*').order('data', { ascending: true });
+  if(!error && data) bloqueios = data;
 }
 
 async function criarEventoCalendar(form) {
@@ -850,6 +907,7 @@ function goPage(page, demandId, filtroStatus) {
   if(page==='detail')    renderDetail(demandId);
   if(page==='relatorio') renderRelatorio();
   if(page==='calculadora') { calcCarregarParams(); }
+  if(page==='bloqueios') renderBloqueios();
   if(page==='novo' && !demandId) { editId=null; id('form-title').textContent='Nova Demanda'; id('form-submit-btn').textContent='Cadastrar Demanda'; clearForm(); }
   if(page==='novo' && demandId) {
     const d=demands.find(x=>x.id===demandId);
@@ -937,13 +995,82 @@ function clearForm() { ['f-data','f-horario','f-local','f-descricao','f-valor','
 function fillForm(d) { id('f-data').value=d.data?.split('T')[0]||''; id('f-horario').value=d.horario||''; id('f-local').value=d.local||''; id('f-descricao').value=d.descricao||''; id('f-valor').value=d.valor||''; id('f-plataforma').value=d.plataforma||''; id('f-responsavel').value=d.responsavel||''; id('f-status').value=d.status||'aguardando_cumprimento'; id('f-previsao').value=d.previsao_pagamento?.split('T')[0]||''; id('f-nome').value=d.contratante_nome||''; id('f-whatsapp').value=d.contratante_whatsapp||''; }
 function getForm() { return { data:id('f-data').value||null, horario:id('f-horario').value||null, local:id('f-local').value, descricao:id('f-descricao').value, valor:parseFloat(id('f-valor').value)||null, plataforma:id('f-plataforma').value, responsavel:id('f-responsavel').value, status:id('f-status').value, previsao_pagamento:id('f-previsao').value||null, contratante_nome:id('f-nome').value, contratante_whatsapp:id('f-whatsapp').value }; }
 
-async function submitForm() {
-  const f=getForm();
-  if(!f.data||!f.local||!f.descricao||!f.valor||!f.plataforma||!f.responsavel) return showToast('Preencha os campos obrigatórios.','err');
+// ── CONFLITOS DE AGENDA ──
+const TOLERANCIA_MIN = 90; // intervalo mínimo de segurança entre diligências (minutos)
+
+function timeToMin(t) {
+  if(!t) return null;
+  const [h,m] = t.split(':').map(Number);
+  return h*60+(m||0);
+}
+
+function checkConflitos(f) {
+  const avisos = [];
+
+  // 1. Outras diligências marcadas muito próximas no mesmo dia (qualquer responsável)
+  if(f.horario) {
+    const novoMin = timeToMin(f.horario);
+    demands.forEach(d => {
+      if(editId && d.id===editId) return;
+      if((d.data||'').split('T')[0] !== f.data) return;
+      if(!d.horario) return;
+      const dif = Math.abs(timeToMin(d.horario) - novoMin);
+      if(dif < TOLERANCIA_MIN) {
+        avisos.push(`🕐 <b>${d.responsavel}</b> já tem "${d.descricao}" marcado para <b>${d.horario.slice(0,5)}</b> no mesmo dia (diferença de ${dif} min — mínimo recomendado é ${TOLERANCIA_MIN} min).`);
+      }
+    });
+  }
+
+  // 2. Indisponibilidade do Esdras (bloqueios de agenda), independente do responsável
+  bloqueios.forEach(b => {
+    if((b.data||'').split('T')[0] !== f.data) return;
+    const motivo = b.motivo ? ` — ${b.motivo}` : '';
+    if(!b.horario_inicio && !b.horario_fim) {
+      avisos.push(`🔒 Esdras bloqueou <b>o dia ${fmtDate(f.data)}</b> (indisponível)${motivo}.`);
+      return;
+    }
+    const ini = b.horario_inicio ? timeToMin(b.horario_inicio) : 0;
+    const fim = b.horario_fim ? timeToMin(b.horario_fim) : (24*60-1);
+    if(!f.horario) {
+      avisos.push(`🔒 Esdras está indisponível entre <b>${(b.horario_inicio||'00:00').slice(0,5)}</b> e <b>${(b.horario_fim||'23:59').slice(0,5)}</b> em ${fmtDate(f.data)}${motivo}. Confira o horário desta diligência.`);
+      return;
+    }
+    const novoMin = timeToMin(f.horario);
+    if(novoMin >= ini && novoMin <= fim) {
+      avisos.push(`🔒 Esdras está indisponível das <b>${(b.horario_inicio||'00:00').slice(0,5)}</b> às <b>${(b.horario_fim||'23:59').slice(0,5)}</b> em ${fmtDate(f.data)}${motivo}.`);
+    }
+  });
+
+  return avisos;
+}
+
+function showConflictModal(avisos) {
+  id('conflict-modal-body').innerHTML = avisos.map(a=>`<div class="conflict-item">${a}</div>`).join('');
+  id('conflict-modal').classList.remove('hidden');
+}
+function closeConflictModal() {
+  id('conflict-modal').classList.add('hidden');
+  pendingForm = null;
+}
+async function confirmSaveAnyway() {
+  id('conflict-modal').classList.add('hidden');
+  const f = pendingForm; pendingForm = null;
+  if(f) await proceedSave(f);
+}
+
+async function proceedSave(f) {
   const btn=id('form-submit-btn'); btn.textContent='Salvando...'; btn.disabled=true;
   const ok=await saveDemand(f);
   btn.disabled=false; btn.textContent=editId?'Salvar Alterações':'Cadastrar Demanda';
   if(ok){ showToast(editId?'Demanda atualizada!':'Demanda cadastrada!'); editId=null; goPage('demandas'); }
+}
+
+async function submitForm() {
+  const f=getForm();
+  if(!f.data||!f.local||!f.descricao||!f.valor||!f.plataforma||!f.responsavel) return showToast('Preencha os campos obrigatórios.','err');
+  const avisos = checkConflitos(f);
+  if(avisos.length) { pendingForm = f; showConflictModal(avisos); return; }
+  await proceedSave(f);
 }
 
 async function advanceStatus(did) {
@@ -958,6 +1085,47 @@ async function deleteDemand(did) {
   if(!confirm('Remover esta demanda?')) return;
   const ok=await deleteDemandDB(did);
   if(ok){ showToast('Removida.','info'); goPage('demandas'); }
+}
+
+// ── BLOQUEIOS ──
+function toggleBlDiaInteiro() {
+  const chk = id('bl-dia-inteiro').checked;
+  id('bl-inicio').disabled = chk;
+  id('bl-fim').disabled = chk;
+  if(chk){ id('bl-inicio').value=''; id('bl-fim').value=''; }
+}
+
+async function addBloqueio() {
+  const data = id('bl-data').value;
+  if(!data) return showToast('Informe a data.','err');
+  const diaInteiro = id('bl-dia-inteiro').checked;
+  const horario_inicio = diaInteiro ? null : (id('bl-inicio').value || null);
+  const horario_fim = diaInteiro ? null : (id('bl-fim').value || null);
+  const motivo = id('bl-motivo').value || null;
+  const { error } = await sb.from('bloqueios').insert([{ data, horario_inicio, horario_fim, motivo }]);
+  if(error) return showToast('Erro ao salvar bloqueio.','err');
+  id('bl-data').value=''; id('bl-motivo').value=''; id('bl-inicio').value=''; id('bl-fim').value=''; id('bl-dia-inteiro').checked=false;
+  toggleBlDiaInteiro();
+  await loadBloqueios();
+  renderBloqueios();
+  showToast('Bloqueio adicionado!');
+}
+
+async function removeBloqueio(bid) {
+  if(!confirm('Remover este bloqueio?')) return;
+  const { error } = await sb.from('bloqueios').delete().eq('id', bid);
+  if(error) return showToast('Erro ao remover.','err');
+  await loadBloqueios();
+  renderBloqueios();
+  showToast('Bloqueio removido.','info');
+}
+
+function renderBloqueios() {
+  if(!bloqueios.length) { id('bloqueios-list').innerHTML = `<div class="empty"><div class="empty-icon">🔓</div><div class="empty-title">Nenhum bloqueio cadastrado</div><div class="empty-sub">Adicione acima para avisar sobre a indisponibilidade do Esdras</div></div>`; return; }
+  id('bloqueios-list').innerHTML = bloqueios.map(b => {
+    const periodo = (!b.horario_inicio && !b.horario_fim) ? 'Dia inteiro' : `${(b.horario_inicio||'00:00').slice(0,5)} – ${(b.horario_fim||'23:59').slice(0,5)}`;
+    return `<div class="demand-row" style="cursor:default"><div style="flex:1;min-width:0"><div class="demand-title">${fmtDate(b.data)} · ${periodo}</div>${b.motivo?`<div class="demand-meta">${b.motivo}</div>`:''}</div><button class="btn btn-danger" style="padding:6px 12px;font-size:12px" onclick="removeBloqueio('${b.id}')">Remover</button></div>`;
+  }).join('');
 }
 
 // Enter no login
