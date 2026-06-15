@@ -700,6 +700,20 @@
   </div>
 </div>
 
+<!-- MODAL DE CONFLITO AO CRIAR BLOQUEIO -->
+<div id="bloqueio-conflict-modal" class="modal-overlay hidden">
+  <div class="modal-box">
+    <div class="modal-icon">📌</div>
+    <div class="modal-title">Você já tem compromisso nesse período</div>
+    <div class="modal-sub">Confira antes de bloquear:</div>
+    <div id="bloqueio-conflict-body"></div>
+    <div class="btn-row" style="margin-top:16px">
+      <button class="btn btn-secondary" onclick="closeBloqueioConflictModal()">Revisar</button>
+      <button class="btn btn-primary" onclick="confirmBloqueioAnyway()">Bloquear mesmo assim</button>
+    </div>
+  </div>
+</div>
+
 <script>
 // ── SUPABASE ──
 const sb = supabase; // cliente já inicializado no topo
@@ -722,6 +736,7 @@ let filterStatus = 'all';
 let filterResp = 'all';
 let currentUser = null;
 let pendingForm = null;
+let pendingBloqueio = null;
 
 // ── UTILS ──
 const fmt = v => { const n=parseFloat(String(v||0).replace(',','.')); return isNaN(n)?'—':n.toLocaleString('pt-BR',{style:'currency',currency:'BRL'}); };
@@ -1102,13 +1117,57 @@ async function addBloqueio() {
   const horario_inicio = diaInteiro ? null : (id('bl-inicio').value || null);
   const horario_fim = diaInteiro ? null : (id('bl-fim').value || null);
   const motivo = id('bl-motivo').value || null;
-  const { error } = await sb.from('bloqueios').insert([{ data, horario_inicio, horario_fim, motivo }]);
+  const bloqueio = { data, horario_inicio, horario_fim, motivo };
+
+  const conflitos = checkBloqueioVsDiligencias(data, horario_inicio, horario_fim);
+  if(conflitos.length) {
+    pendingBloqueio = bloqueio;
+    showBloqueioConflictModal(conflitos);
+    return;
+  }
+  await saveBloqueio(bloqueio);
+}
+
+async function saveBloqueio(bloqueio) {
+  const { error } = await sb.from('bloqueios').insert([bloqueio]);
   if(error) return showToast('Erro ao salvar bloqueio.','err');
   id('bl-data').value=''; id('bl-motivo').value=''; id('bl-inicio').value=''; id('bl-fim').value=''; id('bl-dia-inteiro').checked=false;
   toggleBlDiaInteiro();
   await loadBloqueios();
   renderBloqueios();
   showToast('Bloqueio adicionado!');
+}
+
+// Verifica se o Esdras já tem diligências marcadas no período do bloqueio
+function checkBloqueioVsDiligencias(data, horario_inicio, horario_fim) {
+  const ini = horario_inicio ? timeToMin(horario_inicio) : 0;
+  const fim = horario_fim ? timeToMin(horario_fim) : (24*60-1);
+  return demands.filter(d => {
+    if(d.responsavel !== 'Esdras') return false;
+    if((d.data||'').split('T')[0] !== data) return false;
+    if(!d.horario) return true; // sem horário definido, pode cair em qualquer faixa do dia
+    const dMin = timeToMin(d.horario);
+    return dMin >= ini && dMin <= fim;
+  });
+}
+
+function showBloqueioConflictModal(conflitos) {
+  id('bloqueio-conflict-body').innerHTML = conflitos.map(d => `<div class="conflict-item">📌 Você já tem <b>"${d.descricao}"</b> agendado${d.horario?` para <b>${d.horario.slice(0,5)}</b>`:''} em ${fmtDate(d.data)}${d.local?` (${d.local})`:''}.<div style="margin-top:8px"><button class="btn btn-secondary" style="font-size:12px;padding:6px 12px" onclick="verDemandaConflito('${d.id}')">Ver demanda →</button></div></div>`).join('');
+  id('bloqueio-conflict-modal').classList.remove('hidden');
+}
+function closeBloqueioConflictModal() {
+  id('bloqueio-conflict-modal').classList.add('hidden');
+  pendingBloqueio = null;
+}
+async function confirmBloqueioAnyway() {
+  id('bloqueio-conflict-modal').classList.add('hidden');
+  const b = pendingBloqueio; pendingBloqueio = null;
+  if(b) await saveBloqueio(b);
+}
+function verDemandaConflito(did) {
+  id('bloqueio-conflict-modal').classList.add('hidden');
+  pendingBloqueio = null;
+  goPage('detail', did);
 }
 
 async function removeBloqueio(bid) {
