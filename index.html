@@ -740,7 +740,7 @@
 <div id="toast"></div>
 
 <!-- MODAL DO DIA (CALENDÁRIO) -->
-<div id="cal-day-modal" class="modal-overlay hidden">
+<div id="cal-day-modal" class="modal-overlay hidden" onclick="if(event.target===this)closeCalDayModal()">
   <div class="modal-box" style="max-width:480px;position:relative">
     <button onclick="closeCalDayModal()" style="position:absolute;top:14px;right:14px;background:none;border:none;font-size:20px;color:var(--text3);cursor:pointer;line-height:1">×</button>
     <div style="display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:14px;padding-right:24px">
@@ -753,7 +753,7 @@
 </div>
 
 <!-- MODAL DE CONFLITO -->
-<div id="conflict-modal" class="modal-overlay hidden">
+<div id="conflict-modal" class="modal-overlay hidden" onclick="if(event.target===this)closeConflictModal()">
   <div class="modal-box">
     <div class="modal-icon">⚠️</div>
     <div class="modal-title">Possível conflito de horário</div>
@@ -767,7 +767,7 @@
 </div>
 
 <!-- MODAL DE CONFLITO AO CRIAR BLOQUEIO -->
-<div id="bloqueio-conflict-modal" class="modal-overlay hidden">
+<div id="bloqueio-conflict-modal" class="modal-overlay hidden" onclick="if(event.target===this)closeBloqueioConflictModal()">
   <div class="modal-box">
     <div class="modal-icon">📌</div>
     <div class="modal-title">Você já tem compromisso nesse período</div>
