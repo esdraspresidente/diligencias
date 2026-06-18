@@ -1414,20 +1414,24 @@ function renderCalDia(iso) {
   // Bloco de resumo
   html += `<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px">
     <div style="background:#FFFBEB;border:1px solid #FDE68A;border-radius:10px;padding:10px 12px">
-      <div style="font-size:9px;font-weight:700;color:#B45309;text-transform:uppercase;letter-spacing:.6px;margin-bottom:3px">Previsto do dia</div>
+      <div style="font-size:9px;font-weight:700;color:#B45309;text-transform:uppercase;letter-spacing:.6px;margin-bottom:2px">A receber hoje</div>
       <div style="font-size:15px;font-weight:700;color:#92400E">${fmt(previstoDia)}</div>
+      <div style="font-size:10px;color:#B45309;margin-top:2px">previsão de pgto hoje, não pago</div>
     </div>
     <div style="background:#F0FDF4;border:1px solid #BBF7D0;border-radius:10px;padding:10px 12px">
-      <div style="font-size:9px;font-weight:700;color:#065F46;text-transform:uppercase;letter-spacing:.6px;margin-bottom:3px">Recebido do dia</div>
+      <div style="font-size:9px;font-weight:700;color:#065F46;text-transform:uppercase;letter-spacing:.6px;margin-bottom:2px">Recebido hoje</div>
       <div style="font-size:15px;font-weight:700;color:#065F46">${fmt(recebidoDia)}</div>
+      <div style="font-size:10px;color:#059669;margin-top:2px">previsão de pgto hoje, já pago</div>
     </div>
     <div style="background:#FFFBEB;border:1px solid #FDE68A;border-radius:10px;padding:10px 12px">
-      <div style="font-size:9px;font-weight:700;color:#B45309;text-transform:uppercase;letter-spacing:.6px;margin-bottom:3px">Previsto da semana</div>
+      <div style="font-size:9px;font-weight:700;color:#B45309;text-transform:uppercase;letter-spacing:.6px;margin-bottom:2px">A receber na semana</div>
       <div style="font-size:15px;font-weight:700;color:#92400E">${fmt(previstoSemana)}</div>
+      <div style="font-size:10px;color:#B45309;margin-top:2px">dom a sáb desta semana, não pago</div>
     </div>
     <div style="background:#F0FDF4;border:1px solid #BBF7D0;border-radius:10px;padding:10px 12px">
-      <div style="font-size:9px;font-weight:700;color:#065F46;text-transform:uppercase;letter-spacing:.6px;margin-bottom:3px">Recebido da semana</div>
+      <div style="font-size:9px;font-weight:700;color:#065F46;text-transform:uppercase;letter-spacing:.6px;margin-bottom:2px">Recebido na semana</div>
       <div style="font-size:15px;font-weight:700;color:#065F46">${fmt(recebidoSemana)}</div>
+      <div style="font-size:10px;color:#059669;margin-top:2px">dom a sáb desta semana, já pago</div>
     </div>
   </div>`;
 
@@ -1453,7 +1457,7 @@ function renderCalDia(iso) {
       const st = calStatusRecebimento(d, hojeISO);
       return `<div class="demand-row" onclick="fecharCalEAbrirDetalhe('${d.id}')"><div style="flex:1;min-width:0"><div class="demand-title">${d.descricao}</div><div class="demand-meta">${d.responsavel}</div></div><div class="demand-right"><span class="badge ${stMap[st].c}">${stMap[st].l}</span><div class="demand-value">${fmt(d.valor)}</div></div></div>`;
     }).join('') + `</div>`;
-    html += `<div style="display:flex;justify-content:space-between;padding:10px 2px;font-size:13px;font-weight:700;color:var(--text)"><span>Total previsto do dia</span><span>${fmt(previstoDia + recebidoDia)}</span></div>`;
+    html += `<div style="display:flex;justify-content:space-between;padding:10px 2px;font-size:13px;font-weight:700;color:var(--text)"><span>Total do dia</span><span>${fmt(previstoDia + recebidoDia)}</span></div>`;
   }
 
   id('cal-day-body').innerHTML = html;
