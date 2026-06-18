@@ -1389,11 +1389,47 @@ function calNavDia(delta) {
 function renderCalDia(iso) {
   id('cal-day-title').textContent = fmtDataCompleta(iso);
   const hojeISO = fISO(new Date());
-  const demsDia = demands.filter(d => (d.data||'').split('T')[0] === iso).sort((a,b)=>(a.horario||'99:99').localeCompare(b.horario||'99:99'));
-  const recsDia = demands.filter(d => d.previsao_pagamento && d.previsao_pagamento.split('T')[0] === iso);
-  const bloqDia = bloqueios.filter(b => (b.data||'').split('T')[0] === iso);
+
+  // Calcular início e fim da semana do dia selecionado (dom–sáb)
+  const dtDia = new Date(iso+'T12:00:00');
+  const diaSemana = dtDia.getDay();
+  const inicioSemana = new Date(dtDia); inicioSemana.setDate(dtDia.getDate() - diaSemana);
+  const fimSemana = new Date(inicioSemana); fimSemana.setDate(inicioSemana.getDate() + 6);
+  const isoIni = fISO(inicioSemana), isoFim = fISO(fimSemana);
+  const naSemana = iso2 => iso2 >= isoIni && iso2 <= isoFim;
+
+  const demsDia  = demands.filter(d => (d.data||'').split('T')[0] === iso).sort((a,b)=>(a.horario||'99:99').localeCompare(b.horario||'99:99'));
+  const recsDia  = demands.filter(d => d.previsao_pagamento && d.previsao_pagamento.split('T')[0] === iso);
+  const bloqDia  = bloqueios.filter(b => (b.data||'').split('T')[0] === iso);
+
+  // Resumo financeiro
+  const previstoDia   = recsDia.filter(d => calStatusRecebimento(d,hojeISO) !== 'recebido').reduce((s,d)=>s+parseFloat(d.valor||0),0);
+  const recebidoDia   = recsDia.filter(d => calStatusRecebimento(d,hojeISO) === 'recebido').reduce((s,d)=>s+parseFloat(d.valor||0),0);
+  const recsSemana    = demands.filter(d => d.previsao_pagamento && naSemana(d.previsao_pagamento.split('T')[0]));
+  const previstoSemana= recsSemana.filter(d => calStatusRecebimento(d,hojeISO) !== 'recebido').reduce((s,d)=>s+parseFloat(d.valor||0),0);
+  const recebidoSemana= recsSemana.filter(d => calStatusRecebimento(d,hojeISO) === 'recebido').reduce((s,d)=>s+parseFloat(d.valor||0),0);
 
   let html = '';
+
+  // Bloco de resumo
+  html += `<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px">
+    <div style="background:#FFFBEB;border:1px solid #FDE68A;border-radius:10px;padding:10px 12px">
+      <div style="font-size:9px;font-weight:700;color:#B45309;text-transform:uppercase;letter-spacing:.6px;margin-bottom:3px">Previsto do dia</div>
+      <div style="font-size:15px;font-weight:700;color:#92400E">${fmt(previstoDia)}</div>
+    </div>
+    <div style="background:#F0FDF4;border:1px solid #BBF7D0;border-radius:10px;padding:10px 12px">
+      <div style="font-size:9px;font-weight:700;color:#065F46;text-transform:uppercase;letter-spacing:.6px;margin-bottom:3px">Recebido do dia</div>
+      <div style="font-size:15px;font-weight:700;color:#065F46">${fmt(recebidoDia)}</div>
+    </div>
+    <div style="background:#FFFBEB;border:1px solid #FDE68A;border-radius:10px;padding:10px 12px">
+      <div style="font-size:9px;font-weight:700;color:#B45309;text-transform:uppercase;letter-spacing:.6px;margin-bottom:3px">Previsto da semana</div>
+      <div style="font-size:15px;font-weight:700;color:#92400E">${fmt(previstoSemana)}</div>
+    </div>
+    <div style="background:#F0FDF4;border:1px solid #BBF7D0;border-radius:10px;padding:10px 12px">
+      <div style="font-size:9px;font-weight:700;color:#065F46;text-transform:uppercase;letter-spacing:.6px;margin-bottom:3px">Recebido da semana</div>
+      <div style="font-size:15px;font-weight:700;color:#065F46">${fmt(recebidoSemana)}</div>
+    </div>
+  </div>`;
 
   if(bloqDia.length) {
     html += bloqDia.map(b => {
@@ -1411,14 +1447,13 @@ function renderCalDia(iso) {
   html += `<button class="btn btn-primary" style="width:100%;margin-bottom:16px" onclick="novaDiligenciaNoDia('${iso}')">+ Nova diligência neste dia</button>`;
 
   if(recsDia.length) {
-    const total = recsDia.reduce((s,d)=>s+parseFloat(d.valor||0),0);
     const stMap = { recebido: {l:'Recebido', c:'badge-paid'}, atrasado: {l:'Atrasado', c:'badge-late'}, previsto: {l:'Previsto', c:'badge-waiting'} };
     html += `<div class="section-title">Recebimentos previstos</div>`;
     html += `<div class="card">` + recsDia.map(d => {
       const st = calStatusRecebimento(d, hojeISO);
       return `<div class="demand-row" onclick="fecharCalEAbrirDetalhe('${d.id}')"><div style="flex:1;min-width:0"><div class="demand-title">${d.descricao}</div><div class="demand-meta">${d.responsavel}</div></div><div class="demand-right"><span class="badge ${stMap[st].c}">${stMap[st].l}</span><div class="demand-value">${fmt(d.valor)}</div></div></div>`;
     }).join('') + `</div>`;
-    html += `<div style="display:flex;justify-content:space-between;padding:10px 2px;font-size:13px;font-weight:700;color:var(--text)"><span>Total previsto do dia</span><span>${fmt(total)}</span></div>`;
+    html += `<div style="display:flex;justify-content:space-between;padding:10px 2px;font-size:13px;font-weight:700;color:var(--text)"><span>Total previsto do dia</span><span>${fmt(previstoDia + recebidoDia)}</span></div>`;
   }
 
   id('cal-day-body').innerHTML = html;
