@@ -351,6 +351,12 @@
     .conflict-item { background: #FFFBEB; border: 1px solid #FDE68A; border-radius: 8px; padding: 10px 12px; margin-bottom: 8px; font-size: 12.5px; color: var(--text); line-height: 1.5; }
     .conflict-item:last-child { margin-bottom: 0; }
 
+    /* BOTÕES DE VEÍCULO */
+    .veiculo-btn { background:var(--white); border:2px solid var(--border); border-radius:10px; padding:10px 6px; cursor:pointer; font-size:18px; text-align:center; transition:all .15s; font-family:inherit; width:100%; }
+    .veiculo-btn:hover { border-color:var(--accent); }
+    .veiculo-btn.selected { border-color:var(--accent); background:var(--accent-bg); }
+    .veiculo-btn.selected div { color:var(--accent) !important; }
+
     /* CALENDÁRIO */
     .cal-nav { display:flex; align-items:center; gap:8px; }
     .cal-nav-btn { width:30px; height:30px; border-radius:8px; border:1px solid var(--border); background:var(--white); cursor:pointer; display:flex; align-items:center; justify-content:center; font-size:14px; color:var(--text2); transition: all .12s; font-family:inherit; flex-shrink:0; }
@@ -771,7 +777,55 @@
 
 <div id="toast"></div>
 
-<!-- MODAL DO DIA (CALENDÁRIO) -->
+<!-- MODAL DE CUSTO REAL (ao marcar como Realizado) -->
+<div id="custo-modal" class="modal-overlay hidden" onclick="if(event.target===this)closeCustoModal()">
+  <div class="modal-box" style="max-width:420px">
+    <div class="modal-icon">🚗</div>
+    <div class="modal-title">Custo real da diligência</div>
+    <div class="modal-sub">Informe o veículo usado para calcular o gasto real</div>
+
+    <div class="field" style="margin-bottom:12px">
+      <label style="font-size:12px;font-weight:600;color:var(--text2);margin-bottom:6px;display:block">Veículo utilizado *</label>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px">
+        <button class="veiculo-btn" id="vbtn-captur" onclick="selectVeiculo('captur')">
+          🚙<div style="font-size:11px;font-weight:700;margin-top:2px">Captur</div>
+          <div style="font-size:10px;color:var(--text3)">7 km/l</div>
+        </button>
+        <button class="veiculo-btn" id="vbtn-c3" onclick="selectVeiculo('c3')">
+          🚗<div style="font-size:11px;font-weight:700;margin-top:2px">C3</div>
+          <div style="font-size:10px;color:var(--text3)">10,5 km/l</div>
+        </button>
+        <button class="veiculo-btn" id="vbtn-moto" onclick="selectVeiculo('moto')">
+          🏍️<div style="font-size:11px;font-weight:700;margin-top:2px">Moto</div>
+          <div style="font-size:10px;color:var(--text3)">20 km/l</div>
+        </button>
+      </div>
+    </div>
+
+    <div class="field" style="margin-bottom:12px">
+      <label style="font-size:12px;font-weight:600;color:var(--text2);margin-bottom:6px;display:block">Houve estacionamento? *</label>
+      <div style="display:flex;gap:8px">
+        <button class="filter-btn" id="cm-park-nao" onclick="setCustoParking(false)">Não</button>
+        <button class="filter-btn" id="cm-park-sim" onclick="setCustoParking(true)">Sim</button>
+      </div>
+    </div>
+
+    <div class="field" id="cm-estac-wrap" style="display:none;margin-bottom:12px">
+      <label style="font-size:12px;font-weight:600;color:var(--text2);margin-bottom:6px;display:block">Valor do estacionamento (R$) *</label>
+      <input type="number" id="cm-estac-valor" placeholder="0.00" step="0.01" style="width:100%" oninput="calcCustoPreview()"/>
+    </div>
+
+    <!-- Preview do cálculo -->
+    <div id="cm-preview" style="display:none;background:#F5F3FF;border:1px solid #DDD6FE;border-radius:10px;padding:14px;margin-bottom:16px;font-size:12px">
+      <div id="cm-preview-body"></div>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn btn-secondary" onclick="closeCustoModal()">Cancelar</button>
+      <button class="btn btn-primary" id="cm-confirmar-btn" onclick="confirmarCustoReal()" disabled>Confirmar e avançar status</button>
+    </div>
+  </div>
+</div>
 <div id="cal-day-modal" class="modal-overlay hidden" onclick="if(event.target===this)closeCalDayModal()">
   <div class="modal-box" style="max-width:480px;position:relative">
     <button onclick="closeCalDayModal()" style="position:absolute;top:14px;right:14px;background:none;border:none;font-size:20px;color:var(--text3);cursor:pointer;line-height:1">×</button>
@@ -1093,7 +1147,25 @@ function renderDetail(did) {
   const steps=STATUS_FLOW.map((s,i)=>`<div class="step"><div class="step-bar" style="background:${i<=ci?dot:'#F3F4F6'};opacity:${i===ci?1:i<ci?.5:.15}"></div><div class="step-label" style="color:${i===ci?dot:'var(--text3)'};font-weight:${i===ci?700:400}">${STATUS[s].short}</div></div>`).join('');
   const waBtn=d.contratante_whatsapp?`<a href="https://wa.me/55${d.contratante_whatsapp.replace(/\D/g,'')}" target="_blank" class="wa-link"><svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>${d.contratante_whatsapp}</a>`:'<span style="color:var(--text3)">—</span>';
   const advBtn=d.status!=='pago'?`<button class="btn btn-primary" onclick="advanceStatus('${d.id}')">Avançar Status →</button>`:'';
-  id('detail-content').innerHTML=`<div class="detail-header"><div><div class="detail-title">${d.descricao}</div>${badgeFull(d.status)}</div><div class="detail-value-big">${fmt(d.valor)}</div></div><div class="steps">${steps}</div><div style="padding:0 20px"><div class="detail-row"><span class="detail-label">📅 Data</span><span class="detail-value">${fmtDate(d.data)}</span></div><div class="detail-row"><span class="detail-label">🕐 Horário</span><span class="detail-value">${d.horario||'—'}</span></div><div class="detail-row"><span class="detail-label">📍 Local</span><span class="detail-value">${d.local}</span></div><div class="detail-row"><span class="detail-label">🏢 Plataforma</span><span class="detail-value">${d.plataforma}</span></div><div class="detail-row"><span class="detail-label">👤 Responsável</span><span class="detail-value">${d.responsavel}</span></div><div class="detail-row"><span class="detail-label">💳 Previsão Pgto</span><span class="detail-value">${fmtDate(d.previsao_pagamento)}</span></div><div class="detail-row"><span class="detail-label">🙋 Contratante</span><span class="detail-value">${d.contratante_nome||'—'}</span></div><div class="detail-row" style="border-bottom:none"><span class="detail-label">📱 WhatsApp</span>${waBtn}</div></div><div style="padding:14px 20px;border-top:1px solid var(--border2);display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px"><button class="btn btn-danger" onclick="deleteDemand('${d.id}')">Remover</button><div style="display:flex;gap:10px"><button class="btn btn-secondary" onclick="goPage('novo','${d.id}')">Editar</button>${advBtn}</div></div>`;
+
+  // Bloco de custo real (só aparece se foi registrado)
+  let custoBloco = '';
+  if(d.custo_real != null) {
+    const lucro = (d.valor||0) - d.custo_real;
+    const pct = d.valor ? ((lucro/d.valor)*100).toFixed(0) : 0;
+    const cor = lucro >= 0 ? '#059669' : '#B91C1C';
+    custoBloco = `<div style="margin:0 20px 16px;background:#F5F3FF;border:1px solid #DDD6FE;border-radius:12px;padding:14px">
+      <div class="section-title" style="margin-bottom:10px">📊 Análise de Custo</div>
+      <div class="detail-row"><span class="detail-label">🚗 Veículo</span><span class="detail-value">${d.veiculo_usado||'—'}</span></div>
+      ${d.estacionamento_real ? `<div class="detail-row"><span class="detail-label">🅿️ Estacionamento</span><span class="detail-value">${fmt(d.estacionamento_real)}</span></div>` : ''}
+      <div class="detail-row"><span class="detail-label">💸 Custo real</span><span class="detail-value" style="font-weight:700;color:#7C3AED">${fmt(d.custo_real)}</span></div>
+      ${d.valor_sugerido ? `<div class="detail-row"><span class="detail-label">💡 Valor sugerido</span><span class="detail-value">${fmt(d.valor_sugerido)}</span></div>` : ''}
+      <div class="detail-row"><span class="detail-label">💰 Valor cobrado</span><span class="detail-value">${fmt(d.valor)}</span></div>
+      <div class="detail-row" style="border-bottom:none"><span class="detail-label">📈 Margem real</span><span class="detail-value" style="font-weight:700;color:${cor}">${fmt(lucro)} (${pct}%)</span></div>
+    </div>`;
+  }
+
+  id('detail-content').innerHTML=`<div class="detail-header"><div><div class="detail-title">${d.descricao}</div>${badgeFull(d.status)}</div><div class="detail-value-big">${fmt(d.valor)}</div></div><div class="steps">${steps}</div>${custoBloco}<div style="padding:0 20px"><div class="detail-row"><span class="detail-label">📅 Data</span><span class="detail-value">${fmtDate(d.data)}</span></div><div class="detail-row"><span class="detail-label">🕐 Horário</span><span class="detail-value">${d.horario||'—'}</span></div><div class="detail-row"><span class="detail-label">📍 Local</span><span class="detail-value">${d.local}</span></div>${d.endereco?`<div class="detail-row"><span class="detail-label">🗺️ Endereço</span><span class="detail-value">${d.endereco}</span></div>`:''}<div class="detail-row"><span class="detail-label">🏢 Plataforma</span><span class="detail-value">${d.plataforma}</span></div><div class="detail-row"><span class="detail-label">👤 Responsável</span><span class="detail-value">${d.responsavel}</span></div>${d.responsavel==='Terceiro'&&d.valor_terceiro?`<div class="detail-row"><span class="detail-label">🤝 Val. Terceiro</span><span class="detail-value">${fmt(d.valor_terceiro)}</span></div>`+`<div class="detail-row"><span class="detail-label">💼 Val. de vocês</span><span class="detail-value" style="color:#059669;font-weight:700">${fmt((d.valor||0)-(d.valor_terceiro||0))}</span></div>`:''}<div class="detail-row"><span class="detail-label">💳 Previsão Pgto</span><span class="detail-value">${fmtDate(d.previsao_pagamento)}</span></div><div class="detail-row"><span class="detail-label">🙋 Contratante</span><span class="detail-value">${d.contratante_nome||'—'}</span></div><div class="detail-row" style="border-bottom:none"><span class="detail-label">📱 WhatsApp</span>${waBtn}</div></div><div style="padding:14px 20px;border-top:1px solid var(--border2);display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px"><button class="btn btn-danger" onclick="deleteDemand('${d.id}')">Remover</button><div style="display:flex;gap:10px"><button class="btn btn-secondary" onclick="goPage('novo','${d.id}')">Editar</button>${advBtn}</div></div>`;
 }
 
 // ── RELATÓRIO ──
@@ -1240,6 +1312,7 @@ async function advanceStatus(did) {
   const d=demands.find(x=>x.id===did); if(!d) return;
   const i=STATUS_FLOW.indexOf(d.status); if(i===STATUS_FLOW.length-1) return;
   const newStatus=STATUS_FLOW[i+1];
+  if(newStatus==='realizado') { abrirCustoModal(did); return; }
   const ok=await updateStatus(did,newStatus);
   if(ok){ showToast(`Status: ${STATUS[newStatus].label}`); renderDetail(did); }
 }
@@ -1248,6 +1321,106 @@ async function deleteDemand(did) {
   if(!confirm('Remover esta demanda?')) return;
   const ok=await deleteDemandDB(did);
   if(ok){ showToast('Removida.','info'); goPage('demandas'); }
+}
+
+// ── MODAL DE CUSTO REAL ──
+const VEICULOS = { captur: { label:'Captur', consumo: 7 }, c3: { label:'C3', consumo: 10.5 }, moto: { label:'Moto', consumo: 20 } };
+let custoModalDid = null;
+let custoVeiculo = null;
+let custoParking = null;
+
+function abrirCustoModal(did) {
+  custoModalDid = did;
+  custoVeiculo = null;
+  custoParking = null;
+  // reset UI
+  ['captur','c3','moto'].forEach(v => id('vbtn-'+v).classList.remove('selected'));
+  ['cm-park-sim','cm-park-nao'].forEach(b => id(b).classList.remove('active'));
+  id('cm-estac-wrap').style.display = 'none';
+  id('cm-estac-valor').value = '';
+  id('cm-preview').style.display = 'none';
+  id('cm-confirmar-btn').disabled = true;
+  id('custo-modal').classList.remove('hidden');
+}
+function closeCustoModal() { id('custo-modal').classList.add('hidden'); custoModalDid=null; }
+
+function selectVeiculo(v) {
+  custoVeiculo = v;
+  ['captur','c3','moto'].forEach(x => id('vbtn-'+x).classList.toggle('selected', x===v));
+  calcCustoPreview();
+}
+function setCustoParking(sim) {
+  custoParking = sim;
+  id('cm-park-sim').classList.toggle('active', sim===true);
+  id('cm-park-nao').classList.toggle('active', sim===false);
+  id('cm-estac-wrap').style.display = sim ? 'block' : 'none';
+  if(!sim) id('cm-estac-valor').value = '';
+  calcCustoPreview();
+}
+
+function calcCustoPreview() {
+  if(!custoVeiculo || custoParking===null) return;
+  if(custoParking && !id('cm-estac-valor').value) return;
+
+  const d = demands.find(x=>x.id===custoModalDid); if(!d) return;
+  const kmIda = parseFloat((d.km_ida||'').replace(' km','')) || null;
+  const consumo = VEICULOS[custoVeiculo].consumo;
+  const gas = (() => { try { const p = JSON.parse(localStorage.getItem('calc_params')||'{}'); return parseFloat(p.gas)||6.99; } catch(e){ return 6.99; } })();
+  const estac = custoParking ? (parseFloat(id('cm-estac-valor').value)||0) : 0;
+
+  let linhas = [];
+  let combustivel = null;
+  if(kmIda) {
+    const kmTotal = kmIda * 2;
+    combustivel = (kmTotal / consumo) * gas;
+    linhas.push(`⛽ Combustível: ${kmTotal.toFixed(1)} km total ÷ ${consumo} km/l × R$ ${gas.toFixed(2)}/l = <b>${fmt(combustivel)}</b>`);
+  } else {
+    linhas.push(`⚠️ Distância não disponível (diligência sem rota calculada) — combustível não estimado`);
+  }
+  if(estac) linhas.push(`🅿️ Estacionamento: <b>${fmt(estac)}</b>`);
+
+  const custoReal = (combustivel||0) + estac;
+  linhas.push(`<hr style="border:none;border-top:1px solid #DDD6FE;margin:8px 0"/>`);
+  linhas.push(`💸 <b>Custo real: ${fmt(custoReal)}</b>`);
+
+  // confronto
+  if(d.valor_sugerido) linhas.push(`💡 Valor sugerido: ${fmt(d.valor_sugerido)}`);
+  if(d.valor) {
+    const lucro = (d.valor||0) - custoReal;
+    const pct = d.valor ? ((lucro/d.valor)*100).toFixed(0) : 0;
+    linhas.push(`💰 Valor cobrado: ${fmt(d.valor)}`);
+    linhas.push(`📊 Margem real: <b style="color:${lucro>=0?'#059669':'#B91C1C'}">${fmt(lucro)} (${pct}%)</b>`);
+  }
+
+  id('cm-preview-body').innerHTML = linhas.map(l=>`<div style="margin-bottom:5px">${l}</div>`).join('');
+  id('cm-preview').style.display = 'block';
+  id('cm-confirmar-btn').disabled = false;
+
+  // Guardar para salvar
+  id('cm-confirmar-btn').dataset.custoReal = custoReal.toFixed(2);
+  id('cm-confirmar-btn').dataset.veiculo = VEICULOS[custoVeiculo].label;
+  id('cm-confirmar-btn').dataset.estac = estac.toFixed(2);
+}
+
+async function confirmarCustoReal() {
+  const btn = id('cm-confirmar-btn');
+  const custoReal = parseFloat(btn.dataset.custoReal)||0;
+  const veiculo = btn.dataset.veiculo;
+  const estacReal = parseFloat(btn.dataset.estac)||0;
+  const did = custoModalDid;
+
+  const { error } = await sb.from('demandas').update({
+    status: 'realizado',
+    veiculo_usado: veiculo,
+    custo_real: custoReal,
+    estacionamento_real: estacReal
+  }).eq('id', did);
+
+  if(error) { showToast('Erro ao salvar.','err'); return; }
+  await loadDemands();
+  closeCustoModal();
+  showToast('Status avançado — custo registrado!');
+  renderDetail(did);
 }
 
 // ── BLOQUEIOS ──
