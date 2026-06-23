@@ -426,7 +426,7 @@
         <div class="user-avatar" id="user-avatar">?</div>
         <div class="user-name" id="user-name">...</div>
       </div>
-      <button id="new-btn" onclick="goPage('novo')">+ Nova</button>
+      <button id="new-btn" onclick="goPage('calculadora')">+ Nova</button>
     </div>
   </header>
 
@@ -486,20 +486,35 @@
       <!-- NOVO / EDITAR -->
       <div id="page-novo" class="page">
         <div style="display:flex;align-items:center;gap:10px;margin-bottom:20px">
-          <button class="btn-back" onclick="goPage('demandas')">
+          <button class="btn-back" id="form-back-btn" onclick="goPage('demandas')">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15,18 9,12 15,6"/></svg>
             Voltar
           </button>
           <div class="page-title" id="form-title">Nova Demanda</div>
         </div>
         <div class="card card-pad">
+
+          <!-- Bloco de rota (preenchido pela calculadora) -->
+          <div id="f-rota-bloco" style="display:none;margin-bottom:16px">
+            <div class="section-title">📍 Rota calculada</div>
+            <div style="background:#F5F3FF;border:1px solid #DDD6FE;border-radius:10px;padding:12px;font-size:12px;color:var(--text2);margin-bottom:10px" id="f-rota-desc"></div>
+            <div class="form-grid">
+              <div class="field"><label>Km (ida)</label><input type="text" id="f-km-ida" readonly style="background:#F9FAFB"/></div>
+              <div class="field"><label>Km (ida + volta)</label><input type="text" id="f-km-total" readonly style="background:#F9FAFB"/></div>
+              <div class="field"><label>Custo combustível</label><input type="text" id="f-comb" readonly style="background:#F9FAFB"/></div>
+              <div class="field"><label>💡 Valor sugerido</label><input type="text" id="f-valor-sugerido" readonly style="background:#F5F3FF;font-weight:700;color:var(--accent)"/></div>
+            </div>
+            <hr class="divider"/>
+          </div>
+
           <div class="section-title">Dados da Diligência</div>
           <div class="form-grid">
             <div class="field"><label>Data *</label><input type="date" id="f-data"/></div>
             <div class="field"><label>Horário</label><input type="time" id="f-horario"/></div>
-            <div class="field"><label>Local *</label><input type="text" id="f-local" placeholder="Ex: Fórum de Curitiba"/></div>
+            <div class="field"><label>Local *</label><input type="text" id="f-local" placeholder="Ex: 12ª VT Curitiba"/></div>
+            <div class="field"><label>Endereço completo</label><input type="text" id="f-endereco" placeholder="Rua, número, bairro, cidade"/></div>
             <div class="field form-full"><label>Descrição *</label><textarea id="f-descricao" placeholder="Descreva a diligência..."></textarea></div>
-            <div class="field"><label>Valor (R$) *</label><input type="number" id="f-valor" placeholder="0.00" step="0.01"/></div>
+            <div class="field"><label>Valor cobrado (R$) *</label><input type="number" id="f-valor" placeholder="0.00" step="0.01"/></div>
             <div class="field"><label>Plataforma *</label>
               <select id="f-plataforma">
                 <option value="">Selecione...</option>
@@ -509,7 +524,7 @@
               </select>
             </div>
             <div class="field"><label>Responsável *</label>
-              <select id="f-responsavel">
+              <select id="f-responsavel" onchange="toggleTerceiroFields()">
                 <option value="">Selecione...</option>
                 <option>Naiarha</option>
                 <option>Esdras</option>
@@ -526,6 +541,20 @@
             </div>
             <div class="field"><label>Previsão de Pagamento</label><input type="date" id="f-previsao"/></div>
           </div>
+
+          <!-- Campos do Terceiro (aparecem só quando responsável = Terceiro) -->
+          <div id="f-terceiro-bloco" style="display:none">
+            <hr class="divider"/>
+            <div class="section-title">💼 Divisão com Terceiro</div>
+            <div style="background:#FFF7ED;border:1px solid #FED7AA;border-radius:10px;padding:10px 12px;font-size:12px;color:#92400E;margin-bottom:12px">
+              O <b>Valor cobrado</b> acima é o total recebido do cliente. Informe abaixo quanto fica para o Terceiro — o restante é de vocês.
+            </div>
+            <div class="form-grid">
+              <div class="field"><label>Valor do Terceiro (R$)</label><input type="number" id="f-valor-terceiro" placeholder="0.00" step="0.01" oninput="calcValorNosso()"/></div>
+              <div class="field"><label>💰 Valor de vocês (R$)</label><input type="text" id="f-valor-nosso" readonly style="background:#F0FDF4;font-weight:700;color:#065F46"/></div>
+            </div>
+          </div>
+
           <hr class="divider"/>
           <div class="section-title">Dados do Contratante</div>
           <div class="form-grid">
@@ -679,6 +708,9 @@
             </div>
             <div style="font-size:26px;font-weight:700;color:#fff" id="calc-r-min">—</div>
           </div>
+          <button id="calc-criar-btn" class="btn btn-primary" style="width:100%;margin-top:14px;font-size:15px;padding:14px;display:none" onclick="irParaFormularioDaCalculadora()">
+            Criar diligência com estes dados →
+          </button>
         </div>
       </div>
 
@@ -806,6 +838,7 @@ let pendingBloqueio = null;
 let editBloqueioId = null;
 let calMes = new Date(); calMes.setDate(1);
 let calDiaAtual = null;
+let calcUltimoResultado = null;
 
 // ── UTILS ──
 const fmt = v => { const n=parseFloat(String(v||0).replace(',','.')); return isNaN(n)?'—':n.toLocaleString('pt-BR',{style:'currency',currency:'BRL'}); };
@@ -1079,9 +1112,51 @@ function renderRelatorio() {
 }
 
 // ── FORM ──
-function clearForm() { ['f-data','f-horario','f-local','f-descricao','f-valor','f-previsao','f-nome','f-whatsapp'].forEach(x=>id(x).value=''); id('f-plataforma').value=''; id('f-responsavel').value=''; id('f-status').value='aguardando_cumprimento'; }
-function fillForm(d) { id('f-data').value=d.data?.split('T')[0]||''; id('f-horario').value=d.horario||''; id('f-local').value=d.local||''; id('f-descricao').value=d.descricao||''; id('f-valor').value=d.valor||''; id('f-plataforma').value=d.plataforma||''; id('f-responsavel').value=d.responsavel||''; id('f-status').value=d.status||'aguardando_cumprimento'; id('f-previsao').value=d.previsao_pagamento?.split('T')[0]||''; id('f-nome').value=d.contratante_nome||''; id('f-whatsapp').value=d.contratante_whatsapp||''; }
-function getForm() { return { data:id('f-data').value||null, horario:id('f-horario').value||null, local:id('f-local').value, descricao:id('f-descricao').value, valor:parseFloat(id('f-valor').value)||null, plataforma:id('f-plataforma').value, responsavel:id('f-responsavel').value, status:id('f-status').value, previsao_pagamento:id('f-previsao').value||null, contratante_nome:id('f-nome').value, contratante_whatsapp:id('f-whatsapp').value }; }
+function clearForm() {
+  ['f-data','f-horario','f-local','f-endereco','f-descricao','f-valor','f-valor-terceiro','f-previsao','f-nome','f-whatsapp'].forEach(x=>id(x).value='');
+  ['f-km-ida','f-km-total','f-comb','f-valor-sugerido','f-valor-nosso'].forEach(x=>{ if(id(x)) id(x).value=''; });
+  id('f-plataforma').value=''; id('f-responsavel').value=''; id('f-status').value='aguardando_cumprimento';
+  id('f-rota-bloco').style.display='none'; id('f-terceiro-bloco').style.display='none';
+  id('form-back-btn').onclick = ()=>goPage('demandas');
+}
+function fillForm(d) {
+  id('f-data').value        = d.data?.split('T')[0]||'';
+  id('f-horario').value     = d.horario||'';
+  id('f-local').value       = d.local||'';
+  id('f-endereco').value    = d.endereco||'';
+  id('f-descricao').value   = d.descricao||'';
+  id('f-valor').value       = d.valor||'';
+  id('f-plataforma').value  = d.plataforma||'';
+  id('f-responsavel').value = d.responsavel||'';
+  id('f-status').value      = d.status||'aguardando_cumprimento';
+  id('f-previsao').value    = d.previsao_pagamento?.split('T')[0]||'';
+  id('f-nome').value        = d.contratante_nome||'';
+  id('f-whatsapp').value    = d.contratante_whatsapp||'';
+  if(d.km_ida) { id('f-km-ida').value=d.km_ida; id('f-km-total').value=d.km_total||''; id('f-rota-bloco').style.display='block'; id('f-rota-desc').innerHTML=d.endereco?`<b>Destino:</b> ${d.endereco}`:''; }
+  if(d.valor_sugerido) id('f-valor-sugerido').value = fmt(d.valor_sugerido);
+  if(d.responsavel==='Terceiro') { id('f-terceiro-bloco').style.display='block'; id('f-valor-terceiro').value=d.valor_terceiro||''; calcValorNosso(); }
+  id('form-back-btn').onclick = ()=>goPage('demandas');
+}
+function getForm() {
+  return {
+    data: id('f-data').value||null,
+    horario: id('f-horario').value||null,
+    local: id('f-local').value,
+    endereco: id('f-endereco').value||null,
+    descricao: id('f-descricao').value,
+    valor: parseFloat(id('f-valor').value)||null,
+    valor_sugerido: parseFloat((id('f-valor-sugerido').value||'').replace(/[R$\s]/g,'').replace(',','.')) || null,
+    valor_terceiro: parseFloat(id('f-valor-terceiro').value)||null,
+    km_ida: id('f-km-ida').value||null,
+    km_total: id('f-km-total').value||null,
+    plataforma: id('f-plataforma').value,
+    responsavel: id('f-responsavel').value,
+    status: id('f-status').value,
+    previsao_pagamento: id('f-previsao').value||null,
+    contratante_nome: id('f-nome').value,
+    contratante_whatsapp: id('f-whatsapp').value
+  };
+}
 
 // ── CONFLITOS DE AGENDA ──
 const TOLERANCIA_MIN = 90; // intervalo mínimo de segurança entre diligências (minutos)
@@ -1470,8 +1545,42 @@ function fecharCalEAbrirDetalhe(did) {
 
 function novaDiligenciaNoDia(iso) {
   closeCalDayModal();
+  goPage('calculadora');
+  setTimeout(()=>{ id('f-data') && (id('f-data').value = iso); }, 100);
+  // Guarda data para pré-preencher depois que calcular
+  calcDataPreenchida = iso;
+}
+
+let calcDataPreenchida = null;
+
+function irParaFormularioDaCalculadora() {
+  if(!calcUltimoResultado) { showToast('Calcule a rota antes de continuar.','err'); return; }
+  const r = calcUltimoResultado;
   goPage('novo');
-  id('f-data').value = iso;
+  // Preencher bloco de rota
+  id('f-rota-desc').innerHTML = `<b>Origem:</b> ${r.origem}<br><b>Destino:</b> ${r.destino}`;
+  id('f-km-ida').value       = r.kmIda + ' km';
+  id('f-km-total').value     = r.kmTotal + ' km';
+  id('f-comb').value         = 'R$ ' + r.comb;
+  id('f-valor-sugerido').value = 'R$ ' + r.valMin;
+  id('f-endereco').value     = r.destino;
+  id('f-rota-bloco').style.display = 'block';
+  id('form-back-btn').onclick = () => goPage('calculadora');
+  // Pré-preencher data se veio do calendário
+  if(calcDataPreenchida) { id('f-data').value = calcDataPreenchida; calcDataPreenchida = null; }
+}
+
+function toggleTerceiroFields() {
+  const isTerceiro = id('f-responsavel').value === 'Terceiro';
+  id('f-terceiro-bloco').style.display = isTerceiro ? 'block' : 'none';
+  if(!isTerceiro) { id('f-valor-terceiro').value=''; id('f-valor-nosso').value=''; }
+}
+
+function calcValorNosso() {
+  const total = parseFloat(id('f-valor').value) || 0;
+  const terceiro = parseFloat(id('f-valor-terceiro').value) || 0;
+  const nosso = total - terceiro;
+  id('f-valor-nosso').value = nosso >= 0 ? fmt(nosso) : '—';
 }
 
 // Enter no login
@@ -1556,6 +1665,8 @@ async function calcularRota() {
   id('calc-loading').style.display = 'block';
   id('calc-resultado').style.display = 'none';
   id('calc-erro').style.display = 'none';
+  id('calc-criar-btn').style.display = 'none';
+  calcUltimoResultado = null;
 
   try {
     // 1. Geocodificar origem e destino
@@ -1588,8 +1699,23 @@ async function calcularRota() {
     id('calc-r-comb').textContent      = fmt(comb);
     id('calc-r-lucro-desc').textContent = 'combustível' + (estac ? ' + estac. R$10' : '') + ' + R$ ' + lucro.toFixed(2) + ' lucro';
     id('calc-r-min').textContent       = fmt(valMin);
-
     id('calc-resultado').style.display = 'block';
+
+    // Guardar resultado para passar ao formulário
+    calcUltimoResultado = {
+      origem: calcOrigemMode === 'BASE' ? 'Base — Pinhais' : origemAddr,
+      destino: dest.label,
+      destinoInput: destino,
+      kmIda: kmIda.toFixed(1),
+      kmTotal: kmTotal.toFixed(1),
+      minIda, minTotal,
+      comb: comb.toFixed(2),
+      estac,
+      lucro,
+      valMin: valMin.toFixed(2),
+      parking: calcParking
+    };
+    id('calc-criar-btn').style.display = 'block';
   } catch (e) {
     id('calc-erro-msg').textContent = '⚠️ ' + (e.message || 'Erro inesperado.');
     id('calc-erro').style.display = 'block';
