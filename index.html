@@ -624,6 +624,7 @@
           <span id="report-month-label" style="font-size:12px;color:var(--accent);font-weight:600"></span>
         </div>
         <div class="report-mini-grid" id="report-stats" style="margin-bottom:16px"></div>
+        <div class="card card-pad" style="margin-bottom:16px" id="report-custos"></div>
         <div class="resp-grid" id="report-resp"></div>
         <div class="card card-pad" style="margin-bottom:14px" id="report-plataformas"></div>
         <div class="card" id="report-list"></div>
@@ -1137,16 +1138,55 @@ function renderDashboard() {
   const pendentes=demands.filter(d=>d.status==='aguardando_cumprimento').length;
   const totalPago=demands.filter(d=>d.status==='pago').reduce((s,d)=>s+parseFloat(d.valor||0),0);
   const totalAR=demands.filter(d=>d.status!=='pago').reduce((s,d)=>s+parseFloat(d.valor||0),0);
+
+  // Indicadores de custo
+  const comCusto = demands.filter(d=>d.custo_real!=null);
+  const totalCusto = comCusto.reduce((s,d)=>s+parseFloat(d.custo_real||0),0);
+  const totalReceita = comCusto.reduce((s,d)=>s+parseFloat(d.valor||0),0);
+  const lucroLiq = totalReceita - totalCusto;
+  const custoMedio = comCusto.length ? totalCusto/comCusto.length : 0;
+  const negativas = comCusto.filter(d=>(d.valor||0)<(d.custo_real||0)).length;
+  const totalSugerido = demands.filter(d=>d.valor_sugerido).reduce((s,d)=>s+parseFloat(d.valor_sugerido||0),0);
+  const totalCobrado  = demands.filter(d=>d.valor_sugerido).reduce((s,d)=>s+parseFloat(d.valor||0),0);
+  const difSugCob = totalCobrado - totalSugerido;
+
   id('dash-stats').innerHTML=`
     <div class="stat-card" style="border-top-color:#7C3AED;cursor:pointer" onclick="goPage('demandas')"><div class="stat-label">📋 Total</div><div class="stat-value">${total}</div></div>
     <div class="stat-card" style="border-top-color:#D97706;cursor:pointer" onclick="goPage('demandas',null,'aguardando_cumprimento')"><div class="stat-label">⏳ Pendentes</div><div class="stat-value">${pendentes}</div></div>
     <div class="stat-card" style="border-top-color:#7C3AED;cursor:pointer" onclick="goPage('demandas',null,'a_receber')"><div class="stat-label">💳 A Receber</div><div class="stat-value sm">${fmt(totalAR)}</div></div>
     <div class="stat-card" style="border-top-color:#059669;cursor:pointer" onclick="goPage('demandas',null,'pago')"><div class="stat-label">✅ Recebido</div><div class="stat-value sm">${fmt(totalPago)}</div></div>
   `;
+
+  // Bloco de custo/margem (só aparece se há dados)
+  const custoHtml = comCusto.length ? `
+    <div class="card card-pad" style="margin-bottom:20px">
+      <div class="section-title" style="margin-bottom:14px">📊 Análise de Rentabilidade · ${comCusto.length} dem. com custo registrado</div>
+      <div class="stats-grid" style="margin-bottom:0">
+        <div class="stat-card" style="border-top-color:#059669">
+          <div class="stat-label">💰 Lucro líquido</div>
+          <div class="stat-value sm" style="color:${lucroLiq>=0?'#059669':'#B91C1C'}">${fmt(lucroLiq)}</div>
+        </div>
+        <div class="stat-card" style="border-top-color:#7C3AED">
+          <div class="stat-label">💸 Custo médio/dem.</div>
+          <div class="stat-value sm">${fmt(custoMedio)}</div>
+        </div>
+        <div class="stat-card" style="border-top-color:${negativas>0?'#DC2626':'#059669'}">
+          <div class="stat-label">⚠️ Em prejuízo</div>
+          <div class="stat-value" style="color:${negativas>0?'#DC2626':'#059669'}">${negativas}</div>
+        </div>
+        <div class="stat-card" style="border-top-color:#2563EB">
+          <div class="stat-label">💡 Cobrado vs sugerido</div>
+          <div class="stat-value sm" style="color:${difSugCob>=0?'#059669':'#B91C1C'}">${difSugCob>=0?'+':''}${fmt(difSugCob)}</div>
+        </div>
+      </div>
+    </div>` : '';
+
   const statusHtml=STATUS_FLOW.map(s=>{ const c=demands.filter(d=>d.status===s).length; const pct=total?Math.round((c/total)*100):0; return `<div style="margin-bottom:10px"><div style="display:flex;justify-content:space-between;margin-bottom:4px"><span style="font-size:12px;color:var(--text)">${STATUS[s].label}</span><span style="font-size:12px;font-weight:700;color:${STATUS[s].dot}">${c}</span></div><div class="bar-track"><div class="bar-fill" style="width:${pct}%;background:${STATUS[s].dot}"></div></div></div>`; }).join('');
   const respHtml=RESPONSAVEIS.map(r=>{ const rd=demands.filter(d=>d.responsavel===r); const rv=rd.reduce((s,d)=>s+parseFloat(d.valor||0),0); return `<div style="margin-bottom:12px;padding-bottom:12px;border-bottom:1px solid var(--border2)"><div style="font-size:13px;font-weight:600;color:var(--text);margin-bottom:5px">👤 ${r}</div><div style="display:flex;gap:12px"><span style="font-size:12px;color:var(--text3)">${rd.length} dem.</span><span style="font-size:12px;font-weight:600;color:var(--accent)">${fmt(rv)}</span></div></div>`; }).join('');
-  id('dash-panels').innerHTML=`<div class="card card-pad"><div class="section-title">Por Status</div>${statusHtml}</div><div class="card card-pad"><div class="section-title">Por Responsável</div>${respHtml}</div>`;
-  if(!demands.length){ id('dash-recent').innerHTML=`<div class="empty"><div class="empty-icon">📂</div><div class="empty-title">Nenhuma demanda ainda</div><div class="empty-sub">Cadastre sua primeira</div><button class="btn btn-primary" onclick="goPage('novo')">+ Nova Demanda</button></div>`; return; }
+
+  id('dash-panels').innerHTML=`${custoHtml}<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px"><div class="card card-pad"><div class="section-title">Por Status</div>${statusHtml}</div><div class="card card-pad"><div class="section-title">Por Responsável</div>${respHtml}</div></div>`;
+
+  if(!demands.length){ id('dash-recent').innerHTML=`<div class="empty"><div class="empty-icon">📂</div><div class="empty-title">Nenhuma demanda ainda</div><div class="empty-sub">Cadastre sua primeira</div><button class="btn btn-primary" onclick="goPage('calculadora')">+ Nova Demanda</button></div>`; return; }
   id('dash-recent').innerHTML=demands.slice(0,5).map(d=>`<div class="demand-row" onclick="goPage('detail','${d.id}')"><div style="flex:1;min-width:0"><div class="demand-title">${d.descricao}</div><div class="demand-meta">${fmtDate(d.data)} · ${d.local}<br>${d.responsavel}</div></div><div class="demand-right">${badge(d.status)}<div class="demand-value">${fmt(d.valor)}</div></div></div>`).join('');
 }
 
@@ -1220,6 +1260,47 @@ function renderRelatorio() {
   const pago=rd.filter(d=>d.status==='pago').reduce((s,d)=>s+parseFloat(d.valor||0),0);
   const ar=rd.filter(d=>d.status!=='pago').reduce((s,d)=>s+parseFloat(d.valor||0),0);
   id('report-stats').innerHTML=[{label:'Volume Total',value:fmt(total),accent:'#7C3AED'},{label:'Recebido',value:fmt(pago),accent:'#059669'},{label:'A Receber',value:fmt(ar),accent:'#D97706'},{label:'Demandas',value:rd.length,accent:'#2563EB'}].map(s=>`<div class="mini-stat" style="border-top-color:${s.accent}"><div class="label">${s.label}</div><div class="value">${s.value}</div></div>`).join('');
+
+  // Análise de custos
+  const comCusto = rd.filter(d=>d.custo_real!=null);
+  if(comCusto.length) {
+    const totCusto    = comCusto.reduce((s,d)=>s+parseFloat(d.custo_real||0),0);
+    const totReceita  = comCusto.reduce((s,d)=>s+parseFloat(d.valor||0),0);
+    const lucroLiq    = totReceita - totCusto;
+    const margemPct   = totReceita ? ((lucroLiq/totReceita)*100).toFixed(1) : 0;
+    const custoMedio  = comCusto.length ? totCusto/comCusto.length : 0;
+    const negativas   = comCusto.filter(d=>(d.valor||0)<(d.custo_real||0));
+    const totSugerido = rd.filter(d=>d.valor_sugerido).reduce((s,d)=>s+parseFloat(d.valor_sugerido||0),0);
+    const totCobrado  = rd.filter(d=>d.valor_sugerido).reduce((s,d)=>s+parseFloat(d.valor||0),0);
+    const difSugCob   = totCobrado - totSugerido;
+    const corLucro    = lucroLiq>=0?'#059669':'#B91C1C';
+    const corDif      = difSugCob>=0?'#059669':'#B91C1C';
+    id('report-custos').innerHTML=`
+      <div class="section-title" style="margin-bottom:14px">📊 Análise de Rentabilidade · ${comCusto.length} dem. com custo registrado</div>
+      <div class="report-mini-grid" style="margin-bottom:14px">
+        <div class="mini-stat" style="border-top-color:${corLucro}"><div class="label">💰 Lucro líquido</div><div class="value" style="color:${corLucro}">${fmt(lucroLiq)}</div></div>
+        <div class="mini-stat" style="border-top-color:#7C3AED"><div class="label">💸 Total de custos</div><div class="value">${fmt(totCusto)}</div></div>
+        <div class="mini-stat" style="border-top-color:#2563EB"><div class="label">📈 Margem média</div><div class="value">${margemPct}%</div></div>
+        <div class="mini-stat" style="border-top-color:#D97706"><div class="label">💸 Custo médio/dem.</div><div class="value">${fmt(custoMedio)}</div></div>
+      </div>
+      <div style="background:#F5F3FF;border:1px solid #DDD6FE;border-radius:10px;padding:12px 14px;margin-bottom:${negativas.length?'12px':'0'}">
+        <div style="font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px">Comparativo: sugerido × cobrado × custo</div>
+        <div class="mini-row"><span>💡 Total sugerido</span><span style="font-weight:600">${fmt(totSugerido)}</span></div>
+        <div class="mini-row"><span>💰 Total cobrado</span><span style="font-weight:600">${fmt(totCobrado)}</span></div>
+        <div class="mini-row"><span>Diferença cobrado − sugerido</span><span style="font-weight:700;color:${corDif}">${difSugCob>=0?'+':''}${fmt(difSugCob)}</span></div>
+        <div style="border-top:1px solid #DDD6FE;margin:8px 0"></div>
+        <div class="mini-row"><span>💸 Total custos reais</span><span style="font-weight:600;color:#7C3AED">${fmt(totCusto)}</span></div>
+        <div class="mini-row"><span>📈 Lucro líquido real</span><span style="font-weight:700;color:${corLucro}">${fmt(lucroLiq)} (${margemPct}%)</span></div>
+      </div>
+      ${negativas.length ? `<div style="background:#FEF2F2;border:1px solid #FECACA;border-radius:10px;padding:12px 14px;margin-top:12px">
+        <div style="font-size:11px;font-weight:700;color:#B91C1C;text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px">⚠️ ${negativas.length} diligência(s) com margem negativa</div>
+        ${negativas.map(d=>`<div class="mini-row" style="cursor:pointer" onclick="goPage('detail','${d.id}')"><span style="font-size:12px;color:var(--text)">${d.descricao.slice(0,40)}…</span><span style="font-size:12px;font-weight:700;color:#B91C1C">${fmt((d.valor||0)-(d.custo_real||0))}</span></div>`).join('')}
+      </div>` : ''}
+    `;
+  } else {
+    id('report-custos').innerHTML = '';
+  }
+
   id('report-resp').innerHTML=RESPONSAVEIS.map(r=>{ const rr=rd.filter(d=>d.responsavel===r); const rv=rr.reduce((s,d)=>s+parseFloat(d.valor||0),0); const rp=rr.filter(d=>d.status==='pago').reduce((s,d)=>s+parseFloat(d.valor||0),0); const rar=rr.filter(d=>d.status!=='pago').reduce((s,d)=>s+parseFloat(d.valor||0),0); return `<div class="resp-card"><div class="resp-name">👤 ${r}</div><div class="mini-row"><span>Demandas</span><span>${rr.length}</span></div><div class="mini-row"><span>Volume</span><span style="color:#7C3AED">${fmt(rv)}</span></div><div class="mini-row"><span>Recebido</span><span style="color:#059669">${fmt(rp)}</span></div><div class="mini-row"><span>A Receber</span><span style="color:#D97706">${fmt(rar)}</span></div></div>`; }).join('');
   const pltHtml=PLATAFORMAS.map(p=>{ const pd=rd.filter(d=>d.plataforma===p); const pv=pd.reduce((s,d)=>s+parseFloat(d.valor||0),0); const pct=total?Math.round((pv/total)*100):0; return `<div style="margin-bottom:12px"><div style="display:flex;justify-content:space-between;margin-bottom:4px"><span style="font-size:13px;color:var(--text)">${p}</span><span style="font-size:12px;font-weight:600;color:var(--accent)">${fmt(pv)} · ${pd.length} dem.</span></div><div class="bar-track"><div class="bar-fill" style="width:${pct}%;background:var(--accent)"></div></div></div>`; }).join('');
   id('report-plataformas').innerHTML=`<div class="section-title" style="margin-bottom:14px">Por Plataforma</div>${pltHtml}`;
