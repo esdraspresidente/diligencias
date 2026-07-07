@@ -475,7 +475,7 @@
     <button class="nav-item" id="nav-bloqueios" onclick="goPage('bloqueios')"><span class="nav-icon">🔒</span> Bloqueios</button>
     <button class="nav-item" id="nav-revisao" onclick="goPage('revisao')"><span class="nav-icon">📋</span> Revisão em Lote</button>
     <div class="sidebar-footer">
-      <p style="font-size:10px;color:var(--text3);margin-bottom:10px">v2.4 · Terceiros</p>
+      <p style="font-size:10px;color:var(--text3);margin-bottom:10px">v2.4 · Com Supabase</p>
       <button class="logout-btn" onclick="doLogout()">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16,17 21,12 16,7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
         Sair da conta
@@ -505,6 +505,9 @@
             <div class="page-title">Demandas</div>
             <div class="page-sub" id="demand-count">0 resultado(s)</div>
           </div>
+        </div>
+        <div class="field form-full" style="margin-bottom:14px">
+          <input type="text" id="demand-search" placeholder="🔍 Pesquisar por descrição, local, endereço, contratante..." oninput="onSearchInput(this.value)"/>
         </div>
         <div class="filters" id="filters"></div>
         <div class="card" id="demand-list"></div>
@@ -577,31 +580,6 @@
           <div id="f-terceiro-bloco" style="display:none">
             <hr class="divider"/>
             <div class="section-title">💼 Divisão com Terceiro</div>
-
-            <div class="field form-full" style="margin-bottom:10px">
-              <label>Terceiro *</label>
-              <select id="f-terceiro-select" onchange="selecionarTerceiro()">
-                <option value="">Selecione...</option>
-              </select>
-            </div>
-
-            <div id="f-terceiro-whatsapp-preview" style="display:none;font-size:12px;color:var(--text2);margin:-2px 0 12px"></div>
-
-            <div id="f-terceiro-novo-toggle-wrap" style="margin-bottom:12px">
-              <button type="button" class="btn btn-secondary" style="font-size:12px;padding:7px 12px" onclick="toggleNovoTerceiro()">+ Novo terceiro</button>
-            </div>
-
-            <div id="f-terceiro-novo-bloco" style="display:none;background:#F5F3FF;border:1px solid #DDD6FE;border-radius:10px;padding:12px;margin-bottom:12px">
-              <div class="form-grid">
-                <div class="field"><label>Nome</label><input type="text" id="f-terceiro-novo-nome" placeholder="Nome do terceiro"/></div>
-                <div class="field"><label>WhatsApp</label><input type="tel" id="f-terceiro-novo-whatsapp" placeholder="(41) 99999-9999"/></div>
-              </div>
-              <div class="btn-row" style="margin-top:10px">
-                <button type="button" class="btn btn-secondary" style="font-size:12px;padding:7px 12px" onclick="toggleNovoTerceiro()">Cancelar</button>
-                <button type="button" class="btn btn-primary" style="font-size:12px;padding:7px 12px" onclick="salvarNovoTerceiro()">Salvar terceiro</button>
-              </div>
-            </div>
-
             <div style="background:#FFF7ED;border:1px solid #FED7AA;border-radius:10px;padding:10px 12px;font-size:12px;color:#92400E;margin-bottom:12px">
               O <b>Valor cobrado</b> acima é o total recebido do cliente. Informe abaixo quanto fica para o Terceiro — o restante é de vocês.
             </div>
@@ -948,10 +926,11 @@ const RESPONSAVEIS = ['Naiarha','Esdras','Terceiro'];
 
 let demands = [];
 let bloqueios = [];
-let terceiros = [];
 let editId = null;
 let filterStatus = 'all';
 let filterResp = 'all';
+let searchQuery = '';
+let demandasModoFiltrado = null;
 let currentUser = null;
 let pendingForm = null;
 let pendingBloqueio = null;
@@ -971,11 +950,6 @@ const id = x => document.getElementById(x);
 const badge = s => `<span class="badge ${STATUS[s].cls}"><span class="badge-dot" style="background:${STATUS[s].dot}"></span>${STATUS[s].short}</span>`;
 const badgeFull = s => `<span class="badge ${STATUS[s].cls}"><span class="badge-dot" style="background:${STATUS[s].dot}"></span>${STATUS[s].label}</span>`;
 const progressStrip = s => { const ci=STATUS_FLOW.indexOf(s); const dot=STATUS[s].dot; return `<div class="progress-strip">${STATUS_FLOW.map((_,i)=>`<span style="background:${i<=ci?dot:'#F3F4F6'}"></span>`).join('')}</div>`; };
-const terceiroMetaLine = d => {
-  if(d.responsavel !== 'Terceiro' || !d.terceiro_nome) return d.responsavel;
-  const waIcon = d.terceiro_whatsapp ? ` <a href="https://wa.me/55${d.terceiro_whatsapp.replace(/\D/g,'')}" target="_blank" onclick="event.stopPropagation()" style="color:#25D366;text-decoration:none;font-weight:700">💬</a>` : '';
-  return `Terceiro: ${d.terceiro_nome}${waIcon}`;
-};
 
 function showToast(msg, type='ok') {
   const t=id('toast'); t.textContent=msg; t.className=type; t.classList.add('show');
@@ -1023,7 +997,6 @@ sb.auth.onAuthStateChange(async (event, session) => {
     id('app').classList.remove('hidden');
     await loadDemands();
     await loadBloqueios();
-    await loadTerceiros();
     renderDashboard();
   } else {
     currentUser = null;
@@ -1042,11 +1015,6 @@ async function loadDemands() {
 async function loadBloqueios() {
   const { data, error } = await sb.from('bloqueios').select('*').order('data', { ascending: true });
   if(!error && data) bloqueios = data;
-}
-
-async function loadTerceiros() {
-  const { data, error } = await sb.from('terceiros').select('*').order('nome', { ascending: true });
-  if(!error && data) terceiros = data;
 }
 
 async function criarEventoCalendar(form) {
@@ -1146,6 +1114,8 @@ function goPage(page, demandId, filtroStatus) {
   id('main').scrollTop = 0;
   if(page==='dashboard') renderDashboard();
   if(page==='demandas') {
+    searchQuery = '';
+    if(id('demand-search')) id('demand-search').value = '';
     if(filtroStatus==='a_receber') {
       filterStatus='all'; filterResp='all';
       renderDemandasFiltradas(demands.filter(d=>d.status!=='pago'), '💳 A Receber');
@@ -1184,32 +1154,49 @@ function renderDashboard() {
   const respHtml=RESPONSAVEIS.map(r=>{ const rd=demands.filter(d=>d.responsavel===r); const rv=rd.reduce((s,d)=>s+parseFloat(d.valor||0),0); return `<div style="margin-bottom:12px;padding-bottom:12px;border-bottom:1px solid var(--border2)"><div style="font-size:13px;font-weight:600;color:var(--text);margin-bottom:5px">👤 ${r}</div><div style="display:flex;gap:12px"><span style="font-size:12px;color:var(--text3)">${rd.length} dem.</span><span style="font-size:12px;font-weight:600;color:var(--accent)">${fmt(rv)}</span></div></div>`; }).join('');
   id('dash-panels').innerHTML=`<div class="card card-pad"><div class="section-title">Por Status</div>${statusHtml}</div><div class="card card-pad"><div class="section-title">Por Responsável</div>${respHtml}</div>`;
   if(!demands.length){ id('dash-recent').innerHTML=`<div class="empty"><div class="empty-icon">📂</div><div class="empty-title">Nenhuma demanda ainda</div><div class="empty-sub">Cadastre sua primeira</div><button class="btn btn-primary" onclick="goPage('novo')">+ Nova Demanda</button></div>`; return; }
-  id('dash-recent').innerHTML=demands.slice(0,5).map(d=>`<div class="demand-row" onclick="goPage('detail','${d.id}')"><div style="flex:1;min-width:0"><div class="demand-title">${d.descricao}</div><div class="demand-meta">${fmtDate(d.data)} · ${d.local}<br>${terceiroMetaLine(d)}</div></div><div class="demand-right">${badge(d.status)}<div class="demand-value">${fmt(d.valor)}</div></div></div>`).join('');
+  id('dash-recent').innerHTML=demands.slice(0,5).map(d=>`<div class="demand-row" onclick="goPage('detail','${d.id}')"><div style="flex:1;min-width:0"><div class="demand-title">${d.descricao}</div><div class="demand-meta">${fmtDate(d.data)} · ${d.local}<br>${d.responsavel}</div></div><div class="demand-right">${badge(d.status)}<div class="demand-value">${fmt(d.valor)}</div></div></div>`).join('');
 }
 
 // ── DEMANDAS FILTRADAS (chamada pelo dashboard) ──
 function renderDemandasFiltradas(lista, titulo) {
+  demandasModoFiltrado = { lista, titulo };
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
   document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
   id('page-demandas').classList.add('active');
   id('nav-demandas').classList.add('active');
   id('sidebar').classList.remove('open'); id('overlay').classList.remove('open');
   id('main').scrollTop = 0;
+  const listaFiltrada = lista.filter(matchesSearch);
   id('filters').innerHTML = `<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap"><span style="font-size:13px;font-weight:600;color:var(--accent)">${titulo}</span><button class="filter-btn" onclick="goPage('demandas')" style="font-size:11px">✕ Limpar filtro</button></div>`;
-  id('demand-count').textContent = lista.length + ' resultado(s)';
-  if(!lista.length){ id('demand-list').innerHTML=`<div class="empty"><div class="empty-icon">📂</div><div class="empty-title">Nenhuma demanda</div></div>`; return; }
-  id('demand-list').innerHTML=lista.map(d=>`<div onclick="goPage('detail','${d.id}')"><div class="demand-row"><div style="flex:1;min-width:0"><div class="demand-title">${d.descricao}</div><div class="demand-meta">${d.plataforma} · ${terceiroMetaLine(d)}<br>${fmtDate(d.data)} · 📍 ${d.local}</div></div><div class="demand-right">${badgeFull(d.status)}<div class="demand-value">${fmt(d.valor)}</div>${d.previsao_pagamento?`<div style="font-size:11px;color:var(--text3)">Pgto: ${fmtDate(d.previsao_pagamento)}</div>`:''}</div></div>${progressStrip(d.status)}</div>`).join('');
+  id('demand-count').textContent = listaFiltrada.length + ' resultado(s)';
+  if(!listaFiltrada.length){ id('demand-list').innerHTML=`<div class="empty"><div class="empty-icon">📂</div><div class="empty-title">Nenhuma demanda</div></div>`; return; }
+  id('demand-list').innerHTML=listaFiltrada.map(d=>`<div onclick="goPage('detail','${d.id}')"><div class="demand-row"><div style="flex:1;min-width:0"><div class="demand-title">${d.descricao}</div><div class="demand-meta">${d.plataforma} · ${d.responsavel}<br>${fmtDate(d.data)} · 📍 ${d.local}</div></div><div class="demand-right">${badgeFull(d.status)}<div class="demand-value">${fmt(d.valor)}</div>${d.previsao_pagamento?`<div style="font-size:11px;color:var(--text3)">Pgto: ${fmtDate(d.previsao_pagamento)}</div>`:''}</div></div>${progressStrip(d.status)}</div>`).join('');
 }
 
 // ── DEMANDAS ──
 function renderDemandas() {
+  demandasModoFiltrado = null;
   const statusBtns=['all',...STATUS_FLOW].map(s=>{ const lbl=s==='all'?'Todos':STATUS[s].short; return `<button class="filter-btn${filterStatus===s?' active':''}" onclick="setFilter('status','${s}')">${lbl}</button>`; }).join('');
   const respBtns=RESPONSAVEIS.map(r=>`<button class="filter-btn${filterResp===r?' active':''}" onclick="setFilter('resp','${r}')">${r}</button>`).join('');
   id('filters').innerHTML=statusBtns+`<div class="filter-divider"></div>`+respBtns;
-  const filtered=demands.filter(d=>{ if(filterStatus!=='all'&&d.status!==filterStatus) return false; if(filterResp!=='all'&&d.responsavel!==filterResp) return false; return true; });
+  const filtered=demands.filter(d=>{ if(filterStatus!=='all'&&d.status!==filterStatus) return false; if(filterResp!=='all'&&d.responsavel!==filterResp) return false; if(!matchesSearch(d)) return false; return true; });
   id('demand-count').textContent=`${filtered.length} resultado(s)`;
   if(!filtered.length){ id('demand-list').innerHTML=`<div class="empty"><div class="empty-icon">📂</div><div class="empty-title">Nenhuma demanda</div><div class="empty-sub">Tente outros filtros ou cadastre uma nova</div><button class="btn btn-primary" onclick="goPage('novo')">+ Nova Demanda</button></div>`; return; }
-  id('demand-list').innerHTML=filtered.map(d=>`<div onclick="goPage('detail','${d.id}')"><div class="demand-row"><div style="flex:1;min-width:0"><div class="demand-title">${d.descricao}</div><div class="demand-meta">${d.plataforma} · ${terceiroMetaLine(d)}<br>${fmtDate(d.data)} · 📍 ${d.local}</div></div><div class="demand-right">${badgeFull(d.status)}<div class="demand-value">${fmt(d.valor)}</div>${d.previsao_pagamento?`<div style="font-size:11px;color:var(--text3)">Pgto: ${fmtDate(d.previsao_pagamento)}</div>`:''}</div></div>${progressStrip(d.status)}</div>`).join('');
+  id('demand-list').innerHTML=filtered.map(d=>`<div onclick="goPage('detail','${d.id}')"><div class="demand-row"><div style="flex:1;min-width:0"><div class="demand-title">${d.descricao}</div><div class="demand-meta">${d.plataforma} · ${d.responsavel}<br>${fmtDate(d.data)} · 📍 ${d.local}</div></div><div class="demand-right">${badgeFull(d.status)}<div class="demand-value">${fmt(d.valor)}</div>${d.previsao_pagamento?`<div style="font-size:11px;color:var(--text3)">Pgto: ${fmtDate(d.previsao_pagamento)}</div>`:''}</div></div>${progressStrip(d.status)}</div>`).join('');
+}
+
+function matchesSearch(d) {
+  if(!searchQuery) return true;
+  const q = searchQuery.toLowerCase();
+  return [d.descricao, d.local, d.endereco, d.contratante_nome, d.plataforma, d.responsavel]
+    .filter(Boolean)
+    .some(v => String(v).toLowerCase().includes(q));
+}
+
+function onSearchInput(v) {
+  searchQuery = v;
+  if(demandasModoFiltrado) renderDemandasFiltradas(demandasModoFiltrado.lista, demandasModoFiltrado.titulo);
+  else renderDemandas();
 }
 
 function setFilter(type, val) {
@@ -1246,7 +1233,7 @@ function renderDetail(did) {
     </div>`;
   }
 
-  id('detail-content').innerHTML=`<div class="detail-header"><div><div class="detail-title">${d.descricao}</div>${badgeFull(d.status)}</div><div style="text-align:right"><div class="detail-value-big">${fmt(d.valor)}</div>${d.valor_sugerido?`<div style="font-size:11px;color:var(--text3);margin-top:2px">sugerido: ${fmt(d.valor_sugerido)}</div>`:''}</div></div><div class="steps">${steps}</div>${custoBloco}<div style="padding:0 20px"><div class="detail-row"><span class="detail-label">📅 Data</span><span class="detail-value">${fmtDate(d.data)}</span></div><div class="detail-row"><span class="detail-label">🕐 Horário</span><span class="detail-value">${d.horario||'—'}</span></div><div class="detail-row"><span class="detail-label">📍 Local</span><span class="detail-value">${d.local}</span></div>${d.endereco?`<div class="detail-row"><span class="detail-label">🗺️ Endereço</span><span class="detail-value">${d.endereco}</span></div>`:''}<div class="detail-row"><span class="detail-label">🏢 Plataforma</span><span class="detail-value">${d.plataforma}</span></div><div class="detail-row"><span class="detail-label">👤 Responsável</span><span class="detail-value">${d.responsavel}</span></div>${d.responsavel==='Terceiro'&&d.terceiro_nome?`<div class="detail-row"><span class="detail-label">🤝 Terceiro</span><span class="detail-value">${d.terceiro_nome}</span></div>`:''}${d.responsavel==='Terceiro'&&d.terceiro_whatsapp?`<div class="detail-row"><span class="detail-label">📱 WhatsApp Terceiro</span><a href="https://wa.me/55${d.terceiro_whatsapp.replace(/\D/g,'')}" target="_blank" class="wa-link"><svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>${d.terceiro_whatsapp}</a></div>`:''}${d.responsavel==='Terceiro'&&d.valor_terceiro?`<div class="detail-row"><span class="detail-label">💰 Val. Terceiro</span><span class="detail-value">${fmt(d.valor_terceiro)}</span></div>`+`<div class="detail-row"><span class="detail-label">💼 Val. de vocês</span><span class="detail-value" style="color:#059669;font-weight:700">${fmt((d.valor||0)-(d.valor_terceiro||0))}</span></div>`:''}<div class="detail-row"><span class="detail-label">💳 Previsão Pgto</span><span class="detail-value">${fmtDate(d.previsao_pagamento)}</span></div><div class="detail-row"><span class="detail-label">🙋 Contratante</span><span class="detail-value">${d.contratante_nome||'—'}</span></div><div class="detail-row" style="border-bottom:none"><span class="detail-label">📱 WhatsApp</span>${waBtn}</div></div><div style="padding:14px 20px;border-top:1px solid var(--border2);display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px"><button class="btn btn-danger" onclick="deleteDemand('${d.id}')">Remover</button><div style="display:flex;gap:10px"><button class="btn btn-secondary" onclick="goPage('novo','${d.id}')">Editar</button>${custoBtn}${advBtn}</div></div>`;
+  id('detail-content').innerHTML=`<div class="detail-header"><div><div class="detail-title">${d.descricao}</div>${badgeFull(d.status)}</div><div style="text-align:right"><div class="detail-value-big">${fmt(d.valor)}</div>${d.valor_sugerido?`<div style="font-size:11px;color:var(--text3);margin-top:2px">sugerido: ${fmt(d.valor_sugerido)}</div>`:''}</div></div><div class="steps">${steps}</div>${custoBloco}<div style="padding:0 20px"><div class="detail-row"><span class="detail-label">📅 Data</span><span class="detail-value">${fmtDate(d.data)}</span></div><div class="detail-row"><span class="detail-label">🕐 Horário</span><span class="detail-value">${d.horario||'—'}</span></div><div class="detail-row"><span class="detail-label">📍 Local</span><span class="detail-value">${d.local}</span></div>${d.endereco?`<div class="detail-row"><span class="detail-label">🗺️ Endereço</span><span class="detail-value">${d.endereco}</span></div>`:''}<div class="detail-row"><span class="detail-label">🏢 Plataforma</span><span class="detail-value">${d.plataforma}</span></div><div class="detail-row"><span class="detail-label">👤 Responsável</span><span class="detail-value">${d.responsavel}</span></div>${d.responsavel==='Terceiro'&&d.valor_terceiro?`<div class="detail-row"><span class="detail-label">🤝 Val. Terceiro</span><span class="detail-value">${fmt(d.valor_terceiro)}</span></div>`+`<div class="detail-row"><span class="detail-label">💼 Val. de vocês</span><span class="detail-value" style="color:#059669;font-weight:700">${fmt((d.valor||0)-(d.valor_terceiro||0))}</span></div>`:''}<div class="detail-row"><span class="detail-label">💳 Previsão Pgto</span><span class="detail-value">${fmtDate(d.previsao_pagamento)}</span></div><div class="detail-row"><span class="detail-label">🙋 Contratante</span><span class="detail-value">${d.contratante_nome||'—'}</span></div><div class="detail-row" style="border-bottom:none"><span class="detail-label">📱 WhatsApp</span>${waBtn}</div></div><div style="padding:14px 20px;border-top:1px solid var(--border2);display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px"><button class="btn btn-danger" onclick="deleteDemand('${d.id}')">Remover</button><div style="display:flex;gap:10px"><button class="btn btn-secondary" onclick="goPage('novo','${d.id}')">Editar</button>${custoBtn}${advBtn}</div></div>`;
 }
 
 // ── RELATÓRIO ──
@@ -1261,7 +1248,7 @@ function renderRelatorio() {
   const pltHtml=PLATAFORMAS.map(p=>{ const pd=rd.filter(d=>d.plataforma===p); const pv=pd.reduce((s,d)=>s+parseFloat(d.valor||0),0); const pct=total?Math.round((pv/total)*100):0; return `<div style="margin-bottom:12px"><div style="display:flex;justify-content:space-between;margin-bottom:4px"><span style="font-size:13px;color:var(--text)">${p}</span><span style="font-size:12px;font-weight:600;color:var(--accent)">${fmt(pv)} · ${pd.length} dem.</span></div><div class="bar-track"><div class="bar-fill" style="width:${pct}%;background:var(--accent)"></div></div></div>`; }).join('');
   id('report-plataformas').innerHTML=`<div class="section-title" style="margin-bottom:14px">Por Plataforma</div>${pltHtml}`;
   if(!rd.length){ id('report-list').innerHTML=''; return; }
-  id('report-list').innerHTML=`<div style="padding:12px 18px;border-bottom:1px solid var(--border2)"><div class="section-title" style="margin:0">Detalhamento · ${rd.length} demanda(s)</div></div>${rd.map(d=>`<div class="demand-row" onclick="goPage('detail','${d.id}')"><div style="flex:1;min-width:0"><div class="demand-title">${d.descricao}</div><div class="demand-meta">${fmtDate(d.data)} · ${terceiroMetaLine(d)} · ${d.plataforma}</div></div><div class="demand-right">${badge(d.status)}<div class="demand-value">${fmt(d.valor)}</div></div></div>`).join('')}`;
+  id('report-list').innerHTML=`<div style="padding:12px 18px;border-bottom:1px solid var(--border2)"><div class="section-title" style="margin:0">Detalhamento · ${rd.length} demanda(s)</div></div>${rd.map(d=>`<div class="demand-row" onclick="goPage('detail','${d.id}')"><div style="flex:1;min-width:0"><div class="demand-title">${d.descricao}</div><div class="demand-meta">${fmtDate(d.data)} · ${d.responsavel} · ${d.plataforma}</div></div><div class="demand-right">${badge(d.status)}<div class="demand-value">${fmt(d.valor)}</div></div></div>`).join('')}`;
 }
 
 // ── FORM ──
@@ -1271,8 +1258,6 @@ function clearForm() {
   id('f-plataforma').value=''; id('f-responsavel').value=''; id('f-status').value='aguardando_cumprimento';
   id('f-online').checked = false;
   id('f-rota-bloco').style.display='none'; id('f-terceiro-bloco').style.display='none';
-  id('f-terceiro-select').value=''; id('f-terceiro-whatsapp-preview').style.display='none';
-  id('f-terceiro-novo-bloco').style.display='none';
   id('form-back-btn').onclick = ()=>goPage('demandas');
 }
 function fillForm(d) {
@@ -1291,13 +1276,7 @@ function fillForm(d) {
   id('f-whatsapp').value    = d.contratante_whatsapp||'';
   if(d.km_ida) { id('f-km-ida').value=d.km_ida; id('f-km-total').value=d.km_total||''; id('f-rota-bloco').style.display='block'; id('f-rota-desc').innerHTML=d.endereco?`<b>Destino:</b> ${d.endereco}`:''; }
   if(d.valor_sugerido) id('f-valor-sugerido').value = fmt(d.valor_sugerido);
-  if(d.responsavel==='Terceiro') {
-    id('f-terceiro-bloco').style.display='block';
-    id('f-valor-terceiro').value=d.valor_terceiro||'';
-    calcValorNosso();
-    const match = terceiros.find(t => t.nome === d.terceiro_nome);
-    renderTerceiroSelect(match ? match.id : '');
-  }
+  if(d.responsavel==='Terceiro') { id('f-terceiro-bloco').style.display='block'; id('f-valor-terceiro').value=d.valor_terceiro||''; calcValorNosso(); }
   id('form-back-btn').onclick = ()=>goPage('demandas');
 }
 function toggleOnlineFields() {
@@ -1314,8 +1293,6 @@ function getForm() {
     valor: parseFloat(id('f-valor').value)||null,
     valor_sugerido: parseFloat((id('f-valor-sugerido').value||'').replace(/[R$\s]/g,'').replace(',','.')) || null,
     valor_terceiro: parseFloat(id('f-valor-terceiro').value)||null,
-    terceiro_nome: (getSelectedTerceiro()||{}).nome || null,
-    terceiro_whatsapp: (getSelectedTerceiro()||{}).whatsapp || null,
     km_ida: id('f-km-ida').value||null,
     km_total: id('f-km-total').value||null,
     plataforma: id('f-plataforma').value,
@@ -1846,54 +1823,7 @@ function irParaFormularioDaCalculadora() {
 function toggleTerceiroFields() {
   const isTerceiro = id('f-responsavel').value === 'Terceiro';
   id('f-terceiro-bloco').style.display = isTerceiro ? 'block' : 'none';
-  if(isTerceiro) renderTerceiroSelect();
-  if(!isTerceiro) { id('f-valor-terceiro').value=''; id('f-valor-nosso').value=''; id('f-terceiro-select').value=''; id('f-terceiro-whatsapp-preview').style.display='none'; }
-}
-
-// ── TERCEIROS ──
-function renderTerceiroSelect(manterSelecionado) {
-  const sel = id('f-terceiro-select');
-  const atual = manterSelecionado!==undefined ? manterSelecionado : sel.value;
-  sel.innerHTML = '<option value="">Selecione...</option>' +
-    terceiros.map(t => `<option value="${t.id}">${t.nome}</option>`).join('');
-  if(atual) sel.value = atual;
-  selecionarTerceiro();
-}
-
-function selecionarTerceiro() {
-  const sel = id('f-terceiro-select');
-  const t = terceiros.find(x => String(x.id) === String(sel.value));
-  const prev = id('f-terceiro-whatsapp-preview');
-  if(t && t.whatsapp) {
-    prev.textContent = '📱 WhatsApp: ' + t.whatsapp;
-    prev.style.display = 'block';
-  } else {
-    prev.style.display = 'none';
-  }
-}
-
-function toggleNovoTerceiro() {
-  const bloco = id('f-terceiro-novo-bloco');
-  const aberto = bloco.style.display === 'block';
-  bloco.style.display = aberto ? 'none' : 'block';
-  if(!aberto) { id('f-terceiro-novo-nome').value=''; id('f-terceiro-novo-whatsapp').value=''; }
-}
-
-async function salvarNovoTerceiro() {
-  const nome = id('f-terceiro-novo-nome').value.trim();
-  const whatsapp = id('f-terceiro-novo-whatsapp').value.trim();
-  if(!nome) return showToast('Informe o nome do terceiro.','err');
-  const { data, error } = await sb.from('terceiros').insert([{ nome, whatsapp: whatsapp||null }]);
-  if(error || !data || !data[0]) return showToast('Erro ao salvar terceiro.','err');
-  await loadTerceiros();
-  toggleNovoTerceiro();
-  renderTerceiroSelect(data[0].id);
-  showToast('Terceiro cadastrado!');
-}
-
-function getSelectedTerceiro() {
-  const sel = id('f-terceiro-select');
-  return terceiros.find(x => String(x.id) === String(sel.value)) || null;
+  if(!isTerceiro) { id('f-valor-terceiro').value=''; id('f-valor-nosso').value=''; }
 }
 
 function calcValorNosso() {
