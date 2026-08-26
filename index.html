@@ -500,7 +500,7 @@
     <button class="nav-item" id="nav-bloqueios" onclick="goPage('bloqueios')"><span class="nav-icon">🔒</span> Bloqueios</button>
     <button class="nav-item" id="nav-revisao" onclick="goPage('revisao')"><span class="nav-icon">📋</span> Revisão em Lote</button>
     <div class="sidebar-footer">
-      <p style="font-size:10px;color:var(--text3);margin-bottom:10px">v2.6 · Com Supabase</p>
+      <p style="font-size:10px;color:var(--text3);margin-bottom:10px">v2.7 · Com Supabase</p>
       <button class="logout-btn" onclick="doLogout()">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16,17 21,12 16,7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
         Sair da conta
@@ -615,10 +615,13 @@
               Participante da equipe (Naiarha/Esdras) não desconta nada — o dinheiro fica em casa.
             </div>
             <div id="f-part-lista"></div>
-            <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:6px">
-              <select id="f-part-add" style="min-width:200px;flex:1"></select>
-              <button type="button" class="btn btn-secondary" onclick="addParticipante()">+ Adicionar</button>
+            <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:10px">
+              <span style="font-size:12px;color:var(--text2);font-weight:600">Preciso de:</span>
+              <button type="button" class="btn btn-secondary" onclick="addVaga('advogado')">+ Advogado</button>
+              <button type="button" class="btn btn-secondary" onclick="addVaga('representante')">+ Representante</button>
+              <button type="button" class="btn btn-secondary" onclick="addVaga('outro')">+ Outro</button>
             </div>
+            <div style="font-size:11px;color:var(--text3);margin-top:6px">Clique quantas vezes precisar — dois advogados e um representante é só clicar três vezes. Pode deixar como "a definir" e escolher a pessoa depois.</div>
             <div class="form-grid" style="margin-top:14px">
               <div class="field"><label>🤝 Total a terceiros (R$)</label><input type="text" id="f-valor-terceiro" readonly style="background:#FFF7ED;font-weight:700;color:#92400E"/></div>
               <div class="field"><label>💰 Valor de vocês (R$)</label><input type="text" id="f-valor-nosso" readonly style="background:#F0FDF4;font-weight:700;color:#065F46"/></div>
@@ -838,15 +841,6 @@
           <div class="section-title" id="tc-form-title">Novo Cadastro</div>
           <div class="form-grid">
             <div class="field"><label>Nome *</label><input type="text" id="tc-nome" placeholder="Nome completo"/></div>
-            <div class="field"><label>Tipo</label>
-              <select id="tc-tipo">
-                <option value="">Selecione...</option>
-                <option value="advogado">Advogado(a)</option>
-                <option value="preposto">Preposto(a)</option>
-                <option value="ambos">Advogado(a) e Preposto(a)</option>
-                <option value="outro">Outro</option>
-              </select>
-            </div>
             <div class="field"><label>WhatsApp</label><input type="tel" id="tc-whatsapp" placeholder="(41) 99999-9999"/></div>
             <div class="field"><label>E-mail</label><input type="email" id="tc-email" placeholder="email@exemplo.com"/></div>
             <div class="field"><label>OAB</label><input type="text" id="tc-oab" placeholder="Ex: PR 93.900"/></div>
@@ -864,6 +858,11 @@
             <div class="field"><label>Chave PIX</label><input type="text" id="tc-pix" placeholder="Chave para pagamento"/></div>
             <div class="field form-full"><label>Observações</label><textarea id="tc-obs" placeholder="Ex: só atende de manhã, não pega audiência trabalhista..."></textarea></div>
           </div>
+
+          <hr class="divider"/>
+          <div class="section-title">⚖️ Funções que exerce</div>
+          <div style="font-size:12px;color:var(--text2);margin-bottom:4px">Pode marcar mais de uma. Só aparece nas vagas da função marcada.</div>
+          <div class="cidades-wrap" id="tc-funcoes"></div>
 
           <hr class="divider"/>
           <div class="section-title">🏙️ Cidades em que atua</div>
@@ -1460,7 +1459,11 @@ function fillForm(d) {
   }
 
   formParticipantes = participantesDaDemanda(d.id).map(v => ({
-    terceiro_id: v.terceiro_id, papel: v.papel || 'advogado', valor: v.valor
+    terceiro_id: v.terceiro_id || null,
+    // "preposto" foi renomeado para "representante" na v2.7; converte na
+    // leitura para o caso de algum registro antigo ter ficado com o termo.
+    papel: (v.papel === 'preposto') ? 'representante' : (v.papel || 'advogado'),
+    valor: v.valor
   }));
   renderParticipantes();
   id('form-back-btn').onclick = ()=>goPage('demandas');
@@ -1486,10 +1489,12 @@ function getForm() {
     // Espelho em texto de quem cumpriu. Existia vazia no banco; agora serve
     // de rótulo rápido para quem lê a demanda sem cruzar a tabela de vínculos.
     terceiro_nome: formParticipantes
+      .filter(p => p.terceiro_id)
       .map(p => tercById(p.terceiro_id))
       .filter(t => t && !t.interno)
       .map(t => t.nome).join(', ') || null,
     terceiro_whatsapp: (formParticipantes
+      .filter(p => p.terceiro_id)
       .map(p => tercById(p.terceiro_id))
       .filter(t => t && !t.interno)[0]?.whatsapp) || null,
     km_ida: id('f-km-ida').value||null,
@@ -1518,7 +1523,7 @@ function checkConflitos(f) {
 
   // Quem vai cumprir esta demanda. Serve para não encher a tela de aviso
   // sobre gente que não tem nada a ver com a diligência sendo criada.
-  const envolvidos = new Set(formParticipantes.map(p=>p.terceiro_id));
+  const envolvidos = new Set(formParticipantes.map(p=>p.terceiro_id).filter(Boolean));
 
   // 1. Choque de horário no mesmo dia
   if(f.horario) {
@@ -1529,7 +1534,7 @@ function checkConflitos(f) {
       if(!d.horario) return;
       const dif = Math.abs(timeToMin(d.horario) - novoMin);
       if(dif >= TOLERANCIA_MIN) return;
-      const outros = participantesDaDemanda(d.id).map(v=>v.terceiro_id);
+      const outros = participantesDaDemanda(d.id).map(v=>v.terceiro_id).filter(Boolean);
       const comuns = outros.filter(t=>envolvidos.has(t));
       if(comuns.length) {
         avisos.push(`🕐 <b>${comuns.map(nomeTerc).join(', ')}</b> já tem "${d.descricao}" às <b>${d.horario.slice(0,5)}</b> no mesmo dia (diferença de ${dif} min — mínimo recomendado é ${TOLERANCIA_MIN} min).`);
@@ -1592,11 +1597,18 @@ async function submitForm() {
   const f=getForm();
   if(!f.data||!f.local||!f.descricao||!f.valor||!f.plataforma||!f.responsavel) return showToast('Preencha os campos obrigatórios.','err');
   if(!f.cidade) return showToast('Selecione a cidade da demanda.','err');
-  // Participante sem valor passaria como zero e sumiria da conta de repasse.
-  const semValor = formParticipantes.filter(p => { const t=tercById(p.terceiro_id); return t && !t.interno && !(parseFloat(p.valor)>0); });
+  // Valor só é exigido de quem já foi escolhido — vaga "a definir" ainda
+  // não tem com quem combinar preço.
+  const semValor = formParticipantes.filter(p => { const t = p.terceiro_id ? tercById(p.terceiro_id) : null; return t && !t.interno && !(parseFloat(p.valor)>0); });
   if(semValor.length) return showToast(`Informe quanto será pago a ${semValor.map(p=>nomeTerc(p.terceiro_id)).join(', ')}.`,'err');
   if(f.valor_terceiro && f.valor_terceiro > f.valor) return showToast('O total dos terceiros passou o valor cobrado do cliente.','err');
+  const abertas = formParticipantes.filter(p => !p.terceiro_id);
   const avisos = checkConflitos(f);
+  // Vaga sem pessoa não impede o cadastro: serve justamente para registrar
+  // que ainda falta alguém. Vira aviso junto com os conflitos de agenda.
+  if(abertas.length) {
+    avisos.unshift(`👥 ${abertas.length} vaga(s) ainda sem pessoa definida: ${abertas.map(p=>LABEL_FUNCAO[p.papel]).join(', ')}.`);
+  }
   if(avisos.length) { pendingForm = f; showConflictModal(avisos); return; }
   await proceedSave(f);
 }
@@ -2054,7 +2066,7 @@ function irParaFormularioDaCalculadora() {
 }
 
 // O bloco de participantes agora vale para qualquer responsável — uma
-// demanda da Naiarha pode ter um terceiro como preposto. A função continua
+// demanda da Naiarha pode ter um terceiro como representante. A função continua
 // existindo porque o select de responsável a chama no onchange.
 function toggleTerceiroFields() { renderParticipantes(); }
 
@@ -2077,7 +2089,10 @@ document.getElementById('login-email').addEventListener('keydown', e=>{ if(e.key
 // tabela) porque mudam praticamente nunca e assim a tela não depende de
 // mais um round-trip no banco. Cidade fora da lista entra como texto livre.
 const CIDADES = ['Almirante Tamandaré','Araucária','Campina Grande do Sul','Colombo','Curitiba','Fazenda Rio Grande','Pinhais','Piraquara','Quatro Barras','São José dos Pinhais'];
-const PAPEIS = ['advogado','preposto','outro'];
+// Funções possíveis. "representante" substituiu "preposto" na v2.7.
+const FUNCOES = ['advogado','representante','outro'];
+const LABEL_FUNCAO = { advogado:'Advogado', representante:'Representante', outro:'Outro' };
+const ICONE_FUNCAO = { advogado:'⚖️', representante:'🧍', outro:'👤' };
 
 let terceiros = [];          // equipe interna + terceiros externos
 let vinculos = [];           // demanda_terceiros: quem participou de qual demanda
@@ -2108,6 +2123,17 @@ function renderCidadesCheckboxes(marcadas) {
   const extras = (marcadas||[]).filter(c => !CIDADES.includes(c));
   id('tc-cidades-extra').value = extras.join(', ');
 }
+function renderFuncoesCheckboxes(marcadas) {
+  const set = new Set(marcadas||[]);
+  id('tc-funcoes').innerHTML = FUNCOES.map(f =>
+    `<label class="chip-cidade${set.has(f)?' on':''}" onclick="toggleChipCidade(this)">
+       <input type="checkbox" value="${f}"${set.has(f)?' checked':''}/>${ICONE_FUNCAO[f]} ${LABEL_FUNCAO[f]}
+     </label>`).join('');
+}
+function coletaFuncoesForm() {
+  return Array.from(document.querySelectorAll('#tc-funcoes input:checked')).map(i=>i.value);
+}
+
 function toggleChipCidade(el) {
   const chk = el.querySelector('input');
   chk.checked = !chk.checked;
@@ -2124,7 +2150,7 @@ async function salvarTerceiro() {
   if(!nome) return showToast('Informe o nome.','err');
   const payload = {
     nome,
-    tipo: id('tc-tipo').value || null,
+    funcoes: coletaFuncoesForm(),
     whatsapp: (id('tc-whatsapp').value||'').trim() || null,
     email: (id('tc-email').value||'').trim() || null,
     oab: (id('tc-oab').value||'').trim() || null,
@@ -2149,7 +2175,6 @@ function editarTerceiro(tid) {
   const t = tercById(tid); if(!t) return;
   editTerceiroId = tid;
   id('tc-nome').value = t.nome||'';
-  id('tc-tipo').value = t.tipo||'';
   id('tc-whatsapp').value = t.whatsapp||'';
   id('tc-email').value = t.email||'';
   id('tc-oab').value = t.oab||'';
@@ -2158,6 +2183,7 @@ function editarTerceiro(tid) {
   id('tc-valor-padrao').value = t.valor_padrao||'';
   id('tc-obs').value = t.observacoes||'';
   renderCidadesCheckboxes(t.cidades||[]);
+  renderFuncoesCheckboxes(t.funcoes||[]);
   id('tc-form-title').textContent = 'Editar Cadastro';
   id('tc-submit-btn').textContent = 'Salvar Alterações';
   id('tc-cancel-btn').classList.remove('hidden');
@@ -2166,8 +2192,9 @@ function editarTerceiro(tid) {
 function cancelEditTerceiro() {
   editTerceiroId = null;
   ['tc-nome','tc-whatsapp','tc-email','tc-oab','tc-pix','tc-valor-padrao','tc-obs','tc-cidades-extra'].forEach(x=>id(x).value='');
-  id('tc-tipo').value=''; id('tc-pix-tipo').value='';
+  id('tc-pix-tipo').value='';
   renderCidadesCheckboxes([]);
+  renderFuncoesCheckboxes([]);
   id('tc-form-title').textContent = 'Novo Cadastro';
   id('tc-submit-btn').textContent = '+ Cadastrar';
   id('tc-cancel-btn').classList.add('hidden');
@@ -2205,6 +2232,7 @@ function setTercFiltro(f) {
 
 function renderTerceiros() {
   if(!id('tc-cidades').innerHTML) renderCidadesCheckboxes([]);
+  if(!id('tc-funcoes').innerHTML) renderFuncoesCheckboxes([]);
   preencheSelectCidadeDemanda();
   let lista = terceiros.slice();
   if(tercFiltro==='ativos')   lista = lista.filter(t=>t.ativo);
@@ -2220,6 +2248,10 @@ function renderTerceiros() {
     const cidades = (t.cidades||[]).length
       ? (t.cidades||[]).map(c=>`<span class="chip-ro">${c}</span>`).join('')
       : `<span style="font-size:12px;color:var(--red)">⚠️ Nenhuma cidade marcada — não vai aparecer como opção nas demandas</span>`;
+    // Sem função marcada a pessoa não entra em nenhuma vaga, mesmo com
+    // cidade certa. O aviso evita que ela "suma" sem explicação.
+    const semFuncao = !(t.funcoes||[]).length
+      ? `<div style="font-size:12px;color:var(--red);margin-top:6px">⚠️ Nenhuma função marcada — não vai aparecer em nenhuma vaga</div>` : '';
     const wpp = t.whatsapp ? `<a href="https://wa.me/55${String(t.whatsapp).replace(/\D/g,'')}" target="_blank" style="color:var(--green);text-decoration:none">📱 ${t.whatsapp}</a>` : '';
     const pix = t.pix ? `<button class="btn-mini" onclick="copiarPix('${t.id}')">📋 PIX${t.pix_tipo?' ('+t.pix_tipo+')':''}</button>` : '';
     return `<div class="terc-card${t.ativo?'':' inativo'}">
@@ -2227,7 +2259,7 @@ function renderTerceiros() {
         <div style="flex:1;min-width:180px">
           <div class="terc-nome">${t.nome}${t.interno?'<span class="tag-interno">EQUIPE</span>':''}${t.ativo?'':'<span class="tag-off">ARQUIVADO</span>'}</div>
           <div class="terc-meta">
-            ${t.tipo?t.tipo.charAt(0).toUpperCase()+t.tipo.slice(1):'—'}
+            ${(t.funcoes||[]).length ? (t.funcoes||[]).map(f=>LABEL_FUNCAO[f]||f).join(' e ') : '<span style="color:var(--red)">sem função marcada</span>'}
             ${t.oab?' · OAB '+t.oab:''}
             ${t.valor_padrao?' · sugerido '+fmt(t.valor_padrao):''}
             · ${qtd} diligência(s)
@@ -2241,7 +2273,7 @@ function renderTerceiros() {
           <button class="btn-mini danger" onclick="toggleAtivoTerceiro('${t.id}')">${t.ativo?'Arquivar':'Reativar'}</button>
         </div>
       </div>
-      <div style="margin-top:10px">${cidades}</div>
+      <div style="margin-top:10px">${cidades}</div>${semFuncao}
       ${t.observacoes?`<div class="terc-meta" style="margin-top:8px;font-style:italic">💬 ${t.observacoes}</div>`:''}
     </div>`;
   }).join('');
@@ -2279,68 +2311,78 @@ function atendeCidade(t, cidade) {
 }
 function renderParticipantes() {
   const cidade = cidadeDemandaAtual();
-  const jaEscolhidos = new Set(formParticipantes.map(p=>p.terceiro_id));
-
-  // Select de adicionar: só quem está ativo E atende a cidade escolhida.
-  // É esse filtro que evita ter que perguntar no WhatsApp se fulano topa ir lá.
-  const sel = id('f-part-add');
-  if(sel) {
-    const disp = terceiros.filter(t => t.ativo && atendeCidade(t, cidade) && !jaEscolhidos.has(t.id));
-    if(!cidade) {
-      sel.innerHTML = `<option value="">Escolha a cidade primeiro</option>`;
-      sel.disabled = true;
-    } else if(!disp.length) {
-      sel.innerHTML = `<option value="">Ninguém disponível em ${cidade}</option>`;
-      sel.disabled = true;
-    } else {
-      sel.disabled = false;
-      sel.innerHTML = `<option value="">Selecione quem vai...</option>` +
-        disp.map(t=>`<option value="${t.id}">${t.nome}${t.interno?' (equipe)':''}${t.tipo?' — '+t.tipo:''}</option>`).join('');
-    }
-  }
-
   const box = id('f-part-lista');
+
   if(!formParticipantes.length) {
-    box.innerHTML = `<div style="font-size:12px;color:var(--text3);padding:10px 0">Nenhuma pessoa vinculada ainda.</div>`;
-  } else {
-    box.innerHTML = formParticipantes.map((p,i) => {
-      const t = tercById(p.terceiro_id);
-      const interno = !!t?.interno;
-      const foraDaCidade = cidade && !atendeCidade(t, cidade);
-      return `<div class="part-row">
-        <div class="field">
-          <label>Quem${foraDaCidade?' <span style="color:var(--red)">⚠️ não atende '+cidade+'</span>':''}</label>
-          <div style="font-size:13px;font-weight:700;padding:8px 0">${t?.nome||'—'}${interno?'<span class="tag-interno">EQUIPE</span>':''}</div>
-        </div>
-        <div class="field"><label>Papel</label>
-          <select onchange="setPartCampo(${i},'papel',this.value)">
-            ${PAPEIS.map(x=>`<option value="${x}"${p.papel===x?' selected':''}>${x.charAt(0).toUpperCase()+x.slice(1)}</option>`).join('')}
-          </select>
-        </div>
-        <div class="field"><label>${interno?'Fica em casa':'Valor (R$)'}</label>
-          ${interno
-            ? `<div style="font-size:12px;color:var(--green);font-weight:600;padding:9px 0">— </div>`
-            : `<input type="number" step="0.01" value="${p.valor??''}" placeholder="0.00" onchange="setPartCampo(${i},'valor',this.value)" oninput="setPartCampo(${i},'valor',this.value)"/>`}
-        </div>
-        <div style="display:flex;gap:6px;padding-bottom:8px">
-          <button type="button" class="btn-mini" onclick="abrirAgenda('${p.terceiro_id}')">📅</button>
-          <button type="button" class="btn-mini danger" onclick="removerParticipante(${i})">✕</button>
-        </div>
-      </div>`;
-    }).join('');
+    box.innerHTML = `<div style="font-size:12px;color:var(--text3);padding:10px 0">Nenhuma vaga ainda. Use os botões abaixo para dizer do que você precisa.</div>`;
+    calcValorNosso();
+    return;
   }
+
+  box.innerHTML = formParticipantes.map((p,i) => {
+    const t = p.terceiro_id ? tercById(p.terceiro_id) : null;
+    const interno = !!t?.interno;
+
+    // Candidatos da vaga: ativos, que atendem a cidade E exercem a função
+    // pedida nesta linha. Quem já está em outra vaga sai da lista para não
+    // marcar a mesma pessoa duas vezes na mesma diligência.
+    const usados = new Set(formParticipantes.filter((_,j)=>j!==i).map(x=>x.terceiro_id).filter(Boolean));
+    const cand = terceiros.filter(x =>
+      x.ativo && atendeCidade(x, cidade) && (x.funcoes||[]).includes(p.papel) && !usados.has(x.id)
+    );
+
+    let opcoes = `<option value="">— a definir —</option>` +
+      cand.map(x=>`<option value="${x.id}"${p.terceiro_id===x.id?' selected':''}>${x.nome}${x.interno?' (equipe)':''}</option>`).join('');
+    // Se a pessoa já escolhida não está entre os candidatos (mudou a cidade,
+    // foi arquivada, perdeu a função), ela continua na lista marcada em
+    // vermelho em vez de sumir calada da demanda.
+    if(p.terceiro_id && !cand.some(x=>x.id===p.terceiro_id)) {
+      opcoes += `<option value="${p.terceiro_id}" selected>⚠️ ${nomeTerc(p.terceiro_id)} (não atende esta vaga)</option>`;
+    }
+
+    const aviso = !cidade ? '<span style="color:var(--text3)"> — escolha a cidade</span>'
+                : (!cand.length && !p.terceiro_id ? `<span style="color:var(--red)"> — ninguém em ${cidade}</span>` : '');
+
+    return `<div class="part-row">
+      <div class="field">
+        <label>${ICONE_FUNCAO[p.papel]} ${LABEL_FUNCAO[p.papel]}${aviso}</label>
+        <select onchange="setPartPessoa(${i}, this.value)">${opcoes}</select>
+      </div>
+      <div class="field"><label>Função</label>
+        <select onchange="setPartCampo(${i},'papel',this.value)">
+          ${FUNCOES.map(f=>`<option value="${f}"${p.papel===f?' selected':''}>${LABEL_FUNCAO[f]}</option>`).join('')}
+        </select>
+      </div>
+      <div class="field"><label>${interno?'Fica em casa':'Valor (R$)'}</label>
+        ${interno
+          ? `<div style="font-size:12px;color:var(--green);font-weight:600;padding:9px 0">—</div>`
+          : `<input type="number" step="0.01" value="${p.valor??''}" placeholder="0.00" oninput="setPartCampo(${i},'valor',this.value)"/>`}
+      </div>
+      <div style="display:flex;gap:6px;padding-bottom:8px">
+        ${p.terceiro_id?`<button type="button" class="btn-mini" onclick="abrirAgenda('${p.terceiro_id}')">📅</button>`:''}
+        <button type="button" class="btn-mini danger" onclick="removerParticipante(${i})">✕</button>
+      </div>
+    </div>`;
+  }).join('');
   calcValorNosso();
 }
-function addParticipante() {
-  const tid = id('f-part-add').value;
-  if(!tid) return;
-  const t = tercById(tid);
-  formParticipantes.push({
-    terceiro_id: tid,
-    papel: (t?.tipo==='preposto') ? 'preposto' : 'advogado',
-    // pré-preenche com o valor sugerido do cadastro; a Nai ajusta livremente
-    valor: t?.interno ? null : (t?.valor_padrao ?? null)
-  });
+
+// Cada clique cria uma vaga. Repetir a mesma função é o esperado:
+// dois advogados e um representante = três cliques.
+function addVaga(funcao) {
+  formParticipantes.push({ terceiro_id:null, papel:funcao, valor:null });
+  renderParticipantes();
+}
+function setPartPessoa(i, tid) {
+  if(!formParticipantes[i]) return;
+  formParticipantes[i].terceiro_id = tid || null;
+  const t = tid ? tercById(tid) : null;
+  // Pré-preenche com o valor sugerido do cadastro só se ainda estiver vazio,
+  // para não sobrescrever um valor que a Naiarha já ajustou na mão.
+  if(t && !t.interno && (formParticipantes[i].valor===null || formParticipantes[i].valor==='')) {
+    formParticipantes[i].valor = t.valor_padrao ?? null;
+  }
+  if(t?.interno) formParticipantes[i].valor = null;
   renderParticipantes();
 }
 function removerParticipante(i) { formParticipantes.splice(i,1); renderParticipantes(); }
@@ -2348,12 +2390,14 @@ function setPartCampo(i, campo, val) {
   if(!formParticipantes[i]) return;
   formParticipantes[i][campo] = (campo==='valor') ? (parseFloat(val)||null) : val;
   if(campo==='valor') calcValorNosso();
+  else renderParticipantes(); // trocou a função: a lista de candidatos muda
 }
 // Total pago a terceiros = só os externos. Participante interno não é despesa.
 function somaTerceiros() {
   return formParticipantes.reduce((acc,p) => {
+    if(!p.terceiro_id) return acc;          // vaga ainda sem pessoa
     const t = tercById(p.terceiro_id);
-    if(t?.interno) return acc;
+    if(t?.interno) return acc;              // equipe não é despesa
     return acc + (parseFloat(p.valor)||0);
   }, 0);
 }
@@ -2434,10 +2478,10 @@ async function sincronizarVinculos(demandaId) {
   await sb.from('demanda_terceiros').delete().eq('demanda_id', demandaId);
   if(!formParticipantes.length) { await loadVinculos(); return; }
   const rows = formParticipantes.map(p => {
-    const t = tercById(p.terceiro_id);
+    const t = p.terceiro_id ? tercById(p.terceiro_id) : null;
     return {
       demanda_id: demandaId,
-      terceiro_id: p.terceiro_id,
+      terceiro_id: p.terceiro_id || null,   // vaga em aberto
       papel: p.papel || null,
       valor: t?.interno ? null : (parseFloat(p.valor)||null)
     };
@@ -2471,10 +2515,14 @@ function blocoParticipantes(d) {
     const t = tercById(v.terceiro_id);
     const wpp = t?.whatsapp ? ` <a href="https://wa.me/55${String(t.whatsapp).replace(/\D/g,'')}" target="_blank" style="color:var(--green);text-decoration:none">📱</a>` : '';
     const pix = t?.pix ? ` <button class="btn-mini" onclick="copiarPix('${t.id}')">PIX</button>` : '';
+    const icone = ICONE_FUNCAO[v.papel] || '👤';
+    if(!v.terceiro_id) {
+      return `<div class="detail-row"><span class="detail-label">${icone} ${LABEL_FUNCAO[v.papel]||'Vaga'}</span><span class="detail-value" style="color:var(--yellow)">a definir</span></div>`;
+    }
     const val = t?.interno ? '<span style="color:var(--green)">fica em casa</span>' : fmt(v.valor);
-    return `<div class="detail-row"><span class="detail-label">${v.papel==='preposto'?'🧍':'⚖️'} ${t?.nome||'—'}${wpp}${pix}</span><span class="detail-value">${val}</span></div>`;
+    return `<div class="detail-row"><span class="detail-label">${icone} ${t?.nome||'—'}${wpp}${pix}</span><span class="detail-value">${val}</span></div>`;
   }).join('');
-  const totalT = ps.reduce((acc,v)=>{ const t=tercById(v.terceiro_id); return acc + (t?.interno?0:(parseFloat(v.valor)||0)); },0);
+  const totalT = ps.reduce((acc,v)=>{ if(!v.terceiro_id) return acc; const t=tercById(v.terceiro_id); return acc + (t?.interno?0:(parseFloat(v.valor)||0)); },0);
   return linhas
     + (totalT?`<div class="detail-row"><span class="detail-label">🤝 Total a terceiros</span><span class="detail-value">${fmt(totalT)}</span></div>`:'')
     + `<div class="detail-row"><span class="detail-label">💼 Val. de vocês</span><span class="detail-value" style="color:#059669;font-weight:700">${fmt((d.valor||0)-totalT)}</span></div>`;
@@ -2482,7 +2530,7 @@ function blocoParticipantes(d) {
 
 function quemCumpre(d) {
   const ps = participantesDaDemanda(d.id);
-  if(ps.length) return ps.map(v => nomeTerc(v.terceiro_id)).join(' + ');
+  if(ps.length) return ps.map(v => v.terceiro_id ? nomeTerc(v.terceiro_id) : `${LABEL_FUNCAO[v.papel]||'vaga'} a definir`).join(' + ');
   return d.terceiro_nome || d.responsavel || '—';
 }
 function participantesDaDemanda(did) {

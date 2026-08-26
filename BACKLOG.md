@@ -14,6 +14,14 @@ Itens combinados e ainda não implementados. Ordem não é prioridade.
   que hoje só mapeiam o texto da coluna `responsavel` para um e-mail fixo.
   O cadastro do terceiro já guarda e-mail e WhatsApp para isso.
 
+## Decisões que podem voltar atrás
+
+- A necessidade da diligência ("preciso de dois advogados") é representada
+  pelas próprias linhas de participante, com `terceiro_id` nulo enquanto a
+  pessoa não foi definida. Chegou a ser cogitada uma coluna
+  `funcoes_necessarias` separada, descartada para não guardar a mesma
+  informação em dois lugares e ver os dois divergirem.
+
 ## Observações técnicas
 
 - O mini-cliente Supabase deste app manda **apenas o primeiro item** quando
@@ -24,3 +32,6 @@ Itens combinados e ainda não implementados. Ordem não é prioridade.
   `valor`, `valor_terceiro`, `data`, `previsao_pagamento` e `plataforma`
   são lidas de fora deste app.
 - As Edge Functions que valem são as do repositório **previmater-ops**.
+- A coluna `terceiros.tipo` (select antigo de escolha única) foi substituída
+  por `funcoes` (array) na v2.7 e não é mais lida. Ficou no banco só para não
+  perder o histórico do cadastro.
