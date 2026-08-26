@@ -399,7 +399,30 @@
     .rev-actions { display:flex; gap:8px; justify-content:flex-end; }
     .rev-done-badge { font-size:10px; font-weight:700; color:#059669; background:#D1FAE5; padding:3px 8px; border-radius:20px; white-space:nowrap; }
     #toast.info { background: #1E3A5F; }
-  </style>
+      /* ── TERCEIROS / PARTICIPANTES ── */
+    .chip-cidade { display:inline-flex; align-items:center; gap:6px; padding:7px 12px; border-radius:20px; border:1.5px solid var(--border); background:var(--white); font-size:12px; font-weight:600; color:var(--text2); cursor:pointer; user-select:none; transition:all .15s; }
+    .chip-cidade.on { background:var(--accent); border-color:var(--accent); color:#fff; }
+    .chip-cidade input { display:none; }
+    .cidades-wrap { display:flex; flex-wrap:wrap; gap:8px; margin:8px 0 4px; }
+    .chip-ro { display:inline-block; padding:3px 9px; border-radius:12px; background:var(--accent-bg); color:var(--accent); font-size:11px; font-weight:700; margin:2px 4px 2px 0; }
+    .terc-card { border:1px solid var(--border); border-radius:var(--radius); padding:14px 16px; margin-bottom:10px; background:var(--white); }
+    .terc-card.inativo { opacity:.55; background:#FAFAF9; }
+    .terc-head { display:flex; justify-content:space-between; align-items:flex-start; gap:10px; flex-wrap:wrap; }
+    .terc-nome { font-size:15px; font-weight:700; color:var(--text); }
+    .terc-meta { font-size:12px; color:var(--text2); margin-top:2px; }
+    .tag-interno { display:inline-block; padding:2px 8px; border-radius:10px; background:#DBEAFE; color:#1E40AF; font-size:10px; font-weight:700; margin-left:6px; vertical-align:middle; }
+    .tag-off { display:inline-block; padding:2px 8px; border-radius:10px; background:#FEE2E2; color:#991B1B; font-size:10px; font-weight:700; margin-left:6px; vertical-align:middle; }
+    .btn-mini { padding:5px 11px; border-radius:8px; border:1px solid var(--border); background:var(--white); font-size:11px; font-weight:600; color:var(--text2); cursor:pointer; font-family:inherit; }
+    .btn-mini:hover { border-color:var(--accent); color:var(--accent); }
+    .btn-mini.danger:hover { border-color:var(--red); color:var(--red); }
+    .part-row { display:grid; grid-template-columns:1fr 110px 110px auto; gap:8px; align-items:end; padding:10px; border:1px solid var(--border2); border-radius:10px; margin-bottom:8px; background:#FAFAF9; }
+    .part-row .field { margin:0; }
+    .part-row label { font-size:10px; }
+    @media(max-width:640px){ .part-row { grid-template-columns:1fr 1fr; } }
+    .agenda-mini { max-height:300px; overflow-y:auto; text-align:left; }
+    .agenda-item { padding:9px 11px; border-left:3px solid var(--accent); background:#FAFAF9; border-radius:6px; margin-bottom:7px; font-size:12px; }
+    .agenda-item.livre { border-left-color:var(--green); color:var(--green); }
+</style>
 </head>
 <body>
 
@@ -473,10 +496,11 @@
     <button class="nav-item" id="nav-calendario" onclick="goPage('calendario')"><span class="nav-icon">📅</span> Calendário</button>
     <button class="nav-item" id="nav-relatorio" onclick="goPage('relatorio')"><span class="nav-icon">↗</span> Relatório</button>
     <button class="nav-item" id="nav-calculadora" onclick="goPage('calculadora')"><span class="nav-icon">🧮</span> Calculadora</button>
+    <button class="nav-item" id="nav-terceiros" onclick="goPage('terceiros')"><span class="nav-icon">👥</span> Terceiros</button>
     <button class="nav-item" id="nav-bloqueios" onclick="goPage('bloqueios')"><span class="nav-icon">🔒</span> Bloqueios</button>
     <button class="nav-item" id="nav-revisao" onclick="goPage('revisao')"><span class="nav-icon">📋</span> Revisão em Lote</button>
     <div class="sidebar-footer">
-      <p style="font-size:10px;color:var(--text3);margin-bottom:10px">v2.5 · Com Supabase</p>
+      <p style="font-size:10px;color:var(--text3);margin-bottom:10px">v2.6 · Com Supabase</p>
       <button class="logout-btn" onclick="doLogout()">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16,17 21,12 16,7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
         Sair da conta
@@ -544,8 +568,12 @@
             <div class="field"><label>Horário</label><input type="time" id="f-horario"/></div>
             <div class="field"><label>Local *</label><input type="text" id="f-local" placeholder="Ex: 12ª VT Curitiba"/></div>
             <div class="field"><label>Endereço completo</label><input type="text" id="f-endereco" placeholder="Rua, número, bairro, cidade"/></div>
+            <div class="field"><label>Cidade *</label>
+              <select id="f-cidade" onchange="onCidadeDemandaChange()"></select>
+            </div>
+            <div class="field hidden" id="f-cidade-outra-wrap"><label>Qual cidade?</label><input type="text" id="f-cidade-outra" placeholder="Digite a cidade" oninput="renderParticipantes()"/></div>
             <div class="field form-full"><label>Descrição *</label><textarea id="f-descricao" placeholder="Descreva a diligência..."></textarea></div>
-            <div class="field"><label>Valor cobrado (R$) *</label><input type="number" id="f-valor" placeholder="0.00" step="0.01"/></div>
+            <div class="field"><label>Valor cobrado (R$) *</label><input type="number" id="f-valor" placeholder="0.00" step="0.01" oninput="calcValorNosso()"/></div>
             <div class="field"><label>Plataforma *</label>
               <select id="f-plataforma">
                 <option value="">Selecione...</option>
@@ -577,15 +605,22 @@
             <div class="field"><label>Previsão de Pagamento</label><input type="date" id="f-previsao"/></div>
           </div>
 
-          <!-- Campos do Terceiro (aparecem só quando responsável = Terceiro) -->
-          <div id="f-terceiro-bloco" style="display:none">
+          <!-- Participantes da diligência (equipe interna e/ou terceiros) -->
+          <div id="f-terceiro-bloco">
             <hr class="divider"/>
-            <div class="section-title">💼 Divisão com Terceiro</div>
+            <div class="section-title">👥 Quem vai cumprir</div>
             <div style="background:#FFF7ED;border:1px solid #FED7AA;border-radius:10px;padding:10px 12px;font-size:12px;color:#92400E;margin-bottom:12px">
-              O <b>Valor cobrado</b> acima é o total recebido do cliente. Informe abaixo quanto fica para o Terceiro — o restante é de vocês.
+              Só aparecem as pessoas que marcaram no cadastro que atendem a cidade escolhida acima.
+              O <b>Valor cobrado</b> é o total recebido do cliente; o que for pago a terceiros sai dele.
+              Participante da equipe (Naiarha/Esdras) não desconta nada — o dinheiro fica em casa.
             </div>
-            <div class="form-grid">
-              <div class="field"><label>Valor do Terceiro (R$)</label><input type="number" id="f-valor-terceiro" placeholder="0.00" step="0.01" oninput="calcValorNosso()"/></div>
+            <div id="f-part-lista"></div>
+            <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:6px">
+              <select id="f-part-add" style="min-width:200px;flex:1"></select>
+              <button type="button" class="btn btn-secondary" onclick="addParticipante()">+ Adicionar</button>
+            </div>
+            <div class="form-grid" style="margin-top:14px">
+              <div class="field"><label>🤝 Total a terceiros (R$)</label><input type="text" id="f-valor-terceiro" readonly style="background:#FFF7ED;font-weight:700;color:#92400E"/></div>
               <div class="field"><label>💰 Valor de vocês (R$)</label><input type="text" id="f-valor-nosso" readonly style="background:#F0FDF4;font-weight:700;color:#065F46"/></div>
             </div>
           </div>
@@ -753,11 +788,12 @@
       <div id="page-bloqueios" class="page">
         <div style="margin-bottom:22px">
           <div class="page-title">Bloqueios de Agenda</div>
-          <div class="page-sub">Dias/horários em que o Esdras está indisponível para diligências</div>
+          <div class="page-sub">Dias/horários em que alguém da equipe ou um terceiro está indisponível</div>
         </div>
         <div class="card card-pad" style="margin-bottom:16px">
           <div class="section-title" id="bl-form-title">Novo Bloqueio</div>
           <div class="form-grid">
+            <div class="field"><label>Quem está indisponível *</label><select id="bl-pessoa"></select></div>
             <div class="field"><label>Data *</label><input type="date" id="bl-data"/></div>
             <div class="field"><label>Motivo</label><input type="text" id="bl-motivo" placeholder="Ex: Compromisso pessoal"/></div>
             <div class="field"><label>Início</label><input type="time" id="bl-inicio"/></div>
@@ -790,6 +826,69 @@
         <div id="revisao-list"></div>
       </div>
 
+
+      <!-- TERCEIROS -->
+      <div id="page-terceiros" class="page">
+        <div style="margin-bottom:22px">
+          <div class="page-title">Terceiros e Equipe</div>
+          <div class="page-sub">Quem cumpre diligências, em quais cidades e por quanto</div>
+        </div>
+
+        <div class="card card-pad" style="margin-bottom:16px">
+          <div class="section-title" id="tc-form-title">Novo Cadastro</div>
+          <div class="form-grid">
+            <div class="field"><label>Nome *</label><input type="text" id="tc-nome" placeholder="Nome completo"/></div>
+            <div class="field"><label>Tipo</label>
+              <select id="tc-tipo">
+                <option value="">Selecione...</option>
+                <option value="advogado">Advogado(a)</option>
+                <option value="preposto">Preposto(a)</option>
+                <option value="ambos">Advogado(a) e Preposto(a)</option>
+                <option value="outro">Outro</option>
+              </select>
+            </div>
+            <div class="field"><label>WhatsApp</label><input type="tel" id="tc-whatsapp" placeholder="(41) 99999-9999"/></div>
+            <div class="field"><label>E-mail</label><input type="email" id="tc-email" placeholder="email@exemplo.com"/></div>
+            <div class="field"><label>OAB</label><input type="text" id="tc-oab" placeholder="Ex: PR 93.900"/></div>
+            <div class="field"><label>Valor sugerido por diligência (R$)</label><input type="number" id="tc-valor-padrao" placeholder="0.00" step="0.01"/></div>
+            <div class="field"><label>Tipo da chave PIX</label>
+              <select id="tc-pix-tipo">
+                <option value="">Selecione...</option>
+                <option value="CPF">CPF</option>
+                <option value="CNPJ">CNPJ</option>
+                <option value="Telefone">Telefone</option>
+                <option value="E-mail">E-mail</option>
+                <option value="Aleatória">Aleatória</option>
+              </select>
+            </div>
+            <div class="field"><label>Chave PIX</label><input type="text" id="tc-pix" placeholder="Chave para pagamento"/></div>
+            <div class="field form-full"><label>Observações</label><textarea id="tc-obs" placeholder="Ex: só atende de manhã, não pega audiência trabalhista..."></textarea></div>
+          </div>
+
+          <hr class="divider"/>
+          <div class="section-title">🏙️ Cidades em que atua</div>
+          <div style="font-size:12px;color:var(--text2);margin-bottom:4px">Só aparece como opção nas demandas das cidades marcadas aqui.</div>
+          <div class="cidades-wrap" id="tc-cidades"></div>
+          <div class="field" style="max-width:340px;margin-top:6px">
+            <label>Outras cidades (separadas por vírgula)</label>
+            <input type="text" id="tc-cidades-extra" placeholder="Ex: Ponta Grossa, Campo Largo"/>
+          </div>
+
+          <div class="btn-row" style="justify-content:flex-start;margin-top:16px">
+            <button class="btn btn-primary" id="tc-submit-btn" onclick="salvarTerceiro()">+ Cadastrar</button>
+            <button class="btn btn-secondary hidden" id="tc-cancel-btn" onclick="cancelEditTerceiro()">Cancelar edição</button>
+          </div>
+        </div>
+
+        <div class="card card-pad" style="margin-bottom:14px;display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+          <span style="font-size:12px;font-weight:600;color:var(--text2)">Mostrar:</span>
+          <button class="filter-btn active" id="tc-filtro-ativos" onclick="setTercFiltro('ativos')">Ativos</button>
+          <button class="filter-btn" id="tc-filtro-inativos" onclick="setTercFiltro('inativos')">Arquivados</button>
+          <button class="filter-btn" id="tc-filtro-todos" onclick="setTercFiltro('todos')">Todos</button>
+        </div>
+        <div id="terceiros-list"></div>
+      </div>
+
       <!-- CALENDÁRIO -->
       <div id="page-calendario" class="page">
         <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:16px;flex-wrap:wrap;gap:12px">
@@ -797,10 +896,16 @@
             <div class="page-title">Calendário</div>
             <div class="page-sub">Diligências, bloqueios e recebimentos por dia</div>
           </div>
-          <div class="cal-nav">
-            <button class="cal-nav-btn" onclick="calMudaMes(-1)">‹</button>
-            <span class="cal-month-label" id="cal-month-label"></span>
-            <button class="cal-nav-btn" onclick="calMudaMes(1)">›</button>
+          <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+            <div class="field" style="margin:0;min-width:190px">
+              <label>Ver agenda de</label>
+              <select id="cal-perfil" onchange="calSetPerfil(this.value)"></select>
+            </div>
+            <div class="cal-nav">
+              <button class="cal-nav-btn" onclick="calMudaMes(-1)">‹</button>
+              <span class="cal-month-label" id="cal-month-label"></span>
+              <button class="cal-nav-btn" onclick="calMudaMes(1)">›</button>
+            </div>
           </div>
         </div>
         <div class="cal-legend">
@@ -870,6 +975,18 @@
     </div>
   </div>
 </div>
+<div id="agenda-modal" class="modal-overlay hidden" onclick="if(event.target===this)closeAgendaModal()">
+  <div class="modal-box" style="max-width:460px;position:relative">
+    <button onclick="closeAgendaModal()" style="position:absolute;top:14px;right:14px;background:none;border:none;font-size:20px;color:var(--text3);cursor:pointer;line-height:1">×</button>
+    <div class="modal-title" id="agenda-title" style="padding-right:24px"></div>
+    <div class="modal-sub" id="agenda-sub"></div>
+    <div class="agenda-mini" id="agenda-body"></div>
+    <div class="btn-row" style="margin-top:14px">
+      <button class="btn btn-secondary" onclick="closeAgendaModal()">Fechar</button>
+    </div>
+  </div>
+</div>
+
 <div id="cal-day-modal" class="modal-overlay hidden" onclick="if(event.target===this)closeCalDayModal()">
   <div class="modal-box" style="max-width:480px;position:relative">
     <button onclick="closeCalDayModal()" style="position:absolute;top:14px;right:14px;background:none;border:none;font-size:20px;color:var(--text3);cursor:pointer;line-height:1">×</button>
@@ -977,6 +1094,7 @@ function rerenderPaginaAtual(){
   else if(page==='detail') renderDetail(currentDetailId);
   else if(page==='relatorio') renderRelatorio();
   else if(page==='bloqueios') renderBloqueios();
+  else if(page==='terceiros') renderTerceiros();
   else if(page==='calendario') renderCalendario();
   else if(page==='revisao') renderRevisao();
 }
@@ -1029,6 +1147,8 @@ sb.auth.onAuthStateChange(async (event, session) => {
     atualizaHideBtnIcon();
     await loadDemands();
     await loadBloqueios();
+    await loadTerceiros();
+    await loadVinculos();
     renderDashboard();
   } else {
     currentUser = null;
@@ -1106,16 +1226,22 @@ async function enviarEmail(form) {
 }
 
 async function saveDemand(form) {
+  let demandaId = editId;
   if(editId) {
     const { error } = await sb.from('demandas').update(form).eq('id', editId);
     if(error) { showToast('Erro ao salvar.','err'); return false; }
   } else {
-    const { error } = await sb.from('demandas').insert([form]);
+    // O insert deste mini-cliente já volta com "return=representation",
+    // então o registro criado vem em data — é dali que sai o id necessário
+    // para gravar os participantes na tabela demanda_terceiros.
+    const { data, error } = await sb.from('demandas').insert([form]);
     if(error) { showToast('Erro ao cadastrar.','err'); return false; }
+    demandaId = data?.[0]?.id || null;
     await criarEventoCalendar(form);
     await enviarNotificacao(form);
     await enviarEmail(form);
   }
+  await sincronizarVinculos(demandaId);
   await loadDemands();
   return true;
 }
@@ -1160,8 +1286,9 @@ function goPage(page, demandId, filtroStatus) {
   if(page==='detail')    renderDetail(demandId);
   if(page==='relatorio') renderRelatorio();
   if(page==='calculadora') { calcCarregarParams(); }
-  if(page==='bloqueios') renderBloqueios();
-  if(page==='calendario') renderCalendario();
+  if(page==='terceiros') renderTerceiros();
+  if(page==='bloqueios') { preencheSelectBloqueioPessoa(); renderBloqueios(); }
+  if(page==='calendario') { preencheSelectPerfil(); renderCalendario(); }
   if(page==='revisao') renderRevisao();
   if(page==='novo' && !demandId) { editId=null; id('form-title').textContent='Nova Demanda'; id('form-submit-btn').textContent='Cadastrar Demanda'; clearForm(); }
   if(page==='novo' && demandId) {
@@ -1266,7 +1393,7 @@ function renderDetail(did) {
     </div>`;
   }
 
-  id('detail-content').innerHTML=`<div class="detail-header"><div><div class="detail-title">${d.descricao}</div>${badgeFull(d.status)}</div><div style="text-align:right"><div class="detail-value-big">${fmt(d.valor)}</div>${d.valor_sugerido?`<div style="font-size:11px;color:var(--text3);margin-top:2px">sugerido: ${fmt(d.valor_sugerido)}</div>`:''}</div></div><div class="steps">${steps}</div>${custoBloco}<div style="padding:0 20px"><div class="detail-row"><span class="detail-label">📅 Data</span><span class="detail-value">${fmtDate(d.data)}</span></div><div class="detail-row"><span class="detail-label">🕐 Horário</span><span class="detail-value">${d.horario||'—'}</span></div><div class="detail-row"><span class="detail-label">📍 Local</span><span class="detail-value">${d.local}</span></div>${d.endereco?`<div class="detail-row"><span class="detail-label">🗺️ Endereço</span><span class="detail-value">${d.endereco}</span></div>`:''}<div class="detail-row"><span class="detail-label">🏢 Plataforma</span><span class="detail-value">${d.plataforma}</span></div><div class="detail-row"><span class="detail-label">👤 Responsável</span><span class="detail-value">${d.responsavel}</span></div>${d.responsavel==='Terceiro'&&d.valor_terceiro?`<div class="detail-row"><span class="detail-label">🤝 Val. Terceiro</span><span class="detail-value">${fmt(d.valor_terceiro)}</span></div>`+`<div class="detail-row"><span class="detail-label">💼 Val. de vocês</span><span class="detail-value" style="color:#059669;font-weight:700">${fmt((d.valor||0)-(d.valor_terceiro||0))}</span></div>`:''}<div class="detail-row"><span class="detail-label">💳 Previsão Pgto</span><span class="detail-value">${fmtDate(d.previsao_pagamento)}</span></div><div class="detail-row"><span class="detail-label">🙋 Contratante</span><span class="detail-value">${d.contratante_nome||'—'}</span></div><div class="detail-row" style="border-bottom:none"><span class="detail-label">📱 WhatsApp</span>${waBtn}</div></div><div style="padding:14px 20px;border-top:1px solid var(--border2);display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px"><button class="btn btn-danger" onclick="deleteDemand('${d.id}')">Remover</button><div style="display:flex;gap:10px"><button class="btn btn-secondary" onclick="goPage('novo','${d.id}')">Editar</button>${custoBtn}${advBtn}</div></div>`;
+  id('detail-content').innerHTML=`<div class="detail-header"><div><div class="detail-title">${d.descricao}</div>${badgeFull(d.status)}</div><div style="text-align:right"><div class="detail-value-big">${fmt(d.valor)}</div>${d.valor_sugerido?`<div style="font-size:11px;color:var(--text3);margin-top:2px">sugerido: ${fmt(d.valor_sugerido)}</div>`:''}</div></div><div class="steps">${steps}</div>${custoBloco}<div style="padding:0 20px"><div class="detail-row"><span class="detail-label">📅 Data</span><span class="detail-value">${fmtDate(d.data)}</span></div><div class="detail-row"><span class="detail-label">🕐 Horário</span><span class="detail-value">${d.horario||'—'}</span></div><div class="detail-row"><span class="detail-label">📍 Local</span><span class="detail-value">${d.local}</span></div>${d.endereco?`<div class="detail-row"><span class="detail-label">🗺️ Endereço</span><span class="detail-value">${d.endereco}</span></div>`:''}${d.cidade?`<div class="detail-row"><span class="detail-label">🏙️ Cidade</span><span class="detail-value">${d.cidade}</span></div>`:''}<div class="detail-row"><span class="detail-label">🏢 Plataforma</span><span class="detail-value">${d.plataforma}</span></div><div class="detail-row"><span class="detail-label">👤 Responsável</span><span class="detail-value">${d.responsavel}</span></div>${blocoParticipantes(d)}<div class="detail-row"><span class="detail-label">💳 Previsão Pgto</span><span class="detail-value">${fmtDate(d.previsao_pagamento)}</span></div><div class="detail-row"><span class="detail-label">🙋 Contratante</span><span class="detail-value">${d.contratante_nome||'—'}</span></div><div class="detail-row" style="border-bottom:none"><span class="detail-label">📱 WhatsApp</span>${waBtn}</div></div><div style="padding:14px 20px;border-top:1px solid var(--border2);display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px"><button class="btn btn-danger" onclick="deleteDemand('${d.id}')">Remover</button><div style="display:flex;gap:10px"><button class="btn btn-secondary" onclick="goPage('novo','${d.id}')">Editar</button>${custoBtn}${advBtn}</div></div>`;
 }
 
 // ── RELATÓRIO ──
@@ -1290,7 +1417,12 @@ function clearForm() {
   ['f-km-ida','f-km-total','f-comb','f-valor-sugerido','f-valor-nosso'].forEach(x=>{ if(id(x)) id(x).value=''; });
   id('f-plataforma').value=''; id('f-responsavel').value=''; id('f-status').value='aguardando_cumprimento';
   id('f-online').checked = false;
-  id('f-rota-bloco').style.display='none'; id('f-terceiro-bloco').style.display='none';
+  id('f-rota-bloco').style.display='none';
+  preencheSelectCidadeDemanda();
+  id('f-cidade').value=''; id('f-cidade-outra').value='';
+  id('f-cidade-outra-wrap').classList.add('hidden');
+  formParticipantes = [];
+  renderParticipantes();
   id('form-back-btn').onclick = ()=>goPage('demandas');
 }
 function fillForm(d) {
@@ -1309,7 +1441,28 @@ function fillForm(d) {
   id('f-whatsapp').value    = d.contratante_whatsapp||'';
   if(d.km_ida) { id('f-km-ida').value=d.km_ida; id('f-km-total').value=d.km_total||''; id('f-rota-bloco').style.display='block'; id('f-rota-desc').innerHTML=d.endereco?`<b>Destino:</b> ${d.endereco}`:''; }
   if(d.valor_sugerido) id('f-valor-sugerido').value = fmt(d.valor_sugerido);
-  if(d.responsavel==='Terceiro') { id('f-terceiro-bloco').style.display='block'; id('f-valor-terceiro').value=d.valor_terceiro||''; calcValorNosso(); }
+
+  // Cidade: se a demanda foi salva com uma cidade fora das 10 fixas, ela já
+  // entra na lista pelo preencheSelectCidadeDemanda; se mesmo assim não
+  // existir como opção, cai no campo de texto livre em vez de sumir.
+  preencheSelectCidadeDemanda();
+  const selCid = id('f-cidade');
+  if(d.cidade && Array.from(selCid.options).some(o=>o.value===d.cidade)) {
+    selCid.value = d.cidade;
+    id('f-cidade-outra-wrap').classList.add('hidden');
+  } else if(d.cidade) {
+    selCid.value = '__OUTRA__';
+    id('f-cidade-outra').value = d.cidade;
+    id('f-cidade-outra-wrap').classList.remove('hidden');
+  } else {
+    selCid.value = '';
+    id('f-cidade-outra-wrap').classList.add('hidden');
+  }
+
+  formParticipantes = participantesDaDemanda(d.id).map(v => ({
+    terceiro_id: v.terceiro_id, papel: v.papel || 'advogado', valor: v.valor
+  }));
+  renderParticipantes();
   id('form-back-btn').onclick = ()=>goPage('demandas');
 }
 function toggleOnlineFields() {
@@ -1325,7 +1478,20 @@ function getForm() {
     descricao: id('f-descricao').value,
     valor: parseFloat(id('f-valor').value)||null,
     valor_sugerido: parseFloat((id('f-valor-sugerido').value||'').replace(/[R$\s]/g,'').replace(',','.')) || null,
-    valor_terceiro: parseFloat(id('f-valor-terceiro').value)||null,
+    cidade: cidadeDemandaAtual() || null,
+    // Soma dos participantes externos. Continua gravada na própria demanda
+    // porque o detalhe, o relatório e o fullfin já leem esta coluna —
+    // trocar por consulta na tabela nova quebraria os três.
+    valor_terceiro: somaTerceiros() || null,
+    // Espelho em texto de quem cumpriu. Existia vazia no banco; agora serve
+    // de rótulo rápido para quem lê a demanda sem cruzar a tabela de vínculos.
+    terceiro_nome: formParticipantes
+      .map(p => tercById(p.terceiro_id))
+      .filter(t => t && !t.interno)
+      .map(t => t.nome).join(', ') || null,
+    terceiro_whatsapp: (formParticipantes
+      .map(p => tercById(p.terceiro_id))
+      .filter(t => t && !t.interno)[0]?.whatsapp) || null,
     km_ida: id('f-km-ida').value||null,
     km_total: id('f-km-total').value||null,
     plataforma: id('f-plataforma').value,
@@ -1350,7 +1516,11 @@ function timeToMin(t) {
 function checkConflitos(f) {
   const avisos = [];
 
-  // 1. Outras diligências marcadas muito próximas no mesmo dia (qualquer responsável)
+  // Quem vai cumprir esta demanda. Serve para não encher a tela de aviso
+  // sobre gente que não tem nada a ver com a diligência sendo criada.
+  const envolvidos = new Set(formParticipantes.map(p=>p.terceiro_id));
+
+  // 1. Choque de horário no mesmo dia
   if(f.horario) {
     const novoMin = timeToMin(f.horario);
     demands.forEach(d => {
@@ -1358,29 +1528,39 @@ function checkConflitos(f) {
       if((d.data||'').split('T')[0] !== f.data) return;
       if(!d.horario) return;
       const dif = Math.abs(timeToMin(d.horario) - novoMin);
-      if(dif < TOLERANCIA_MIN) {
-        avisos.push(`🕐 <b>${d.responsavel}</b> já tem "${d.descricao}" marcado para <b>${d.horario.slice(0,5)}</b> no mesmo dia (diferença de ${dif} min — mínimo recomendado é ${TOLERANCIA_MIN} min).`);
+      if(dif >= TOLERANCIA_MIN) return;
+      const outros = participantesDaDemanda(d.id).map(v=>v.terceiro_id);
+      const comuns = outros.filter(t=>envolvidos.has(t));
+      if(comuns.length) {
+        avisos.push(`🕐 <b>${comuns.map(nomeTerc).join(', ')}</b> já tem "${d.descricao}" às <b>${d.horario.slice(0,5)}</b> no mesmo dia (diferença de ${dif} min — mínimo recomendado é ${TOLERANCIA_MIN} min).`);
+      } else if(!outros.length) {
+        // Demanda antiga, sem participantes registrados: mantém o aviso
+        // genérico de antes para não deixar de alertar sobre nada.
+        avisos.push(`🕐 <b>${d.responsavel}</b> já tem "${d.descricao}" marcado para <b>${d.horario.slice(0,5)}</b> no mesmo dia (diferença de ${dif} min).`);
       }
     });
   }
 
-  // 2. Indisponibilidade do Esdras (bloqueios de agenda), independente do responsável
+  // 2. Bloqueios de agenda — só de quem está envolvido nesta demanda
   bloqueios.forEach(b => {
     if((b.data||'').split('T')[0] !== f.data) return;
+    const dono = b.terceiro_id ? nomeTerc(b.terceiro_id) : 'Esdras';
+    const donoId = b.terceiro_id || terceiros.find(t=>t.interno && (t.nome||'').toLowerCase()==='esdras')?.id;
+    if(envolvidos.size && !envolvidos.has(donoId)) return;
     const motivo = b.motivo ? ` — ${b.motivo}` : '';
     if(!b.horario_inicio && !b.horario_fim) {
-      avisos.push(`🔒 Esdras bloqueou <b>o dia ${fmtDate(f.data)}</b> (indisponível)${motivo}.`);
+      avisos.push(`🔒 ${dono} bloqueou <b>o dia ${fmtDate(f.data)}</b> (indisponível)${motivo}.`);
       return;
     }
     const ini = b.horario_inicio ? timeToMin(b.horario_inicio) : 0;
     const fim = b.horario_fim ? timeToMin(b.horario_fim) : (24*60-1);
     if(!f.horario) {
-      avisos.push(`🔒 Esdras está indisponível entre <b>${(b.horario_inicio||'00:00').slice(0,5)}</b> e <b>${(b.horario_fim||'23:59').slice(0,5)}</b> em ${fmtDate(f.data)}${motivo}. Confira o horário desta diligência.`);
+      avisos.push(`🔒 ${dono} está indisponível entre <b>${(b.horario_inicio||'00:00').slice(0,5)}</b> e <b>${(b.horario_fim||'23:59').slice(0,5)}</b> em ${fmtDate(f.data)}${motivo}. Confira o horário desta diligência.`);
       return;
     }
     const novoMin = timeToMin(f.horario);
     if(novoMin >= ini && novoMin <= fim) {
-      avisos.push(`🔒 Esdras está indisponível das <b>${(b.horario_inicio||'00:00').slice(0,5)}</b> às <b>${(b.horario_fim||'23:59').slice(0,5)}</b> em ${fmtDate(f.data)}${motivo}.`);
+      avisos.push(`🔒 ${dono} está indisponível das <b>${(b.horario_inicio||'00:00').slice(0,5)}</b> às <b>${(b.horario_fim||'23:59').slice(0,5)}</b> em ${fmtDate(f.data)}${motivo}.`);
     }
   });
 
@@ -1411,6 +1591,11 @@ async function proceedSave(f) {
 async function submitForm() {
   const f=getForm();
   if(!f.data||!f.local||!f.descricao||!f.valor||!f.plataforma||!f.responsavel) return showToast('Preencha os campos obrigatórios.','err');
+  if(!f.cidade) return showToast('Selecione a cidade da demanda.','err');
+  // Participante sem valor passaria como zero e sumiria da conta de repasse.
+  const semValor = formParticipantes.filter(p => { const t=tercById(p.terceiro_id); return t && !t.interno && !(parseFloat(p.valor)>0); });
+  if(semValor.length) return showToast(`Informe quanto será pago a ${semValor.map(p=>nomeTerc(p.terceiro_id)).join(', ')}.`,'err');
+  if(f.valor_terceiro && f.valor_terceiro > f.valor) return showToast('O total dos terceiros passou o valor cobrado do cliente.','err');
   const avisos = checkConflitos(f);
   if(avisos.length) { pendingForm = f; showConflictModal(avisos); return; }
   await proceedSave(f);
@@ -1548,7 +1733,9 @@ async function addBloqueio() {
   const horario_inicio = diaInteiro ? null : (id('bl-inicio').value || null);
   const horario_fim = diaInteiro ? null : (id('bl-fim').value || null);
   const motivo = id('bl-motivo').value || null;
-  const bloqueio = { data, horario_inicio, horario_fim, motivo };
+  const terceiro_id = id('bl-pessoa').value || null;
+  if(!terceiro_id) return showToast('Selecione de quem é o bloqueio.','err');
+  const bloqueio = { data, horario_inicio, horario_fim, motivo, terceiro_id };
 
   const conflitos = checkBloqueioVsDiligencias(data, horario_inicio, horario_fim);
   if(conflitos.length) {
@@ -1576,6 +1763,7 @@ async function saveBloqueio(bloqueio) {
 
 function resetBloqueioForm() {
   id('bl-data').value=''; id('bl-motivo').value=''; id('bl-inicio').value=''; id('bl-fim').value=''; id('bl-dia-inteiro').checked=false;
+  preencheSelectBloqueioPessoa();
   toggleBlDiaInteiro();
   editBloqueioId = null;
   id('bl-form-title').textContent = 'Novo Bloqueio';
@@ -1586,6 +1774,10 @@ function resetBloqueioForm() {
 function editBloqueio(bid) {
   const b = bloqueios.find(x=>x.id===bid); if(!b) return;
   editBloqueioId = bid;
+  preencheSelectBloqueioPessoa();
+  // Bloqueio antigo não tem dono gravado: por definição era do Esdras.
+  const esdras = terceiros.find(t=>t.interno && (t.nome||'').toLowerCase()==='esdras');
+  id('bl-pessoa').value = b.terceiro_id || esdras?.id || '';
   id('bl-data').value = (b.data||'').split('T')[0];
   id('bl-motivo').value = b.motivo || '';
   const diaInteiro = !b.horario_inicio && !b.horario_fim;
@@ -1645,10 +1837,11 @@ async function removeBloqueio(bid) {
 }
 
 function renderBloqueios() {
-  if(!bloqueios.length) { id('bloqueios-list').innerHTML = `<div class="empty"><div class="empty-icon">🔓</div><div class="empty-title">Nenhum bloqueio cadastrado</div><div class="empty-sub">Adicione acima para avisar sobre a indisponibilidade do Esdras</div></div>`; return; }
+  if(!bloqueios.length) { id('bloqueios-list').innerHTML = `<div class="empty"><div class="empty-icon">🔓</div><div class="empty-title">Nenhum bloqueio cadastrado</div><div class="empty-sub">Adicione acima para marcar quem está indisponível</div></div>`; return; }
   id('bloqueios-list').innerHTML = bloqueios.map(b => {
     const periodo = (!b.horario_inicio && !b.horario_fim) ? 'Dia inteiro' : `${(b.horario_inicio||'00:00').slice(0,5)} – ${(b.horario_fim||'23:59').slice(0,5)}`;
-    return `<div class="demand-row" style="cursor:default"><div style="flex:1;min-width:0"><div class="demand-title">${fmtDate(b.data)} · ${periodo}</div>${b.motivo?`<div class="demand-meta">${b.motivo}</div>`:''}</div><div style="display:flex;gap:8px;flex-shrink:0"><button class="btn btn-secondary" style="padding:6px 12px;font-size:12px" onclick="editBloqueio('${b.id}')">Editar</button><button class="btn btn-danger" style="padding:6px 12px;font-size:12px" onclick="removeBloqueio('${b.id}')">Remover</button></div></div>`;
+    const dono = b.terceiro_id ? nomeTerc(b.terceiro_id) : 'Esdras';
+    return `<div class="demand-row" style="cursor:default"><div style="flex:1;min-width:0"><div class="demand-title">${dono} · ${fmtDate(b.data)} · ${periodo}</div>${b.motivo?`<div class="demand-meta">${b.motivo}</div>`:''}</div><div style="display:flex;gap:8px;flex-shrink:0"><button class="btn btn-secondary" style="padding:6px 12px;font-size:12px" onclick="editBloqueio('${b.id}')">Editar</button><button class="btn btn-danger" style="padding:6px 12px;font-size:12px" onclick="removeBloqueio('${b.id}')">Remover</button></div></div>`;
   }).join('');
 }
 
@@ -1675,13 +1868,18 @@ function renderCalendario() {
   const mapa = {};
   const get = iso => { if(!mapa[iso]) mapa[iso] = { dem:0, atr:false, rec:false, prev:false, bloq:false }; return mapa[iso]; };
 
+  // Tudo abaixo respeita o perfil escolhido no dropdown. Em "Geral" as
+  // listas são as completas, então o comportamento antigo não muda.
+  const demsPerfil = demandasDoPerfil();
+  const blqsPerfil = bloqueiosDoPerfil();
+
   // Diligências agendadas (campo "data")
-  demands.forEach(d => {
+  demsPerfil.forEach(d => {
     const iso = (d.data||'').split('T')[0];
     if(iso) get(iso).dem++;
   });
   // Recebimentos previstos (campo "previsao_pagamento" + status)
-  demands.forEach(d => {
+  demsPerfil.forEach(d => {
     if(!d.previsao_pagamento) return;
     const iso = d.previsao_pagamento.split('T')[0];
     const st = calStatusRecebimento(d, hojeISO);
@@ -1690,8 +1888,8 @@ function renderCalendario() {
     else if(st==='atrasado') m.atr = true;
     else m.prev = true;
   });
-  // Bloqueios de agenda do Esdras
-  bloqueios.forEach(b => {
+  // Bloqueios de agenda (da equipe ou de terceiros)
+  blqsPerfil.forEach(b => {
     const iso = (b.data||'').split('T')[0];
     if(iso) get(iso).bloq = true;
   });
@@ -1756,14 +1954,15 @@ function renderCalDia(iso) {
   const isoIni = fISO(inicioSemana), isoFim = fISO(fimSemana);
   const naSemana = iso2 => iso2 >= isoIni && iso2 <= isoFim;
 
-  const demsDia  = demands.filter(d => (d.data||'').split('T')[0] === iso).sort((a,b)=>(a.horario||'99:99').localeCompare(b.horario||'99:99'));
-  const recsDia  = demands.filter(d => d.previsao_pagamento && d.previsao_pagamento.split('T')[0] === iso);
-  const bloqDia  = bloqueios.filter(b => (b.data||'').split('T')[0] === iso);
+  const _dems = demandasDoPerfil();
+  const demsDia  = _dems.filter(d => (d.data||'').split('T')[0] === iso).sort((a,b)=>(a.horario||'99:99').localeCompare(b.horario||'99:99'));
+  const recsDia  = _dems.filter(d => d.previsao_pagamento && d.previsao_pagamento.split('T')[0] === iso);
+  const bloqDia  = bloqueiosDoPerfil().filter(b => (b.data||'').split('T')[0] === iso);
 
   // Resumo financeiro
   const previstoDia   = recsDia.filter(d => calStatusRecebimento(d,hojeISO) !== 'recebido').reduce((s,d)=>s+parseFloat(d.valor||0),0);
   const recebidoDia   = recsDia.filter(d => calStatusRecebimento(d,hojeISO) === 'recebido').reduce((s,d)=>s+parseFloat(d.valor||0),0);
-  const recsSemana    = demands.filter(d => d.previsao_pagamento && naSemana(d.previsao_pagamento.split('T')[0]));
+  const recsSemana    = _dems.filter(d => d.previsao_pagamento && naSemana(d.previsao_pagamento.split('T')[0]));
   const previstoSemana= recsSemana.filter(d => calStatusRecebimento(d,hojeISO) !== 'recebido').reduce((s,d)=>s+parseFloat(d.valor||0),0);
   const recebidoSemana= recsSemana.filter(d => calStatusRecebimento(d,hojeISO) === 'recebido').reduce((s,d)=>s+parseFloat(d.valor||0),0);
 
@@ -1796,7 +1995,8 @@ function renderCalDia(iso) {
   if(bloqDia.length) {
     html += bloqDia.map(b => {
       const periodo = (!b.horario_inicio && !b.horario_fim) ? 'Dia inteiro' : `${(b.horario_inicio||'00:00').slice(0,5)} – ${(b.horario_fim||'23:59').slice(0,5)}`;
-      return `<div class="conflict-item">🔒 Esdras indisponível — ${periodo}${b.motivo?` (${b.motivo})`:''}</div>`;
+      const dono = b.terceiro_id ? nomeTerc(b.terceiro_id) : 'Esdras';
+      return `<div class="conflict-item">🔒 ${dono} indisponível — ${periodo}${b.motivo?` (${b.motivo})`:''}</div>`;
     }).join('');
   }
 
@@ -1804,7 +2004,7 @@ function renderCalDia(iso) {
   if(!demsDia.length) {
     html += `<div style="font-size:12px;color:var(--text3);margin-bottom:12px">Nenhuma diligência marcada para este dia.</div>`;
   } else {
-    html += `<div class="card" style="margin-bottom:12px">` + demsDia.map(d => `<div class="demand-row" onclick="fecharCalEAbrirDetalhe('${d.id}')"><div style="flex:1;min-width:0"><div class="demand-title">${d.horario?d.horario.slice(0,5)+' · ':''}${d.descricao}</div><div class="demand-meta">${d.local} · ${d.responsavel}</div></div>${badge(d.status)}</div>`).join('') + `</div>`;
+    html += `<div class="card" style="margin-bottom:12px">` + demsDia.map(d => `<div class="demand-row" onclick="fecharCalEAbrirDetalhe('${d.id}')"><div style="flex:1;min-width:0"><div class="demand-title">${d.horario?d.horario.slice(0,5)+' · ':''}${d.descricao}</div><div class="demand-meta">${d.local}${d.cidade?' · '+d.cidade:''} · ${quemCumpre(d)}</div></div>${badge(d.status)}</div>`).join('') + `</div>`;
   }
   html += `<button class="btn btn-primary" style="width:100%;margin-bottom:16px" onclick="novaDiligenciaNoDia('${iso}')">+ Nova diligência neste dia</button>`;
 
@@ -1853,17 +2053,17 @@ function irParaFormularioDaCalculadora() {
   if(calcDataPreenchida) { id('f-data').value = calcDataPreenchida; calcDataPreenchida = null; }
 }
 
-function toggleTerceiroFields() {
-  const isTerceiro = id('f-responsavel').value === 'Terceiro';
-  id('f-terceiro-bloco').style.display = isTerceiro ? 'block' : 'none';
-  if(!isTerceiro) { id('f-valor-terceiro').value=''; id('f-valor-nosso').value=''; }
-}
+// O bloco de participantes agora vale para qualquer responsável — uma
+// demanda da Naiarha pode ter um terceiro como preposto. A função continua
+// existindo porque o select de responsável a chama no onchange.
+function toggleTerceiroFields() { renderParticipantes(); }
 
 function calcValorNosso() {
   const total = parseFloat(id('f-valor').value) || 0;
-  const terceiro = parseFloat(id('f-valor-terceiro').value) || 0;
+  const terceiro = somaTerceiros();
   const nosso = total - terceiro;
-  id('f-valor-nosso').value = nosso >= 0 ? fmt(nosso) : '—';
+  id('f-valor-terceiro').value = terceiro ? fmt(terceiro) : '—';
+  id('f-valor-nosso').value = nosso >= 0 ? fmt(nosso) : '⚠️ ' + fmt(nosso);
 }
 
 // Enter no login
@@ -1871,6 +2071,433 @@ document.getElementById('login-senha').addEventListener('keydown', e=>{ if(e.key
 document.getElementById('login-email').addEventListener('keydown', e=>{ if(e.key==='Enter') document.getElementById('login-senha').focus(); });
 
 // ── CALCULADORA ──
+
+// ══════════════════ TERCEIROS E PARTICIPANTES ══════════════════
+// As 10 cidades em que o escritório atua. Ficam aqui em código (e não em
+// tabela) porque mudam praticamente nunca e assim a tela não depende de
+// mais um round-trip no banco. Cidade fora da lista entra como texto livre.
+const CIDADES = ['Almirante Tamandaré','Araucária','Campina Grande do Sul','Colombo','Curitiba','Fazenda Rio Grande','Pinhais','Piraquara','Quatro Barras','São José dos Pinhais'];
+const PAPEIS = ['advogado','preposto','outro'];
+
+let terceiros = [];          // equipe interna + terceiros externos
+let vinculos = [];           // demanda_terceiros: quem participou de qual demanda
+let formParticipantes = [];  // rascunho do formulário de demanda
+let editTerceiroId = null;
+let tercFiltro = 'ativos';
+let calPerfil = 'GERAL';
+
+async function loadTerceiros() {
+  const { data, error } = await sb.from('terceiros').select('*').order('nome');
+  if(!error && data) terceiros = data;
+}
+async function loadVinculos() {
+  const { data, error } = await sb.from('demanda_terceiros').select('*');
+  if(!error && data) vinculos = data;
+}
+const tercById = tid => terceiros.find(t => t.id === tid);
+const nomeTerc = tid => (tercById(tid)?.nome) || '—';
+
+// ── CADASTRO ──
+function renderCidadesCheckboxes(marcadas) {
+  const set = new Set(marcadas||[]);
+  id('tc-cidades').innerHTML = CIDADES.map(c =>
+    `<label class="chip-cidade${set.has(c)?' on':''}" onclick="toggleChipCidade(this)">
+       <input type="checkbox" value="${c}"${set.has(c)?' checked':''}/>${c}
+     </label>`).join('');
+  // cidades fora da lista das 10 vão para o campo de texto livre
+  const extras = (marcadas||[]).filter(c => !CIDADES.includes(c));
+  id('tc-cidades-extra').value = extras.join(', ');
+}
+function toggleChipCidade(el) {
+  const chk = el.querySelector('input');
+  chk.checked = !chk.checked;
+  el.classList.toggle('on', chk.checked);
+}
+function coletaCidadesForm() {
+  const marcadas = Array.from(document.querySelectorAll('#tc-cidades input:checked')).map(i=>i.value);
+  const extras = (id('tc-cidades-extra').value||'').split(',').map(x=>x.trim()).filter(Boolean);
+  return Array.from(new Set([...marcadas, ...extras]));
+}
+
+async function salvarTerceiro() {
+  const nome = (id('tc-nome').value||'').trim();
+  if(!nome) return showToast('Informe o nome.','err');
+  const payload = {
+    nome,
+    tipo: id('tc-tipo').value || null,
+    whatsapp: (id('tc-whatsapp').value||'').trim() || null,
+    email: (id('tc-email').value||'').trim() || null,
+    oab: (id('tc-oab').value||'').trim() || null,
+    pix: (id('tc-pix').value||'').trim() || null,
+    pix_tipo: id('tc-pix-tipo').value || null,
+    valor_padrao: parseFloat(id('tc-valor-padrao').value) || null,
+    observacoes: (id('tc-obs').value||'').trim() || null,
+    cidades: coletaCidadesForm()
+  };
+  let error;
+  if(editTerceiroId) ({ error } = await sb.from('terceiros').update(payload).eq('id', editTerceiroId));
+  else               ({ error } = await sb.from('terceiros').insert([payload]));
+  if(error) return showToast('Erro ao salvar cadastro.','err');
+  const eraEdicao = !!editTerceiroId;
+  cancelEditTerceiro();
+  await loadTerceiros();
+  renderTerceiros();
+  showToast(eraEdicao ? 'Cadastro atualizado!' : 'Cadastrado com sucesso!');
+}
+
+function editarTerceiro(tid) {
+  const t = tercById(tid); if(!t) return;
+  editTerceiroId = tid;
+  id('tc-nome').value = t.nome||'';
+  id('tc-tipo').value = t.tipo||'';
+  id('tc-whatsapp').value = t.whatsapp||'';
+  id('tc-email').value = t.email||'';
+  id('tc-oab').value = t.oab||'';
+  id('tc-pix').value = t.pix||'';
+  id('tc-pix-tipo').value = t.pix_tipo||'';
+  id('tc-valor-padrao').value = t.valor_padrao||'';
+  id('tc-obs').value = t.observacoes||'';
+  renderCidadesCheckboxes(t.cidades||[]);
+  id('tc-form-title').textContent = 'Editar Cadastro';
+  id('tc-submit-btn').textContent = 'Salvar Alterações';
+  id('tc-cancel-btn').classList.remove('hidden');
+  id('main').scrollTop = 0;
+}
+function cancelEditTerceiro() {
+  editTerceiroId = null;
+  ['tc-nome','tc-whatsapp','tc-email','tc-oab','tc-pix','tc-valor-padrao','tc-obs','tc-cidades-extra'].forEach(x=>id(x).value='');
+  id('tc-tipo').value=''; id('tc-pix-tipo').value='';
+  renderCidadesCheckboxes([]);
+  id('tc-form-title').textContent = 'Novo Cadastro';
+  id('tc-submit-btn').textContent = '+ Cadastrar';
+  id('tc-cancel-btn').classList.add('hidden');
+}
+
+// Arquivar em vez de apagar: as demandas antigas continuam apontando para
+// esta pessoa. DELETE de verdade quebraria o histórico e o relatório futuro.
+async function toggleAtivoTerceiro(tid) {
+  const t = tercById(tid); if(!t) return;
+  const novo = !t.ativo;
+  const qtd = vinculos.filter(v => v.terceiro_id === tid).length;
+  const msg = novo
+    ? `Reativar ${t.nome}?`
+    : `Arquivar ${t.nome}?\n\nEle some do calendário e das listas de escolha, mas as ${qtd} demanda(s) já registradas ficam preservadas no histórico.`;
+  if(!confirm(msg)) return;
+  const { error } = await sb.from('terceiros').update({ ativo: novo }).eq('id', tid);
+  if(error) return showToast('Erro ao atualizar.','err');
+  await loadTerceiros();
+  renderTerceiros();
+  showToast(novo ? 'Reativado!' : 'Arquivado.');
+}
+
+function copiarPix(tid) {
+  const t = tercById(tid); if(!t?.pix) return;
+  navigator.clipboard.writeText(t.pix)
+    .then(()=>showToast('Chave PIX copiada!'))
+    .catch(()=>showToast('Não consegui copiar.','err'));
+}
+
+function setTercFiltro(f) {
+  tercFiltro = f;
+  ['ativos','inativos','todos'].forEach(x=>id('tc-filtro-'+x).classList.toggle('active', x===f));
+  renderTerceiros();
+}
+
+function renderTerceiros() {
+  if(!id('tc-cidades').innerHTML) renderCidadesCheckboxes([]);
+  preencheSelectCidadeDemanda();
+  let lista = terceiros.slice();
+  if(tercFiltro==='ativos')   lista = lista.filter(t=>t.ativo);
+  if(tercFiltro==='inativos') lista = lista.filter(t=>!t.ativo);
+  lista.sort((a,b)=> (b.interno?1:0)-(a.interno?1:0) || a.nome.localeCompare(b.nome));
+
+  if(!lista.length) {
+    id('terceiros-list').innerHTML = `<div class="empty"><div class="empty-icon">👥</div><div class="empty-title">Ninguém aqui</div><div class="empty-sub">Cadastre acima para começar</div></div>`;
+    return;
+  }
+  id('terceiros-list').innerHTML = lista.map(t => {
+    const qtd = vinculos.filter(v=>v.terceiro_id===t.id).length;
+    const cidades = (t.cidades||[]).length
+      ? (t.cidades||[]).map(c=>`<span class="chip-ro">${c}</span>`).join('')
+      : `<span style="font-size:12px;color:var(--red)">⚠️ Nenhuma cidade marcada — não vai aparecer como opção nas demandas</span>`;
+    const wpp = t.whatsapp ? `<a href="https://wa.me/55${String(t.whatsapp).replace(/\D/g,'')}" target="_blank" style="color:var(--green);text-decoration:none">📱 ${t.whatsapp}</a>` : '';
+    const pix = t.pix ? `<button class="btn-mini" onclick="copiarPix('${t.id}')">📋 PIX${t.pix_tipo?' ('+t.pix_tipo+')':''}</button>` : '';
+    return `<div class="terc-card${t.ativo?'':' inativo'}">
+      <div class="terc-head">
+        <div style="flex:1;min-width:180px">
+          <div class="terc-nome">${t.nome}${t.interno?'<span class="tag-interno">EQUIPE</span>':''}${t.ativo?'':'<span class="tag-off">ARQUIVADO</span>'}</div>
+          <div class="terc-meta">
+            ${t.tipo?t.tipo.charAt(0).toUpperCase()+t.tipo.slice(1):'—'}
+            ${t.oab?' · OAB '+t.oab:''}
+            ${t.valor_padrao?' · sugerido '+fmt(t.valor_padrao):''}
+            · ${qtd} diligência(s)
+          </div>
+          <div class="terc-meta" style="margin-top:4px">${wpp}${t.email?(wpp?' · ':'')+'✉️ '+t.email:''}</div>
+        </div>
+        <div style="display:flex;gap:6px;flex-wrap:wrap">
+          ${pix}
+          <button class="btn-mini" onclick="abrirAgenda('${t.id}')">📅 Agenda</button>
+          <button class="btn-mini" onclick="editarTerceiro('${t.id}')">Editar</button>
+          <button class="btn-mini danger" onclick="toggleAtivoTerceiro('${t.id}')">${t.ativo?'Arquivar':'Reativar'}</button>
+        </div>
+      </div>
+      <div style="margin-top:10px">${cidades}</div>
+      ${t.observacoes?`<div class="terc-meta" style="margin-top:8px;font-style:italic">💬 ${t.observacoes}</div>`:''}
+    </div>`;
+  }).join('');
+}
+
+// ── CIDADE DA DEMANDA ──
+function preencheSelectCidadeDemanda() {
+  const sel = id('f-cidade'); if(!sel) return;
+  const atual = sel.value;
+  // Junta as 10 fixas com as cidades extras que alguém já cadastrou,
+  // para não perder opção que só existe no cadastro de um terceiro.
+  const extras = Array.from(new Set(terceiros.flatMap(t=>t.cidades||[]).filter(c=>!CIDADES.includes(c))));
+  const todas = [...CIDADES, ...extras.sort()];
+  sel.innerHTML = `<option value="">Selecione...</option>` +
+    todas.map(c=>`<option value="${c}">${c}</option>`).join('') +
+    `<option value="__OUTRA__">➕ Outra cidade...</option>`;
+  if(atual) sel.value = atual;
+}
+function cidadeDemandaAtual() {
+  const v = id('f-cidade').value;
+  if(v === '__OUTRA__') return (id('f-cidade-outra').value||'').trim();
+  return v;
+}
+function onCidadeDemandaChange() {
+  const outra = id('f-cidade').value === '__OUTRA__';
+  id('f-cidade-outra-wrap').classList.toggle('hidden', !outra);
+  if(!outra) id('f-cidade-outra').value = '';
+  renderParticipantes();
+}
+
+// ── PARTICIPANTES DA DEMANDA ──
+function atendeCidade(t, cidade) {
+  if(!cidade) return false;
+  return (t.cidades||[]).includes(cidade);
+}
+function renderParticipantes() {
+  const cidade = cidadeDemandaAtual();
+  const jaEscolhidos = new Set(formParticipantes.map(p=>p.terceiro_id));
+
+  // Select de adicionar: só quem está ativo E atende a cidade escolhida.
+  // É esse filtro que evita ter que perguntar no WhatsApp se fulano topa ir lá.
+  const sel = id('f-part-add');
+  if(sel) {
+    const disp = terceiros.filter(t => t.ativo && atendeCidade(t, cidade) && !jaEscolhidos.has(t.id));
+    if(!cidade) {
+      sel.innerHTML = `<option value="">Escolha a cidade primeiro</option>`;
+      sel.disabled = true;
+    } else if(!disp.length) {
+      sel.innerHTML = `<option value="">Ninguém disponível em ${cidade}</option>`;
+      sel.disabled = true;
+    } else {
+      sel.disabled = false;
+      sel.innerHTML = `<option value="">Selecione quem vai...</option>` +
+        disp.map(t=>`<option value="${t.id}">${t.nome}${t.interno?' (equipe)':''}${t.tipo?' — '+t.tipo:''}</option>`).join('');
+    }
+  }
+
+  const box = id('f-part-lista');
+  if(!formParticipantes.length) {
+    box.innerHTML = `<div style="font-size:12px;color:var(--text3);padding:10px 0">Nenhuma pessoa vinculada ainda.</div>`;
+  } else {
+    box.innerHTML = formParticipantes.map((p,i) => {
+      const t = tercById(p.terceiro_id);
+      const interno = !!t?.interno;
+      const foraDaCidade = cidade && !atendeCidade(t, cidade);
+      return `<div class="part-row">
+        <div class="field">
+          <label>Quem${foraDaCidade?' <span style="color:var(--red)">⚠️ não atende '+cidade+'</span>':''}</label>
+          <div style="font-size:13px;font-weight:700;padding:8px 0">${t?.nome||'—'}${interno?'<span class="tag-interno">EQUIPE</span>':''}</div>
+        </div>
+        <div class="field"><label>Papel</label>
+          <select onchange="setPartCampo(${i},'papel',this.value)">
+            ${PAPEIS.map(x=>`<option value="${x}"${p.papel===x?' selected':''}>${x.charAt(0).toUpperCase()+x.slice(1)}</option>`).join('')}
+          </select>
+        </div>
+        <div class="field"><label>${interno?'Fica em casa':'Valor (R$)'}</label>
+          ${interno
+            ? `<div style="font-size:12px;color:var(--green);font-weight:600;padding:9px 0">— </div>`
+            : `<input type="number" step="0.01" value="${p.valor??''}" placeholder="0.00" onchange="setPartCampo(${i},'valor',this.value)" oninput="setPartCampo(${i},'valor',this.value)"/>`}
+        </div>
+        <div style="display:flex;gap:6px;padding-bottom:8px">
+          <button type="button" class="btn-mini" onclick="abrirAgenda('${p.terceiro_id}')">📅</button>
+          <button type="button" class="btn-mini danger" onclick="removerParticipante(${i})">✕</button>
+        </div>
+      </div>`;
+    }).join('');
+  }
+  calcValorNosso();
+}
+function addParticipante() {
+  const tid = id('f-part-add').value;
+  if(!tid) return;
+  const t = tercById(tid);
+  formParticipantes.push({
+    terceiro_id: tid,
+    papel: (t?.tipo==='preposto') ? 'preposto' : 'advogado',
+    // pré-preenche com o valor sugerido do cadastro; a Nai ajusta livremente
+    valor: t?.interno ? null : (t?.valor_padrao ?? null)
+  });
+  renderParticipantes();
+}
+function removerParticipante(i) { formParticipantes.splice(i,1); renderParticipantes(); }
+function setPartCampo(i, campo, val) {
+  if(!formParticipantes[i]) return;
+  formParticipantes[i][campo] = (campo==='valor') ? (parseFloat(val)||null) : val;
+  if(campo==='valor') calcValorNosso();
+}
+// Total pago a terceiros = só os externos. Participante interno não é despesa.
+function somaTerceiros() {
+  return formParticipantes.reduce((acc,p) => {
+    const t = tercById(p.terceiro_id);
+    if(t?.interno) return acc;
+    return acc + (parseFloat(p.valor)||0);
+  }, 0);
+}
+
+// ── AGENDA DE UMA PESSOA (para conferir disponibilidade antes de escolher) ──
+function demandaDaPessoa(d, tid) {
+  const t = tercById(tid);
+  if(!t) return false;
+  if(vinculos.some(v => v.demanda_id === d.id && v.terceiro_id === tid)) return true;
+  // Demandas antigas (anteriores ao cadastro de participantes) só têm o
+  // texto em "responsavel" — por isso a equipe interna também casa por nome.
+  if(t.interno && (d.responsavel||'').toLowerCase() === (t.nome||'').toLowerCase()) return true;
+  return false;
+}
+function bloqueioDaPessoa(b, tid) {
+  const t = tercById(tid);
+  if(!t) return false;
+  if(b.terceiro_id) return b.terceiro_id === tid;
+  // Bloqueio sem dono é registro antigo: por definição era do Esdras.
+  return t.interno && (t.nome||'').toLowerCase() === 'esdras';
+}
+
+function abrirAgenda(tid) {
+  const t = tercById(tid); if(!t) return;
+  const hoje = new Date(); hoje.setHours(0,0,0,0);
+  const limite = new Date(hoje); limite.setDate(limite.getDate()+30);
+  const hojeISO = fISO(hoje), limISO = fISO(limite);
+
+  const dems = demands
+    .filter(d => demandaDaPessoa(d, tid))
+    .filter(d => { const iso=(d.data||'').split('T')[0]; return iso>=hojeISO && iso<=limISO; })
+    .sort((a,b)=> ((a.data||'')+(a.horario||'')).localeCompare((b.data||'')+(b.horario||'')));
+  const blqs = bloqueios
+    .filter(b => bloqueioDaPessoa(b, tid))
+    .filter(b => { const iso=(b.data||'').split('T')[0]; return iso>=hojeISO && iso<=limISO; })
+    .sort((a,b)=>(a.data||'').localeCompare(b.data||''));
+
+  id('agenda-title').textContent = `Agenda de ${t.nome}`;
+  id('agenda-sub').textContent = 'Próximos 30 dias';
+  const linhas = [
+    ...dems.map(d=>({iso:(d.data||'').split('T')[0], h:`<div class="agenda-item"><b>${fmtDate(d.data)}</b>${d.horario?' · '+d.horario:''}<br>${d.descricao||''}<br><span style="color:var(--text3)">📍 ${d.local||''}${d.cidade?' — '+d.cidade:''}</span></div>`})),
+    ...blqs.map(b=>({iso:(b.data||'').split('T')[0], h:`<div class="agenda-item" style="border-left-color:var(--red)"><b>🔒 ${fmtDate(b.data)}</b>${b.horario_inicio?' · '+b.horario_inicio.slice(0,5)+'–'+(b.horario_fim||'').slice(0,5):' · dia inteiro'}<br>${b.motivo||'Indisponível'}</div>`}))
+  ].sort((a,b)=>a.iso.localeCompare(b.iso));
+
+  id('agenda-body').innerHTML = linhas.length
+    ? linhas.map(x=>x.h).join('')
+    : `<div class="agenda-item livre">✅ Agenda livre nos próximos 30 dias</div>`;
+  id('agenda-modal').classList.remove('hidden');
+}
+function closeAgendaModal() { id('agenda-modal').classList.add('hidden'); }
+
+// ── PERFIS DO CALENDÁRIO ──
+function preencheSelectPerfil() {
+  const sel = id('cal-perfil'); if(!sel) return;
+  const ativos = terceiros.filter(t=>t.ativo).sort((a,b)=>(b.interno?1:0)-(a.interno?1:0) || a.nome.localeCompare(b.nome));
+  sel.innerHTML = `<option value="GERAL">📆 Geral (todos)</option>` +
+    ativos.map(t=>`<option value="${t.id}">${t.interno?'👤':'🤝'} ${t.nome}</option>`).join('');
+  // Se o perfil selecionado foi arquivado, volta para Geral em vez de
+  // deixar o calendário mostrando vazio sem explicação.
+  if(calPerfil!=='GERAL' && !ativos.some(t=>t.id===calPerfil)) calPerfil='GERAL';
+  sel.value = calPerfil;
+}
+function calSetPerfil(v) { calPerfil = v; renderCalendario(); }
+function demandasDoPerfil() {
+  if(calPerfil==='GERAL') return demands;
+  return demands.filter(d => demandaDaPessoa(d, calPerfil));
+}
+function bloqueiosDoPerfil() {
+  if(calPerfil==='GERAL') return bloqueios;
+  return bloqueios.filter(b => bloqueioDaPessoa(b, calPerfil));
+}
+
+// ── SINCRONIZAÇÃO DOS VÍNCULOS ──
+// Apaga e reinsere: a lista é curta (2 ou 3 pessoas) e assim não sobra
+// vínculo órfão quando alguém é removido da demanda na edição.
+async function sincronizarVinculos(demandaId) {
+  if(!demandaId) return;
+  await sb.from('demanda_terceiros').delete().eq('demanda_id', demandaId);
+  if(!formParticipantes.length) { await loadVinculos(); return; }
+  const rows = formParticipantes.map(p => {
+    const t = tercById(p.terceiro_id);
+    return {
+      demanda_id: demandaId,
+      terceiro_id: p.terceiro_id,
+      papel: p.papel || null,
+      valor: t?.interno ? null : (parseFloat(p.valor)||null)
+    };
+  });
+  // ATENÇÃO: o insert deste mini-cliente envia apenas o primeiro item
+  // quando recebe um array (rows[0]). Por isso vai um de cada vez — com
+  // insert(rows) só o primeiro participante seria gravado, em silêncio.
+  let falhou = 0;
+  for(const row of rows) {
+    const { error } = await sb.from('demanda_terceiros').insert([row]);
+    if(error) falhou++;
+  }
+  if(falhou) showToast(`Demanda salva, mas ${falhou} participante(s) não foram vinculados.`,'err');
+  await loadVinculos();
+}
+// Rótulo de quem cumpre: usa os participantes quando existem e cai no
+// campo antigo "responsavel" para as demandas anteriores a esta versão.
+// Bloco de participantes do detalhe. Cai no formato antigo (valor_terceiro
+// solto) quando a demanda é anterior ao cadastro de participantes, senão o
+// histórico apareceria vazio.
+function blocoParticipantes(d) {
+  const ps = participantesDaDemanda(d.id);
+  if(!ps.length) {
+    if(d.responsavel==='Terceiro' && d.valor_terceiro) {
+      return `<div class="detail-row"><span class="detail-label">🤝 Val. Terceiro</span><span class="detail-value">${fmt(d.valor_terceiro)}</span></div>`
+           + `<div class="detail-row"><span class="detail-label">💼 Val. de vocês</span><span class="detail-value" style="color:#059669;font-weight:700">${fmt((d.valor||0)-(d.valor_terceiro||0))}</span></div>`;
+    }
+    return '';
+  }
+  const linhas = ps.map(v => {
+    const t = tercById(v.terceiro_id);
+    const wpp = t?.whatsapp ? ` <a href="https://wa.me/55${String(t.whatsapp).replace(/\D/g,'')}" target="_blank" style="color:var(--green);text-decoration:none">📱</a>` : '';
+    const pix = t?.pix ? ` <button class="btn-mini" onclick="copiarPix('${t.id}')">PIX</button>` : '';
+    const val = t?.interno ? '<span style="color:var(--green)">fica em casa</span>' : fmt(v.valor);
+    return `<div class="detail-row"><span class="detail-label">${v.papel==='preposto'?'🧍':'⚖️'} ${t?.nome||'—'}${wpp}${pix}</span><span class="detail-value">${val}</span></div>`;
+  }).join('');
+  const totalT = ps.reduce((acc,v)=>{ const t=tercById(v.terceiro_id); return acc + (t?.interno?0:(parseFloat(v.valor)||0)); },0);
+  return linhas
+    + (totalT?`<div class="detail-row"><span class="detail-label">🤝 Total a terceiros</span><span class="detail-value">${fmt(totalT)}</span></div>`:'')
+    + `<div class="detail-row"><span class="detail-label">💼 Val. de vocês</span><span class="detail-value" style="color:#059669;font-weight:700">${fmt((d.valor||0)-totalT)}</span></div>`;
+}
+
+function quemCumpre(d) {
+  const ps = participantesDaDemanda(d.id);
+  if(ps.length) return ps.map(v => nomeTerc(v.terceiro_id)).join(' + ');
+  return d.terceiro_nome || d.responsavel || '—';
+}
+function participantesDaDemanda(did) {
+  return vinculos.filter(v => v.demanda_id === did);
+}
+
+// ── PESSOA DO BLOQUEIO ──
+function preencheSelectBloqueioPessoa() {
+  const sel = id('bl-pessoa'); if(!sel) return;
+  const atual = sel.value;
+  const ativos = terceiros.filter(t=>t.ativo).sort((a,b)=>(b.interno?1:0)-(a.interno?1:0) || a.nome.localeCompare(b.nome));
+  sel.innerHTML = ativos.map(t=>`<option value="${t.id}">${t.nome}${t.interno?' (equipe)':''}</option>`).join('');
+  if(atual) sel.value = atual;
+}
+
 const CALC_BASE = 'Jacob Macanhan, 481, Pinhais, PR, Brasil';
 let calcOrigemMode = 'BASE';
 let calcParking = null;
