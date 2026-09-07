@@ -7,13 +7,15 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="default"/>
   <meta name="apple-mobile-web-app-title" content="Diligências"/>
   <meta name="mobile-web-app-capable" content="yes"/>
-  <meta name="theme-color" content="#5B21B6"/>
+  <meta name="theme-color" content="#003462"/>
   <title>Diligências — Escritório Naiarha</title>
   <link rel="manifest" href="manifest.json"/>
   <script src="push.js" defer></script>
   <link rel="apple-touch-icon" href="icon-192.png"/>
   <link rel="icon" href="icon-192.png"/>
-  <!-- Usando fonte do sistema para evitar CSP -->
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
   <script>
   const supabase = (() => {
     const url = 'https://ggyngtqknonwnohbzkyj.supabase.co';
@@ -147,51 +149,66 @@
   })();
   </script>
   <style>
+    /* ═══════════════════════════════════════════════════════════════
+       IDENTIDADE v2.8 — papel quente + tinta navy da marca (#003462).
+       Regras: uma família tipográfica (Manrope), um acento de ação,
+       três cores de estado (oliva / âmbar / vinho), ícones de linha.
+       Nomes de classe são os mesmos da v2.7 — só a pele mudou.
+       ═══════════════════════════════════════════════════════════════ */
     :root {
-      --bg: #F5F4F2; --white: #FFFFFF; --border: #E8E8E6; --border2: #F0EFED;
-      --text: #1A1A2E; --text2: #6B7280; --text3: #9CA3AF;
-      --accent: #5B21B6; --accent2: #7C3AED; --accent-bg: #EDE9FE;
-      --green: #059669; --yellow: #D97706; --blue: #2563EB; --red: #DC2626;
-      --sidebar-w: 220px; --header-h: 56px; --radius: 12px;
-      --shadow: 0 1px 3px rgba(0,0,0,.08);
+      --bg: #FBF9F5; --white: #FFFFFF; --paper2: #F3F0E9;
+      --border: #E6E1D6; --border2: #EFEBE2;
+      --text: #14213D; --text2: #4A5570; --text3: #8B93A7;
+      --brand: #003462;                 /* navy oficial da logo */
+      --accent: #1F4E9C; --accent2: #2B5FB5; --accent-bg: #E4ECF8;
+      --green: #5B7A3A; --green-bg: #EAF0E1;
+      --yellow: #B7791F; --yellow-bg: #FAF0DC;
+      --blue: #1F4E9C; --blue-bg: #E4ECF8;
+      --red: #8B2635; --red-bg: #F7E3E6;
+      --sidebar-w: 236px; --header-h: 58px; --tab-h: 64px; --radius: 14px;
+      --shadow: none;
     }
     * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
-    html, body { min-height: 100%; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: var(--bg); color: var(--text); }
+    html, body { min-height: 100%; font-family: 'Manrope', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif; background: var(--bg); color: var(--text);
+      font-feature-settings: "tnum" 1; -webkit-font-smoothing: antialiased; }
+    /* ícones de linha inline: herdam a cor do texto ao redor */
+    svg.ic { width: 1.05em; height: 1.05em; vertical-align: -.16em; fill: none; stroke: currentColor; stroke-width: 1.9; stroke-linecap: round; stroke-linejoin: round; flex-shrink: 0; }
+    svg.ic.lg { width: 22px; height: 22px; }
+    svg.ic.xl { width: 34px; height: 34px; stroke-width: 1.5; }
 
-    /* LOGIN */
+    /* LOGIN — capa com a logo em navy */
     #login-screen {
-      position: fixed; inset: 0; background: var(--bg);
-      display: flex; align-items: center; justify-content: center;
+      position: fixed; inset: 0; background: var(--brand);
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
       z-index: 999; padding: 24px;
     }
     #login-screen.hidden { display: none; }
+    .login-hero { text-align: center; margin-bottom: 26px; }
+    .login-hero img { width: 150px; max-width: 46vw; display: block; margin: 0 auto 14px; }
+    .login-hero span { display: block; color: #AAB4CE; font-size: 13px; font-weight: 600; letter-spacing: .01em; }
     .login-box {
-      background: var(--white); border: 1px solid var(--border);
-      border-radius: 16px; padding: 36px 32px; width: 100%; max-width: 360px;
-      box-shadow: 0 8px 40px rgba(0,0,0,.08);
+      background: var(--bg); border-radius: 22px; padding: 28px 26px 22px; width: 100%; max-width: 380px;
+      box-shadow: 0 30px 60px -24px rgba(0,0,0,.5);
     }
-    .login-logo { display: flex; align-items: center; gap: 10px; margin-bottom: 28px; justify-content: center; }
-    .login-logo-icon {
-      width: 40px; height: 40px; border-radius: 10px;
-      background: linear-gradient(135deg, #7C3AED, #5B21B6);
-      display: flex; align-items: center; justify-content: center; font-size: 20px;
-    }
-    .login-title { font-size: 20px; font-weight: 700; color: var(--text); letter-spacing: -.3px; }
-    .login-sub { font-size: 12px; color: var(--text3); text-align: center; margin-bottom: 28px; }
-    .login-field { display: flex; flex-direction: column; gap: 5px; margin-bottom: 14px; }
-    .login-field label { font-size: 11px; font-weight: 600; color: var(--text3); text-transform: uppercase; letter-spacing: .6px; }
+    .login-logo { display: none; }
+    .login-title { font-size: 20px; font-weight: 800; color: var(--text); letter-spacing: -.02em; }
+    .login-sub { font-size: 12.5px; color: var(--text3); text-align: center; margin-bottom: 22px; font-weight: 500; }
+    .login-field { display: flex; flex-direction: column; gap: 6px; margin-bottom: 14px; }
+    .login-field label { font-size: 12px; font-weight: 700; color: var(--text2); }
     .login-field input {
-      background: #F9FAFB; border: 1px solid var(--border); border-radius: 8px;
-      padding: 11px 14px; color: var(--text); font-size: 14px; font-family: inherit; width: 100%;
+      background: var(--white); border: 1.5px solid var(--border); border-radius: 12px;
+      padding: 13px 14px; color: var(--text); font-size: 15px; font-family: inherit; width: 100%;
     }
-    .login-field input:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px rgba(139,92,246,.1); }
+    .login-field input:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px rgba(31,78,156,.14); }
     .login-btn {
       width: 100%; background: var(--accent); color: #fff; border: none;
-      padding: 12px; border-radius: 9px; font-weight: 700; font-size: 14px;
+      padding: 14px; border-radius: 14px; font-weight: 700; font-size: 15px;
       cursor: pointer; font-family: inherit; margin-top: 8px; transition: opacity .15s;
+      box-shadow: 0 12px 24px -10px rgba(31,78,156,.7);
     }
     .login-btn:active { opacity: .85; }
-    .login-err { font-size: 12px; color: var(--red); text-align: center; margin-top: 10px; min-height: 16px; }
+    .login-err { font-size: 12px; color: #F2A5B0; text-align: center; margin-top: 10px; min-height: 16px; font-weight: 600; }
+    .login-box .login-err { color: var(--red); }
 
     /* APP */
     #app { display: flex; flex-direction: column; min-height: 100vh; }
@@ -199,228 +216,264 @@
 
     #header {
       position: fixed; top: 0; left: 0; right: 0; z-index: 100;
-      height: var(--header-h); background: var(--white); border-bottom: 1px solid var(--border);
+      height: var(--header-h); background: rgba(251,249,245,.92); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
       display: flex; align-items: center; padding: 0 16px; justify-content: space-between;
       padding-top: env(safe-area-inset-top);
     }
     .header-logo { display: flex; align-items: center; gap: 10px; }
-    .logo-icon { width: 30px; height: 30px; border-radius: 8px; background: linear-gradient(135deg,#7C3AED,#5B21B6); display: flex; align-items: center; justify-content: center; font-size: 14px; flex-shrink: 0; }
-    .logo-text { font-weight: 700; font-size: 14px; color: var(--text); letter-spacing: -.2px; }
-    .logo-sub { font-size: 10px; color: var(--text3); line-height: 1; }
+    .logo-icon { width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .logo-icon img { width: 100%; height: 100%; object-fit: contain; }
+    .logo-text { font-weight: 800; font-size: 14px; color: var(--text); letter-spacing: -.01em; line-height: 1.1; }
+    .logo-sub { font-size: 10.5px; color: var(--text3); line-height: 1.2; font-weight: 600; white-space: nowrap; }
+    /* celular: cabeçalho enxuto — só monograma + nome do app; a assinatura completa fica no menu lateral */
+    @media (max-width: 767px) { .logo-sub { display: none; } .user-name { display: none; } .user-chip { padding: 3px; } }
     #menu-btn { background: none; border: none; cursor: pointer; padding: 6px; color: var(--text2); display: flex; align-items: center; }
-    #new-btn { background: var(--accent); color: #fff; border: none; padding: 7px 14px; border-radius: 8px; font-weight: 600; font-size: 12px; cursor: pointer; font-family: inherit; }
+    #new-btn { background: var(--accent); color: #fff; border: none; padding: 8px 14px; border-radius: 10px; font-weight: 700; font-size: 12.5px; cursor: pointer; font-family: inherit; }
     .user-chip {
-      display: flex; align-items: center; gap: 6px; background: var(--accent-bg);
-      border-radius: 20px; padding: 4px 10px 4px 6px; cursor: pointer;
+      display: flex; align-items: center; gap: 6px; background: var(--paper2);
+      border-radius: 20px; padding: 4px 10px 4px 5px; cursor: pointer;
     }
-    .user-avatar { width: 22px; height: 22px; border-radius: 50%; background: var(--accent); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 700; }
-    .user-name { font-size: 11px; font-weight: 600; color: var(--accent); }
+    .user-avatar { width: 24px; height: 24px; border-radius: 50%; background: var(--brand); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 800; }
+    .user-name { font-size: 11.5px; font-weight: 700; color: var(--text); }
 
     #body { margin-top: var(--header-h); }
 
-    #overlay { position: fixed; inset: 0; background: rgba(0,0,0,.35); z-index: 200; display: none; }
+    #overlay { position: fixed; inset: 0; background: rgba(20,33,61,.4); z-index: 200; display: none; }
     #overlay.open { display: block; }
     #sidebar {
       position: fixed; top: 0; left: 0; bottom: 0; z-index: 201;
-      width: var(--sidebar-w); background: var(--white); border-right: 1px solid var(--border);
-      padding: 16px 10px; display: flex; flex-direction: column; gap: 2px;
+      width: var(--sidebar-w); background: var(--bg); border-right: 1px solid var(--border);
+      padding: 16px 12px; display: flex; flex-direction: column; gap: 2px;
       transform: translateX(-100%); transition: transform .22s cubic-bezier(.4,0,.2,1);
       padding-top: calc(16px + env(safe-area-inset-top));
     }
     #sidebar.open { transform: translateX(0); }
-    .sidebar-logo { display: flex; align-items: center; gap: 9px; padding: 6px 10px 16px; }
-    .sidebar-section-label { font-size: 10px; font-weight: 700; color: #C4C8D2; letter-spacing: 1px; text-transform: uppercase; padding: 6px 10px 8px; }
-    .nav-item { display: flex; align-items: center; gap: 10px; padding: 9px 12px; border-radius: 8px; cursor: pointer; font-size: 13px; font-weight: 500; color: var(--text2); transition: all .15s; border: none; background: none; width: 100%; text-align: left; font-family: inherit; }
-    .nav-item:hover { background: #F3F0FC; }
-    .nav-item.active { background: var(--accent-bg); color: var(--accent); font-weight: 600; }
-    .nav-icon { width: 18px; text-align: center; font-size: 15px; opacity: .8; }
+    .sidebar-logo { display: flex; align-items: center; justify-content: center; padding: 10px 10px 22px; }
+    .sidebar-logo img { width: 120px; }
+    .sidebar-section-label { font-size: 11px; font-weight: 700; color: var(--text3); padding: 6px 12px 8px; }
+    .nav-item { display: flex; align-items: center; gap: 11px; padding: 10px 12px; border-radius: 10px; cursor: pointer; font-size: 14px; font-weight: 600; color: var(--text2); transition: background .15s, color .15s; border: none; background: none; width: 100%; text-align: left; font-family: inherit; }
+    .nav-item:hover { background: var(--paper2); }
+    .nav-item.active { background: var(--accent-bg); color: var(--accent); font-weight: 700; }
+    .nav-icon { width: 20px; display: inline-flex; align-items: center; justify-content: center; }
+    .nav-icon svg.ic { width: 19px; height: 19px; }
     .sidebar-footer { margin-top: auto; padding: 12px 10px 0; border-top: 1px solid var(--border2); }
-    .logout-btn { display: flex; align-items: center; gap: 8px; padding: 8px 10px; border-radius: 8px; cursor: pointer; font-size: 12px; font-weight: 500; color: var(--red); border: none; background: none; width: 100%; font-family: inherit; transition: background .15s; }
-    .logout-btn:hover { background: #FEF2F2; }
+    .logout-btn { display: flex; align-items: center; gap: 8px; padding: 8px 10px; border-radius: 8px; cursor: pointer; font-size: 12.5px; font-weight: 600; color: var(--red); border: none; background: none; width: 100%; font-family: inherit; transition: background .15s; }
+    .logout-btn:hover { background: var(--red-bg); }
 
-    #main { padding: 24px 16px; }
+    /* BARRA INFERIOR (só celular) — Dashboard, Demandas, Agenda, Calculadora, Mais.
+       O estado ativo é resolvido em CSS via :has(): não precisou mexer no goPage(). */
+    #tabbar { position: fixed; left: 0; right: 0; bottom: 0; z-index: 150; height: calc(var(--tab-h) + env(safe-area-inset-bottom));
+      padding: 8px 6px calc(8px + env(safe-area-inset-bottom)); background: rgba(251,249,245,.94); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+      border-top: 1px solid var(--border); display: grid; grid-template-columns: repeat(5,1fr); }
+    .tab-item { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; border: none; background: none; font-family: inherit;
+      font-size: 10.5px; font-weight: 700; color: var(--text3); cursor: pointer; border-radius: 12px; padding: 4px 0; }
+    .tab-item svg.ic { width: 22px; height: 22px; stroke-width: 1.8; }
+    #app:has(#page-dashboard.active)   #tab-dashboard,
+    #app:has(#page-demandas.active)    #tab-demandas,
+    #app:has(#page-detail.active)      #tab-demandas,
+    #app:has(#page-novo.active)        #tab-demandas,
+    #app:has(#page-calendario.active)  #tab-calendario,
+    #app:has(#page-calculadora.active) #tab-calculadora,
+    #app:has(#sidebar.open)            #tab-mais { color: var(--accent); }
+
+    #main { padding: 22px 16px calc(var(--tab-h) + 24px + env(safe-area-inset-bottom)); }
     @media (min-width: 768px) {
       #sidebar { position: fixed; top: var(--header-h); left: 0; bottom: 0; transform: none !important; overflow-y: auto; }
-      #main { margin-left: var(--sidebar-w); padding: 28px; }
+      #main { margin-left: var(--sidebar-w); padding: 30px 32px; }
       #overlay { display: none !important; }
+      #tabbar { display: none; }
+      #menu-btn { display: none; }
     }
 
-    .page { display: none; animation: fadeUp .2s ease; }
-    .page.active { display: block; }
-    @keyframes fadeUp { from { opacity:0; transform:translateY(6px); } to { opacity:1; transform:translateY(0); } }
+    .page { display: none; }
+    .page.active { display: block; animation: fadeUp .18s ease; }
+    @keyframes fadeUp { from { opacity:0; transform:translateY(4px); } to { opacity:1; transform:translateY(0); } }
+    @media (prefers-reduced-motion: reduce) { .page.active { animation: none; } }
 
-    .page-title { font-size: 20px; font-weight: 700; color: var(--text); letter-spacing: -.3px; }
-    .page-sub { font-size: 12px; color: var(--text3); margin-top: 3px; }
-    .card { background: var(--white); border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow); }
+    .page-title { font-size: 26px; font-weight: 800; color: var(--text); letter-spacing: -.02em; line-height: 1.1; }
+    .page-sub { font-size: 13px; color: var(--text3); margin-top: 4px; font-weight: 500; }
+    .card { background: var(--white); border: 1px solid var(--border); border-radius: var(--radius); }
     .card-pad { padding: 18px 20px; }
-    .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 20px; }
+    .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px; }
     @media (min-width: 640px) { .stats-grid { grid-template-columns: repeat(4,1fr); } }
-    .stat-card { background: var(--white); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px; border-top: 3px solid var(--accent); }
-    .stat-label { font-size: 10px; font-weight: 600; color: var(--text3); text-transform: uppercase; letter-spacing: .7px; margin-bottom: 6px; }
-    .stat-value { font-size: 22px; font-weight: 700; color: var(--text); letter-spacing: -.4px; }
-    .stat-value.sm { font-size: 16px; }
+    /* KPI: bloco de papel escuro, sem a "barrinha colorida no topo" do kit padrão */
+    .stat-card { background: var(--paper2); border: none; border-radius: var(--radius); padding: 16px 16px 14px; border-top: 0 !important; }
+    .stat-card:first-child { background: var(--brand); color: #fff; }
+    .stat-card:first-child .stat-label { color: #AAB4CE; }
+    .stat-card:first-child .stat-value { color: #fff; }
+    .stat-label { font-size: 12px; font-weight: 700; color: var(--text2); margin-bottom: 8px; display: flex; align-items: center; gap: 6px; }
+    .stat-value { font-size: 26px; font-weight: 800; color: var(--text); letter-spacing: -.02em; line-height: 1; }
+    .stat-value.sm { font-size: 19px; }
     .badge { display: inline-flex; align-items: center; gap: 5px; padding: 3px 9px; border-radius: 20px; font-size: 11px; font-weight: 700; }
     .badge-dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
-    .badge-pending  { background: #FEF3C7; color: #B45309; }
-    .badge-done     { background: #DBEAFE; color: #1D4ED8; }
-    .badge-waiting  { background: #EDE9FE; color: #6D28D9; }
-    .badge-paid     { background: #D1FAE5; color: #065F46; }
-    .badge-late     { background: #FEE2E2; color: #B91C1C; }
+    .badge-pending  { background: var(--yellow-bg); color: var(--yellow); }
+    .badge-done     { background: var(--blue-bg); color: var(--blue); }
+    .badge-waiting  { background: var(--paper2); color: var(--text2); }
+    .badge-paid     { background: var(--green-bg); color: var(--green); }
+    .badge-late     { background: var(--red-bg); color: var(--red); }
     .progress-strip { display: flex; height: 3px; }
-    .progress-strip span { flex: 1; background: #F3F4F6; transition: background .3s; }
+    .progress-strip span { flex: 1; background: var(--border2); transition: background .3s; }
     .demand-row { padding: 14px 16px; cursor: pointer; border-bottom: 1px solid var(--border2); display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; transition: background .12s; }
     .demand-row:last-child { border-bottom: none; }
-    .demand-row:active { background: #FAFAFA; }
-    .demand-title { font-size: 14px; font-weight: 600; color: var(--text); margin-bottom: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 200px; }
-    .demand-meta { font-size: 11px; color: var(--text3); line-height: 1.6; }
+    .demand-row:active { background: var(--paper2); }
+    /* título em até 2 linhas (em vez de cortar em "Audiência d…"); meta em linha única */
+    .demand-title { font-size: 15px; font-weight: 700; color: var(--text); margin-bottom: 3px; letter-spacing: -.01em; line-height: 1.25; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+    .demand-row > div:first-child { min-width: 52%; }
+    .demand-meta { font-size: 12px; color: var(--text2); line-height: 1.6; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     .demand-right { display: flex; flex-direction: column; align-items: flex-end; gap: 5px; flex-shrink: 0; }
-    .demand-value { font-size: 14px; font-weight: 700; color: var(--green); }
+    .demand-value { font-size: 15px; font-weight: 800; color: var(--text); letter-spacing: -.01em; }
     .filters { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 16px; }
-    .filter-btn { background: var(--white); border: 1px solid var(--border); color: var(--text2); padding: 5px 12px; border-radius: 20px; font-size: 12px; font-weight: 500; cursor: pointer; transition: all .15s; font-family: inherit; }
-    .filter-btn.active { background: var(--accent); border-color: var(--accent); color: #fff; }
+    .filter-btn { background: var(--paper2); border: 1px solid transparent; color: var(--text2); padding: 7px 13px; border-radius: 10px; font-size: 12.5px; font-weight: 700; cursor: pointer; transition: all .15s; font-family: inherit; }
+    .filter-btn.active { background: var(--text); border-color: var(--text); color: #fff; }
     .filter-divider { width: 1px; background: var(--border); }
-    .section-title { font-size: 10px; font-weight: 700; color: var(--text3); text-transform: uppercase; letter-spacing: .8px; margin-bottom: 12px; }
+    .section-title { font-size: 13px; font-weight: 700; color: var(--text3); margin-bottom: 12px; display: flex; align-items: center; gap: 6px; }
     .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
     @media (max-width: 520px) { .form-grid { grid-template-columns: 1fr; } }
     .form-full { grid-column: 1 / -1; }
-    .field { display: flex; flex-direction: column; gap: 5px; }
-    .field label { font-size: 11px; font-weight: 600; color: var(--text3); text-transform: uppercase; letter-spacing: .6px; }
-    .field input, .field select, .field textarea { background: #F9FAFB; border: 1px solid var(--border); border-radius: 8px; padding: 9px 12px; color: var(--text); font-size: 13px; font-family: inherit; width: 100%; transition: border-color .15s; }
-    .field input:focus, .field select:focus, .field textarea:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px rgba(139,92,246,.1); }
+    .field { display: flex; flex-direction: column; gap: 6px; }
+    .field label { font-size: 12px; font-weight: 700; color: var(--text2); display: flex; align-items: center; gap: 5px; }
+    .field input, .field select, .field textarea { background: var(--white); border: 1.5px solid var(--border); border-radius: 11px; padding: 11px 13px; color: var(--text); font-size: 14px; font-family: inherit; width: 100%; transition: border-color .15s; }
+    .field input:focus, .field select:focus, .field textarea:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px rgba(31,78,156,.12); }
     .field textarea { min-height: 72px; resize: vertical; }
     select option { background: #fff; color: var(--text); }
-    input::placeholder, textarea::placeholder { color: #C4C8D2; }
-    .btn { padding: 10px 18px; border-radius: 9px; font-weight: 600; font-size: 13px; cursor: pointer; font-family: inherit; transition: all .15s; border: none; }
+    input::placeholder, textarea::placeholder { color: #B4BAC9; }
+    .btn { padding: 11px 18px; border-radius: 12px; font-weight: 700; font-size: 13.5px; cursor: pointer; font-family: inherit; transition: all .15s; border: none; }
     .btn-primary { background: var(--accent); color: #fff; }
     .btn-primary:active { opacity: .85; }
-    .btn-secondary { background: var(--white); color: var(--text); border: 1px solid var(--border); }
+    .btn-secondary { background: var(--paper2); color: var(--text); border: 1px solid transparent; }
     .btn-secondary:active { border-color: var(--accent); color: var(--accent); }
-    .btn-danger { background: #FEF2F2; color: var(--red); border: 1px solid #FECACA; }
-    .btn-back { background: none; border: none; color: var(--text2); font-size: 13px; font-weight: 500; cursor: pointer; font-family: inherit; padding: 4px 0; display: flex; align-items: center; gap: 6px; }
+    .btn-danger { background: var(--red-bg); color: var(--red); border: 1px solid transparent; }
+    .btn-back { background: none; border: none; color: var(--text2); font-size: 13.5px; font-weight: 600; cursor: pointer; font-family: inherit; padding: 4px 0; display: flex; align-items: center; gap: 6px; }
     .btn-row { display: flex; gap: 10px; justify-content: flex-end; flex-wrap: wrap; }
     .detail-row { display: flex; justify-content: space-between; align-items: center; padding: 11px 0; border-bottom: 1px solid var(--border2); }
     .detail-row:last-child { border-bottom: none; }
-    .detail-label { font-size: 12px; color: var(--text3); font-weight: 500; }
-    .detail-value { font-size: 13px; color: var(--text); font-weight: 500; text-align: right; }
+    .detail-label { font-size: 13px; color: var(--text2); font-weight: 500; display: flex; align-items: center; gap: 6px; }
+    .detail-value { font-size: 13.5px; color: var(--text); font-weight: 600; text-align: right; }
     .steps { display: flex; gap: 5px; padding: 14px 20px; border-bottom: 1px solid var(--border2); }
     .step { flex: 1; text-align: center; }
-    .step-bar { height: 4px; border-radius: 2px; background: #F3F4F6; margin-bottom: 5px; }
-    .step-label { font-size: 10px; color: var(--text3); font-weight: 500; }
-    .bar-track { background: #F3F4F6; border-radius: 4px; height: 5px; overflow: hidden; }
+    .step-bar { height: 4px; border-radius: 2px; background: var(--border2); margin-bottom: 5px; }
+    .step-label { font-size: 10.5px; color: var(--text3); font-weight: 600; }
+    .bar-track { background: var(--border2); border-radius: 4px; height: 5px; overflow: hidden; }
     .bar-fill { height: 100%; border-radius: 4px; transition: width .5s ease; }
     .empty { text-align: center; padding: 50px 20px; color: var(--text3); }
-    .empty-icon { font-size: 36px; margin-bottom: 10px; }
-    .empty-title { font-size: 15px; font-weight: 600; margin-bottom: 6px; }
-    .empty-sub { font-size: 12px; margin-bottom: 20px; }
+    .empty-icon { margin-bottom: 12px; color: var(--text3); }
+    .empty-title { font-size: 15px; font-weight: 700; margin-bottom: 6px; color: var(--text); }
+    .empty-sub { font-size: 12.5px; margin-bottom: 20px; }
     hr.divider { border: none; border-top: 1px solid var(--border); margin: 18px 0; }
     .detail-header { padding: 20px 20px 16px; border-bottom: 1px solid var(--border2); display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; flex-wrap: wrap; }
-    .detail-title { font-size: 17px; font-weight: 700; color: var(--text); letter-spacing: -.2px; margin-bottom: 8px; }
-    .detail-value-big { font-size: 24px; font-weight: 700; color: var(--green); letter-spacing: -.4px; }
-    .report-mini-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .detail-title { font-size: 20px; font-weight: 800; color: var(--text); letter-spacing: -.02em; margin-bottom: 8px; line-height: 1.15; }
+    .detail-value-big { font-size: 26px; font-weight: 800; color: var(--text); letter-spacing: -.02em; }
+    .report-mini-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
     @media (min-width: 640px) { .report-mini-grid { grid-template-columns: repeat(4,1fr); } }
-    .mini-stat { background: var(--white); border: 1px solid var(--border); border-radius: 10px; padding: 14px 16px; border-top: 3px solid var(--accent); }
-    .mini-stat .label { font-size: 10px; font-weight: 700; color: var(--text3); text-transform: uppercase; letter-spacing: .7px; margin-bottom: 5px; }
-    .mini-stat .value { font-size: 16px; font-weight: 700; color: var(--text); }
-    .resp-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 14px; }
-    .resp-card { background: var(--white); border: 1px solid var(--border); border-radius: 10px; padding: 16px; }
-    .resp-name { font-size: 13px; font-weight: 700; color: var(--text); margin-bottom: 10px; }
+    .mini-stat { background: var(--paper2); border: none; border-radius: 12px; padding: 14px 16px; border-top: 0 !important; }
+    .mini-stat .label { font-size: 12px; font-weight: 700; color: var(--text2); margin-bottom: 6px; }
+    .mini-stat .value { font-size: 18px; font-weight: 800; color: var(--text); letter-spacing: -.01em; }
+    .resp-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 14px; }
+    .resp-card { background: var(--white); border: 1px solid var(--border); border-radius: 12px; padding: 16px; }
+    .resp-name { font-size: 14px; font-weight: 700; color: var(--text); margin-bottom: 10px; }
     .mini-row { display: flex; justify-content: space-between; margin-bottom: 6px; }
-    .mini-row span:first-child { font-size: 12px; color: var(--text3); }
-    .mini-row span:last-child { font-size: 12px; font-weight: 600; }
-    .wa-link { color: #25D366; font-weight: 600; font-size: 13px; text-decoration: none; display: flex; align-items: center; gap: 4px; }
+    .mini-row span:first-child { font-size: 12.5px; color: var(--text3); font-weight: 500; }
+    .mini-row span:last-child { font-size: 12.5px; font-weight: 700; }
+    .wa-link { color: #25D366; font-weight: 700; font-size: 13px; text-decoration: none; display: flex; align-items: center; gap: 4px; }
 
     /* LOADING */
-    #loading-screen { position: fixed; inset: 0; background: var(--bg); display: flex; align-items: center; justify-content: center; z-index: 998; flex-direction: column; gap: 16px; }
+    #loading-screen { position: fixed; inset: 0; background: var(--brand); display: flex; align-items: center; justify-content: center; z-index: 998; flex-direction: column; gap: 22px; }
     #loading-screen.hidden { display: none; }
-    .spinner { width: 32px; height: 32px; border: 3px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin .7s linear infinite; }
+    #loading-screen img { width: 96px; }
+    .spinner { width: 28px; height: 28px; border: 3px solid rgba(255,255,255,.18); border-top-color: #fff; border-radius: 50%; animation: spin .7s linear infinite; }
     @keyframes spin { to { transform: rotate(360deg); } }
 
-    #toast { position: fixed; bottom: calc(24px + env(safe-area-inset-bottom)); left: 50%; transform: translateX(-50%) translateY(80px); background: #1A1A2E; color: #fff; padding: 11px 20px; border-radius: 20px; font-size: 13px; font-weight: 600; z-index: 999; transition: transform .25s cubic-bezier(.34,1.56,.64,1); white-space: nowrap; box-shadow: 0 8px 24px rgba(0,0,0,.2); }
+    #toast { position: fixed; bottom: calc(var(--tab-h) + 16px + env(safe-area-inset-bottom)); left: 50%; transform: translateX(-50%) translateY(160px); background: var(--text); color: #fff; padding: 12px 20px; border-radius: 14px; font-size: 13px; font-weight: 700; z-index: 999; transition: transform .25s cubic-bezier(.34,1.56,.64,1); white-space: nowrap; box-shadow: 0 12px 28px -8px rgba(20,33,61,.5); }
+    @media (min-width: 768px) { #toast { bottom: 24px; } }
     #toast.show { transform: translateX(-50%) translateY(0); }
-    #toast.err { background: #991B1B; }
-    #toast.ok { background: #14532D; }
+    #toast.err { background: var(--red); }
+    #toast.ok { background: var(--green); }
 
     /* MODAL DE CONFLITO */
-    .modal-overlay { position: fixed; inset: 0; background: rgba(26,26,46,.45); z-index: 600; display: flex; align-items: center; justify-content: center; padding: 20px; }
+    .modal-overlay { position: fixed; inset: 0; background: rgba(20,33,61,.5); z-index: 600; display: flex; align-items: center; justify-content: center; padding: 20px; }
     .modal-overlay.hidden { display: none; }
     .hidden { display: none !important; }
-    .modal-box { background: var(--white); border-radius: var(--radius); padding: 22px; max-width: 420px; width: 100%; box-shadow: 0 12px 40px rgba(0,0,0,.25); max-height: 80vh; overflow-y: auto; }
-    .modal-icon { font-size: 30px; text-align: center; margin-bottom: 8px; }
-    .modal-title { font-size: 15px; font-weight: 700; color: var(--text); text-align: center; margin-bottom: 4px; }
-    .modal-sub { font-size: 12px; color: var(--text3); text-align: center; margin-bottom: 14px; }
-    .conflict-item { background: #FFFBEB; border: 1px solid #FDE68A; border-radius: 8px; padding: 10px 12px; margin-bottom: 8px; font-size: 12.5px; color: var(--text); line-height: 1.5; }
+    .modal-box { background: var(--bg); border-radius: 20px; padding: 22px; max-width: 420px; width: 100%; box-shadow: 0 24px 60px -12px rgba(0,0,0,.4); max-height: 80vh; overflow-y: auto; }
+    .modal-icon { text-align: center; margin-bottom: 10px; color: var(--accent); }
+    .modal-title { font-size: 16px; font-weight: 800; color: var(--text); text-align: center; margin-bottom: 4px; letter-spacing: -.01em; }
+    .modal-sub { font-size: 12.5px; color: var(--text3); text-align: center; margin-bottom: 14px; font-weight: 500; }
+    .conflict-item { background: var(--yellow-bg); border: 1px solid #EFD6A3; border-radius: 10px; padding: 10px 12px; margin-bottom: 8px; font-size: 12.5px; color: var(--text); line-height: 1.5; }
     .conflict-item:last-child { margin-bottom: 0; }
 
     /* BOTÕES DE VEÍCULO */
-    .veiculo-btn { background:var(--white); border:2px solid var(--border); border-radius:10px; padding:10px 6px; cursor:pointer; font-size:18px; text-align:center; transition:all .15s; font-family:inherit; width:100%; }
+    .veiculo-btn { background:var(--white); border:1.5px solid var(--border); border-radius:12px; padding:12px 6px 10px; cursor:pointer; text-align:center; transition:all .15s; font-family:inherit; width:100%; color:var(--text2); }
+    .veiculo-btn svg.ic { width:24px; height:24px; }
     .veiculo-btn:hover { border-color:var(--accent); }
-    .veiculo-btn.selected { border-color:var(--accent); background:var(--accent-bg); }
+    .veiculo-btn.selected { border-color:var(--accent); background:var(--accent-bg); color:var(--accent); }
     .veiculo-btn.selected div { color:var(--accent) !important; }
 
     /* CALENDÁRIO */
     .cal-nav { display:flex; align-items:center; gap:8px; }
-    .cal-nav-btn { width:30px; height:30px; border-radius:8px; border:1px solid var(--border); background:var(--white); cursor:pointer; display:flex; align-items:center; justify-content:center; font-size:14px; color:var(--text2); transition: all .12s; font-family:inherit; flex-shrink:0; }
+    .cal-nav-btn { width:32px; height:32px; border-radius:10px; border:1px solid var(--border); background:var(--white); cursor:pointer; display:flex; align-items:center; justify-content:center; font-size:14px; color:var(--text2); transition: all .12s; font-family:inherit; flex-shrink:0; }
     .cal-nav-btn:hover { border-color: var(--accent); color: var(--accent); }
-    .cal-month-label { font-size:14px; font-weight:700; color:var(--text); min-width:110px; text-align:center; }
+    .cal-month-label { font-size:15px; font-weight:800; color:var(--text); min-width:120px; text-align:center; letter-spacing:-.01em; }
     .cal-legend { display:flex; gap:14px; flex-wrap:wrap; margin-bottom:14px; }
-    .cal-legend-item { display:flex; align-items:center; gap:5px; font-size:11px; color:var(--text3); }
+    .cal-legend-item { display:flex; align-items:center; gap:5px; font-size:11.5px; color:var(--text3); font-weight:600; }
     .cal-legend-dot { width:9px; height:9px; border-radius:3px; flex-shrink:0; }
     .cal-grid { display:grid; grid-template-columns: repeat(7,1fr); gap:4px; }
-    .cal-weekday { font-size:9px; font-weight:700; color:var(--text3); text-align:center; padding:4px 0; text-transform:uppercase; }
-    .cal-cell { min-height:54px; border:1.5px solid var(--border2); border-radius:9px; padding:5px; background:var(--white); cursor:pointer; transition: all .12s; }
+    .cal-weekday { font-size:10px; font-weight:700; color:var(--text3); text-align:center; padding:4px 0; }
+    .cal-cell { min-height:54px; border:1px solid var(--border2); border-radius:10px; padding:5px; background:var(--white); cursor:pointer; transition: all .12s; }
     .cal-cell.empty { background:transparent; border-color:transparent; cursor:default; }
-    .cal-cell:hover:not(.empty) { border-color: var(--accent); box-shadow: 0 0 0 2px rgba(91,33,182,.12); }
-    .cal-cell.today { border-color: var(--accent) !important; background: var(--accent-bg) !important; box-shadow: 0 0 0 2px var(--accent); }
-    .cal-cell.today .cal-day-num { color: var(--accent); font-size: 13px; }
-    .cal-cell.atrasado { background:#FEF2F2; border-color:#FECACA; }
-    .cal-cell.recebido { background:#F0FDF4; border-color:#BBF7D0; }
-    .cal-cell.previsto { background:#FFFBEB; border-color:#FDE68A; }
-    .cal-day-num { font-size:11px; font-weight:700; color:var(--text2); }
+    .cal-cell:hover:not(.empty) { border-color: var(--accent); }
+    .cal-cell.today { border-color: var(--brand) !important; background: var(--brand) !important; color:#fff; }
+    .cal-cell.today .cal-day-num { color: #fff; font-size: 13px; }
+    .cal-cell.atrasado { background:var(--red-bg); border-color:#EBC0C6; }
+    .cal-cell.recebido { background:var(--green-bg); border-color:#C9DAB0; }
+    .cal-cell.previsto { background:var(--yellow-bg); border-color:#EFD6A3; }
+    .cal-day-num { font-size:11.5px; font-weight:800; color:var(--text2); }
     .cal-badges { display:flex; gap:3px; margin-top:4px; flex-wrap:wrap; align-items:center; }
-    .cal-badge-dem { background:var(--accent); color:#fff; font-size:9px; font-weight:700; padding:1px 5px; border-radius:6px; }
-    .cal-badge-lock { font-size:10px; line-height:1; }
+    .cal-badge-dem { background:var(--accent); color:#fff; font-size:9.5px; font-weight:800; padding:1px 5px; border-radius:6px; }
+    .cal-badge-lock { font-size:10px; line-height:1; display:inline-flex; color:var(--red); }
+    .cal-badge-lock svg.ic { width:11px; height:11px; }
 
     /* REVISÃO EM LOTE */
-    .rev-card { border:1.5px solid var(--border2); border-radius:12px; padding:14px 16px; margin-bottom:10px; background:var(--white); }
-    .rev-card.rev-done { border-color:#BBF7D0; background:#F0FDF4; opacity:.7; }
+    .rev-card { border:1px solid var(--border); border-radius:14px; padding:14px 16px; margin-bottom:10px; background:var(--white); }
+    .rev-card.rev-done { border-color:#C9DAB0; background:var(--green-bg); opacity:.7; }
     .rev-card-header { display:flex; justify-content:space-between; align-items:flex-start; gap:8px; margin-bottom:10px; }
-    .rev-card-title { font-size:13px; font-weight:700; color:var(--text); }
-    .rev-card-meta  { font-size:11px; color:var(--text3); margin-top:2px; }
+    .rev-card-title { font-size:14px; font-weight:700; color:var(--text); }
+    .rev-card-meta  { font-size:11.5px; color:var(--text3); margin-top:2px; font-weight:500; }
     .rev-fields { display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:10px; }
-    .rev-field label { font-size:10px; font-weight:700; color:var(--text3); text-transform:uppercase; letter-spacing:.4px; display:block; margin-bottom:3px; }
-    .rev-field input { width:100%; padding:7px 10px; font-size:12px; border:1px solid var(--border); border-radius:8px; font-family:inherit; color:var(--text); background:var(--bg); box-sizing:border-box; }
+    .rev-field label { font-size:11px; font-weight:700; color:var(--text2); display:block; margin-bottom:3px; }
+    .rev-field input { width:100%; padding:8px 10px; font-size:12.5px; border:1.5px solid var(--border); border-radius:9px; font-family:inherit; color:var(--text); background:var(--white); box-sizing:border-box; }
     .rev-veiculos { display:flex; gap:6px; }
-    .rev-vbtn { flex:1; padding:6px 4px; border:1.5px solid var(--border); border-radius:8px; background:var(--white); cursor:pointer; font-size:10px; text-align:center; font-family:inherit; font-weight:700; color:var(--text2); transition:all .12s; }
+    .rev-vbtn { flex:1; padding:7px 4px; border:1.5px solid var(--border); border-radius:9px; background:var(--white); cursor:pointer; font-size:10px; text-align:center; font-family:inherit; font-weight:700; color:var(--text2); transition:all .12s; }
+    .rev-vbtn svg.ic { width:18px; height:18px; }
     .rev-vbtn:hover { border-color:var(--accent); }
     .rev-vbtn.selected { border-color:var(--accent); background:var(--accent-bg); color:var(--accent); }
     .rev-park-btns { display:flex; gap:6px; }
     .rev-park-btns .filter-btn { flex:1; font-size:11px; padding:6px 8px; }
-    .rev-preview { background:#F5F3FF; border:1px solid #DDD6FE; border-radius:8px; padding:10px 12px; font-size:11px; color:var(--text2); margin-bottom:10px; line-height:1.7; }
+    .rev-preview { background:var(--paper2); border:1px solid var(--border); border-radius:10px; padding:10px 12px; font-size:11.5px; color:var(--text2); margin-bottom:10px; line-height:1.7; }
     .rev-actions { display:flex; gap:8px; justify-content:flex-end; }
-    .rev-done-badge { font-size:10px; font-weight:700; color:#059669; background:#D1FAE5; padding:3px 8px; border-radius:20px; white-space:nowrap; }
-    #toast.info { background: #1E3A5F; }
+    .rev-done-badge { font-size:10.5px; font-weight:700; color:var(--green); background:var(--green-bg); padding:3px 8px; border-radius:20px; white-space:nowrap; }
+    #toast.info { background: var(--brand); }
       /* ── TERCEIROS / PARTICIPANTES ── */
-    .chip-cidade { display:inline-flex; align-items:center; gap:6px; padding:7px 12px; border-radius:20px; border:1.5px solid var(--border); background:var(--white); font-size:12px; font-weight:600; color:var(--text2); cursor:pointer; user-select:none; transition:all .15s; }
-    .chip-cidade.on { background:var(--accent); border-color:var(--accent); color:#fff; }
+    .chip-cidade { display:inline-flex; align-items:center; gap:6px; padding:7px 12px; border-radius:20px; border:1.5px solid var(--border); background:var(--white); font-size:12.5px; font-weight:700; color:var(--text2); cursor:pointer; user-select:none; transition:all .15s; }
+    .chip-cidade.on { background:var(--text); border-color:var(--text); color:#fff; }
     .chip-cidade input { display:none; }
     .cidades-wrap { display:flex; flex-wrap:wrap; gap:8px; margin:8px 0 4px; }
     .chip-ro { display:inline-block; padding:3px 9px; border-radius:12px; background:var(--accent-bg); color:var(--accent); font-size:11px; font-weight:700; margin:2px 4px 2px 0; }
     .terc-card { border:1px solid var(--border); border-radius:var(--radius); padding:14px 16px; margin-bottom:10px; background:var(--white); }
-    .terc-card.inativo { opacity:.55; background:#FAFAF9; }
+    .terc-card.inativo { opacity:.55; background:var(--paper2); }
     .terc-head { display:flex; justify-content:space-between; align-items:flex-start; gap:10px; flex-wrap:wrap; }
-    .terc-nome { font-size:15px; font-weight:700; color:var(--text); }
-    .terc-meta { font-size:12px; color:var(--text2); margin-top:2px; }
-    .tag-interno { display:inline-block; padding:2px 8px; border-radius:10px; background:#DBEAFE; color:#1E40AF; font-size:10px; font-weight:700; margin-left:6px; vertical-align:middle; }
-    .tag-off { display:inline-block; padding:2px 8px; border-radius:10px; background:#FEE2E2; color:#991B1B; font-size:10px; font-weight:700; margin-left:6px; vertical-align:middle; }
-    .btn-mini { padding:5px 11px; border-radius:8px; border:1px solid var(--border); background:var(--white); font-size:11px; font-weight:600; color:var(--text2); cursor:pointer; font-family:inherit; }
+    .terc-nome { font-size:16px; font-weight:800; color:var(--text); letter-spacing:-.01em; }
+    .terc-meta { font-size:12.5px; color:var(--text2); margin-top:2px; font-weight:500; }
+    .tag-interno { display:inline-block; padding:2px 8px; border-radius:10px; background:var(--accent-bg); color:var(--accent); font-size:10.5px; font-weight:700; margin-left:6px; vertical-align:middle; }
+    .tag-off { display:inline-block; padding:2px 8px; border-radius:10px; background:var(--red-bg); color:var(--red); font-size:10.5px; font-weight:700; margin-left:6px; vertical-align:middle; }
+    .btn-mini { padding:6px 11px; border-radius:9px; border:1px solid var(--border); background:var(--white); font-size:11.5px; font-weight:700; color:var(--text2); cursor:pointer; font-family:inherit; display:inline-flex; align-items:center; gap:5px; }
     .btn-mini:hover { border-color:var(--accent); color:var(--accent); }
     .btn-mini.danger:hover { border-color:var(--red); color:var(--red); }
-    .part-row { display:grid; grid-template-columns:1fr 110px 110px auto; gap:8px; align-items:end; padding:10px; border:1px solid var(--border2); border-radius:10px; margin-bottom:8px; background:#FAFAF9; }
+    .part-row { display:grid; grid-template-columns:1fr 110px 110px auto; gap:8px; align-items:end; padding:10px; border:1px solid var(--border2); border-radius:12px; margin-bottom:8px; background:var(--paper2); }
     .part-row .field { margin:0; }
-    .part-row label { font-size:10px; }
+    .part-row label { font-size:11px; }
     @media(max-width:640px){ .part-row { grid-template-columns:1fr 1fr; } }
     .agenda-mini { max-height:300px; overflow-y:auto; text-align:left; }
-    .agenda-item { padding:9px 11px; border-left:3px solid var(--accent); background:#FAFAF9; border-radius:6px; margin-bottom:7px; font-size:12px; }
+    .agenda-item { padding:9px 11px; border-left:3px solid var(--accent); background:var(--paper2); border-radius:6px; margin-bottom:7px; font-size:12.5px; }
     .agenda-item.livre { border-left-color:var(--green); color:var(--green); }
 </style>
 </head>
@@ -428,20 +481,23 @@
 
 <!-- LOADING -->
 <div id="loading-screen">
-  <div style="width:40px;height:40px;border-radius:10px;background:linear-gradient(135deg,#7C3AED,#5B21B6);display:flex;align-items:center;justify-content:center;font-size:20px">⚖️</div>
+  <img src="logo/na-mono-light.png" alt="NA"/>
   <div class="spinner"></div>
 </div>
 
 <!-- LOGIN -->
 <div id="login-screen" class="hidden">
+  <!-- Capa: logo completa em cinza-claro sobre o navy oficial -->
+  <div class="login-hero">
+    <img src="logo/na-full-light.png" alt="Naiarha Almeida Advogada"/>
+    <span>Gestão de diligências</span>
+  </div>
   <div class="login-box">
-    <div class="login-logo">
-      <div class="login-logo-icon">⚖️</div>
+    <div class="login-logo"></div>
+    <div style="text-align:center;margin-bottom:4px">
+      <div class="login-title">Bem-vinda de volta</div>
     </div>
-    <div style="text-align:center;margin-bottom:6px">
-      <div class="login-title">Escritório Naiarha</div>
-    </div>
-    <div class="login-sub">Gestão de Diligências</div>
+    <div class="login-sub">Entre para ver os prazos de hoje</div>
     <div class="login-field">
       <label>E-mail</label>
       <input type="email" id="login-email" placeholder="seu@email.com" autocomplete="email"/>
@@ -463,15 +519,15 @@
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
       </button>
       <div class="header-logo">
-        <div class="logo-icon">⚖️</div>
+        <div class="logo-icon"><img src="logo/na-mono.png" alt="NA"/></div>
         <div>
-          <div class="logo-text">Escritório Naiarha</div>
-          <div class="logo-sub">Gestão de Diligências</div>
+          <div class="logo-text">Diligências</div>
+          <div class="logo-sub">Naiarha Almeida Advogada</div>
         </div>
       </div>
     </div>
     <div style="display:flex;align-items:center;gap:8px">
-      <button id="hide-values-btn" onclick="toggleValoresOcultos()" title="Ocultar/mostrar valores" style="background:none;border:none;color:var(--text2);font-size:16px;cursor:pointer;padding:6px;display:flex;align-items:center">👁️</button>
+      <button id="hide-values-btn" onclick="toggleValoresOcultos()" title="Ocultar/mostrar valores" style="background:none;border:none;color:var(--text2);cursor:pointer;padding:6px;display:flex;align-items:center"><svg class="ic lg" viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg></button>
       <div class="user-chip" onclick="toggleSidebar()">
         <div class="user-avatar" id="user-avatar">?</div>
         <div class="user-name" id="user-name">...</div>
@@ -484,28 +540,33 @@
 
   <nav id="sidebar">
     <div class="sidebar-logo">
-      <div class="logo-icon" style="width:32px;height:32px;font-size:15px">⚖️</div>
-      <div>
-        <div style="font-weight:700;font-size:14px;color:var(--text)">Naiarha</div>
-        <div style="font-size:10px;color:var(--text3)">Escritório</div>
-      </div>
+      <img src="logo/na-full.png" alt="Naiarha Almeida Advogada"/>
     </div>
     <div class="sidebar-section-label">Menu</div>
-    <button class="nav-item active" id="nav-dashboard" onclick="goPage('dashboard')"><span class="nav-icon">⊞</span> Dashboard</button>
-    <button class="nav-item" id="nav-demandas" onclick="goPage('demandas')"><span class="nav-icon">≡</span> Demandas</button>
-    <button class="nav-item" id="nav-calendario" onclick="goPage('calendario')"><span class="nav-icon">📅</span> Calendário</button>
-    <button class="nav-item" id="nav-relatorio" onclick="goPage('relatorio')"><span class="nav-icon">↗</span> Relatório</button>
-    <button class="nav-item" id="nav-calculadora" onclick="goPage('calculadora')"><span class="nav-icon">🧮</span> Calculadora</button>
-    <button class="nav-item" id="nav-terceiros" onclick="goPage('terceiros')"><span class="nav-icon">👥</span> Terceiros</button>
-    <button class="nav-item" id="nav-bloqueios" onclick="goPage('bloqueios')"><span class="nav-icon">🔒</span> Bloqueios</button>
-    <button class="nav-item" id="nav-revisao" onclick="goPage('revisao')"><span class="nav-icon">📋</span> Revisão em Lote</button>
+    <button class="nav-item active" id="nav-dashboard" onclick="goPage('dashboard')"><span class="nav-icon"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg></span> Dashboard</button>
+    <button class="nav-item" id="nav-demandas" onclick="goPage('demandas')"><span class="nav-icon"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h10"/></svg></span> Demandas</button>
+    <button class="nav-item" id="nav-calendario" onclick="goPage('calendario')"><span class="nav-icon"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="3"/><path d="M3 10h18M8 3v4M16 3v4"/></svg></span> Calendário</button>
+    <button class="nav-item" id="nav-relatorio" onclick="goPage('relatorio')"><span class="nav-icon"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 19V5M4 15l5-5 4 4 7-7"/></svg></span> Relatório</button>
+    <button class="nav-item" id="nav-calculadora" onclick="goPage('calculadora')"><span class="nav-icon"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="2" width="14" height="20" rx="2.5"/><path d="M8 6h8M8 11h.01M12 11h.01M16 11h.01M8 15h.01M12 15h.01M16 15h.01M8 19h.01M12 19h.01M16 19h.01"/></svg></span> Calculadora</button>
+    <button class="nav-item" id="nav-terceiros" onclick="goPage('terceiros')"><span class="nav-icon"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0M16 4a3.5 3.5 0 0 1 0 7M21.5 20a6.5 6.5 0 0 0-5-6.3"/></svg></span> Terceiros</button>
+    <button class="nav-item" id="nav-bloqueios" onclick="goPage('bloqueios')"><span class="nav-icon"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="11" width="16" height="10" rx="2.5"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg></span> Bloqueios</button>
+    <button class="nav-item" id="nav-revisao" onclick="goPage('revisao')"><span class="nav-icon"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="4" width="14" height="18" rx="2.5"/><path d="M9 4V3h6v1M9 11h6M9 15h4"/></svg></span> Revisão em Lote</button>
     <div class="sidebar-footer">
-      <p style="font-size:10px;color:var(--text3);margin-bottom:10px">v2.7 · Com Supabase</p>
+      <p style="font-size:10px;color:var(--text3);margin-bottom:10px">v2.8 · Com Supabase</p>
       <button class="logout-btn" onclick="doLogout()">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16,17 21,12 16,7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
         Sair da conta
       </button>
     </div>
+  </nav>
+
+  <!-- BARRA INFERIOR (celular) -->
+  <nav id="tabbar">
+    <button class="tab-item" id="tab-dashboard" onclick="goPage('dashboard')"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>Dashboard</button>
+    <button class="tab-item" id="tab-demandas" onclick="goPage('demandas')"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h10"/></svg>Demandas</button>
+    <button class="tab-item" id="tab-calendario" onclick="goPage('calendario')"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="3"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>Agenda</button>
+    <button class="tab-item" id="tab-calculadora" onclick="goPage('calculadora')"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="2" width="14" height="20" rx="2.5"/><path d="M8 6h8M8 11h.01M12 11h.01M16 11h.01M8 15h.01M12 15h.01M16 15h.01M8 19h.01M12 19h.01M16 19h.01"/></svg>Calculadora</button>
+    <button class="tab-item" id="tab-mais" onclick="toggleSidebar()"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="5" cy="12" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="19" cy="12" r="1.6"/></svg>Mais</button>
   </nav>
 
   <div id="body">
@@ -514,7 +575,7 @@
       <!-- DASHBOARD -->
       <div id="page-dashboard" class="page active">
         <div style="margin-bottom:22px">
-          <div class="page-title" id="dash-greeting">Visão Geral 👋</div>
+          <div class="page-title" id="dash-greeting">Visão Geral</div>
           <div class="page-sub">Resumo de todas as diligências</div>
         </div>
         <div class="stats-grid" id="dash-stats"></div>
@@ -532,7 +593,7 @@
           </div>
         </div>
         <div class="field form-full" style="margin-bottom:14px">
-          <input type="text" id="demand-search" placeholder="🔍 Pesquisar por descrição, local, endereço, contratante..." oninput="onSearchInput(this.value)"/>
+          <input type="text" id="demand-search" placeholder="Pesquisar por descrição, local, endereço, contratante..." oninput="onSearchInput(this.value)"/>
         </div>
         <div class="filters" id="filters"></div>
         <div class="card" id="demand-list"></div>
@@ -551,13 +612,13 @@
 
           <!-- Bloco de rota (preenchido pela calculadora) -->
           <div id="f-rota-bloco" style="display:none;margin-bottom:16px">
-            <div class="section-title">📍 Rota calculada</div>
-            <div style="background:#F5F3FF;border:1px solid #DDD6FE;border-radius:10px;padding:12px;font-size:12px;color:var(--text2);margin-bottom:10px" id="f-rota-desc"></div>
+            <div class="section-title"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s-6-5.3-6-11a6 6 0 0 1 12 0c0 5.7-6 11-6 11z"/><circle cx="12" cy="10" r="2.2"/></svg> Rota calculada</div>
+            <div style="background:#E4ECF8;border:1px solid #C5D5EE;border-radius:10px;padding:12px;font-size:12px;color:var(--text2);margin-bottom:10px" id="f-rota-desc"></div>
             <div class="form-grid">
-              <div class="field"><label>Km (ida)</label><input type="text" id="f-km-ida" readonly style="background:#F9FAFB"/></div>
-              <div class="field"><label>Km (ida + volta)</label><input type="text" id="f-km-total" readonly style="background:#F9FAFB"/></div>
-              <div class="field"><label>Custo combustível</label><input type="text" id="f-comb" readonly style="background:#F9FAFB"/></div>
-              <div class="field"><label>💡 Valor sugerido</label><input type="text" id="f-valor-sugerido" readonly style="background:#F5F3FF;font-weight:700;color:var(--accent)"/></div>
+              <div class="field"><label>Km (ida)</label><input type="text" id="f-km-ida" readonly style="background:#FFFFFF"/></div>
+              <div class="field"><label>Km (ida + volta)</label><input type="text" id="f-km-total" readonly style="background:#FFFFFF"/></div>
+              <div class="field"><label>Custo combustível</label><input type="text" id="f-comb" readonly style="background:#FFFFFF"/></div>
+              <div class="field"><label><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 18h6M10 21h4M8.5 14.5A5.5 5.5 0 1 1 15.5 14.5c-.6.6-1 1.5-1 2.5h-5c0-1-.4-1.9-1-2.5z"/></svg> Valor sugerido</label><input type="text" id="f-valor-sugerido" readonly style="background:#E4ECF8;font-weight:700;color:var(--accent)"/></div>
             </div>
             <hr class="divider"/>
           </div>
@@ -592,7 +653,7 @@
             </div>
             <div class="field" style="display:flex;align-items:center;gap:10px;padding-top:18px">
               <input type="checkbox" id="f-online" onchange="toggleOnlineFields()" style="width:17px;height:17px;accent-color:var(--accent);cursor:pointer;flex-shrink:0"/>
-              <label for="f-online" style="font-size:13px;font-weight:600;color:var(--text);cursor:pointer;text-transform:none;letter-spacing:0">🌐 Atendimento online</label>
+              <label for="f-online" style="font-size:13px;font-weight:600;color:var(--text);cursor:pointer;text-transform:none;letter-spacing:0"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"/></svg> Atendimento online</label>
             </div>
             <div class="field"><label>Status</label>
               <select id="f-status">
@@ -608,8 +669,8 @@
           <!-- Participantes da diligência (equipe interna e/ou terceiros) -->
           <div id="f-terceiro-bloco">
             <hr class="divider"/>
-            <div class="section-title">👥 Quem vai cumprir</div>
-            <div style="background:#FFF7ED;border:1px solid #FED7AA;border-radius:10px;padding:10px 12px;font-size:12px;color:#92400E;margin-bottom:12px">
+            <div class="section-title"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0M16 4a3.5 3.5 0 0 1 0 7M21.5 20a6.5 6.5 0 0 0-5-6.3"/></svg> Quem vai cumprir</div>
+            <div style="background:#FAF0DC;border:1px solid #FED7AA;border-radius:10px;padding:10px 12px;font-size:12px;color:#B7791F;margin-bottom:12px">
               Só aparecem as pessoas que marcaram no cadastro que atendem a cidade escolhida acima.
               O <b>Valor cobrado</b> é o total recebido do cliente; o que for pago a terceiros sai dele.
               Participante da equipe (Naiarha/Esdras) não desconta nada — o dinheiro fica em casa.
@@ -623,8 +684,8 @@
             </div>
             <div style="font-size:11px;color:var(--text3);margin-top:6px">Clique quantas vezes precisar — dois advogados e um representante é só clicar três vezes. Pode deixar como "a definir" e escolher a pessoa depois.</div>
             <div class="form-grid" style="margin-top:14px">
-              <div class="field"><label>🤝 Total a terceiros (R$)</label><input type="text" id="f-valor-terceiro" readonly style="background:#FFF7ED;font-weight:700;color:#92400E"/></div>
-              <div class="field"><label>💰 Valor de vocês (R$)</label><input type="text" id="f-valor-nosso" readonly style="background:#F0FDF4;font-weight:700;color:#065F46"/></div>
+              <div class="field"><label><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0M16 4a3.5 3.5 0 0 1 0 7M21.5 20a6.5 6.5 0 0 0-5-6.3"/></svg> Total a terceiros (R$)</label><input type="text" id="f-valor-terceiro" readonly style="background:#FAF0DC;font-weight:700;color:#B7791F"/></div>
+              <div class="field"><label><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 7a2 2 0 0 1 2-2h13v4"/><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M16 13.5h5"/><circle cx="16" cy="13.5" r=".8"/></svg> Valor de vocês (R$)</label><input type="text" id="f-valor-nosso" readonly style="background:#EAF0E1;font-weight:700;color:#3F5A28"/></div>
             </div>
           </div>
 
@@ -661,8 +722,8 @@
         </div>
         <div class="card card-pad" style="margin-bottom:16px;display:flex;align-items:center;gap:14px;flex-wrap:wrap">
           <span style="font-size:12px;font-weight:600;color:var(--text2)">Período:</span>
-          <input type="month" id="report-month" style="background:#F9FAFB;border:1px solid var(--border);border-radius:8px;padding:7px 12px;font-size:13px;font-family:inherit;color:var(--text)" oninput="renderRelatorio()"/>
-          <button class="btn btn-secondary" style="padding:7px 12px;font-size:12px" onclick="document.getElementById('report-month').value='';renderRelatorio()">✕ Limpar</button>
+          <input type="month" id="report-month" style="background:#FFFFFF;border:1px solid var(--border);border-radius:8px;padding:7px 12px;font-size:13px;font-family:inherit;color:var(--text)" oninput="renderRelatorio()"/>
+          <button class="btn btn-secondary" style="padding:7px 12px;font-size:12px" onclick="document.getElementById('report-month').value='';renderRelatorio()"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg> Limpar</button>
           <span id="report-month-label" style="font-size:12px;color:var(--accent);font-weight:600"></span>
         </div>
         <div class="report-mini-grid" id="report-stats" style="margin-bottom:16px"></div>
@@ -674,15 +735,15 @@
       <!-- CALCULADORA -->
       <div id="page-calculadora" class="page">
         <div style="margin-bottom:22px">
-          <div class="page-title">🧮 Calculadora</div>
+          <div class="page-title"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="2" width="14" height="20" rx="2.5"/><path d="M8 6h8M8 11h.01M12 11h.01M16 11h.01M8 15h.01M12 15h.01M16 15h.01M8 19h.01M12 19h.01M16 19h.01"/></svg> Calculadora</div>
           <div class="page-sub">Simule o custo antes de aceitar uma diligência</div>
         </div>
 
         <div class="card card-pad" style="margin-bottom:14px">
           <div class="section-title">Origem</div>
           <div style="display:flex;gap:8px;margin-bottom:0" id="calc-origem-pills">
-            <button class="filter-btn active" id="calc-pill-base" onclick="calcSetOrigem('BASE')">📍 Base — Pinhais</button>
-            <button class="filter-btn" id="calc-pill-outro" onclick="calcSetOrigem('OUTRO')">📌 Outro endereço</button>
+            <button class="filter-btn active" id="calc-pill-base" onclick="calcSetOrigem('BASE')"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s-6-5.3-6-11a6 6 0 0 1 12 0c0 5.7-6 11-6 11z"/><circle cx="12" cy="10" r="2.2"/></svg> Base — Pinhais</button>
+            <button class="filter-btn" id="calc-pill-outro" onclick="calcSetOrigem('OUTRO')"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s-6-5.3-6-11a6 6 0 0 1 12 0c0 5.7-6 11-6 11z"/><circle cx="12" cy="10" r="2.2"/></svg> Outro endereço</button>
           </div>
           <div id="calc-outro-wrap" style="display:none;margin-top:12px">
             <div class="field">
@@ -706,7 +767,7 @@
 
         <div class="card card-pad" style="margin-bottom:14px;display:flex;justify-content:space-between;align-items:center">
           <div>
-            <div style="font-size:13px;font-weight:600;color:var(--text)">🅿️ Haverá estacionamento?</div>
+            <div style="font-size:13px;font-weight:600;color:var(--text)"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="4" width="16" height="16" rx="3"/><path d="M9.5 16.5v-9H13a2.5 2.5 0 0 1 0 5H9.5"/></svg> Haverá estacionamento?</div>
             <div style="font-size:11px;color:var(--text3);margin-top:2px">+ R$ 10,00 se sim</div>
           </div>
           <div style="display:flex;gap:8px">
@@ -717,7 +778,7 @@
 
         <div class="card card-pad" style="margin-bottom:14px">
           <div style="display:flex;justify-content:space-between;align-items:center;cursor:pointer" onclick="calcToggleParams()">
-            <div class="section-title" style="margin:0">⚙ Parâmetros</div>
+            <div class="section-title" style="margin:0"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M4.9 19.1L7 17M17 7l2.1-2.1"/></svg> Parâmetros</div>
             <span id="calc-params-chev" style="font-size:12px;color:var(--text3)">▼</span>
           </div>
           <div id="calc-params-body" style="display:none;margin-top:14px">
@@ -736,7 +797,7 @@
               </div>
             </div>
             <div style="margin-top:12px;text-align:right">
-              <button class="btn btn-primary" style="font-size:12px;padding:8px 16px" onclick="calcSalvarParams()">💾 Salvar parâmetros</button>
+              <button class="btn btn-primary" style="font-size:12px;padding:8px 16px" onclick="calcSalvarParams()"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 3h11l3 3v15H5z"/><path d="M8 3v5h7V3M8 21v-6h8v6"/></svg> Salvar parâmetros</button>
             </div>
           </div>
         </div>
@@ -771,7 +832,7 @@
             </div>
           </div>
           <div class="card card-pad" style="margin-bottom:12px;display:flex;justify-content:space-between;align-items:center">
-            <span style="font-size:13px;color:var(--text2)">⛽ Combustível (ida + volta)</span>
+            <span style="font-size:13px;color:var(--text2)"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 21V5a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2v16M3 21h12M4 10h10M14 8h2a2 2 0 0 1 2 2v6a1.5 1.5 0 0 0 3 0v-7l-3-3"/></svg> Combustível (ida + volta)</span>
             <span style="font-size:16px;font-weight:700;color:var(--text)" id="calc-r-comb">—</span>
           </div>
           <div class="card card-pad" style="background:var(--accent);border-color:var(--accent);display:flex;justify-content:space-between;align-items:center">
@@ -860,12 +921,12 @@
           </div>
 
           <hr class="divider"/>
-          <div class="section-title">⚖️ Funções que exerce</div>
+          <div class="section-title"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v18M5 21h14M3 8l9-2 9 2M6 8l-3 8a4 4 0 0 0 6 0L6 8zM18 8l-3 8a4 4 0 0 0 6 0l-3-8z"/></svg> Funções que exerce</div>
           <div style="font-size:12px;color:var(--text2);margin-bottom:4px">Pode marcar mais de uma. Só aparece nas vagas da função marcada.</div>
           <div class="cidades-wrap" id="tc-funcoes"></div>
 
           <hr class="divider"/>
-          <div class="section-title">🏙️ Cidades em que atua</div>
+          <div class="section-title"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="3" width="16" height="18" rx="1.5"/><path d="M9 7h2M13 7h2M9 11h2M13 11h2M9 15h2M13 15h2M10 21v-3h4v3"/></svg> Cidades em que atua</div>
           <div style="font-size:12px;color:var(--text2);margin-bottom:4px">Só aparece como opção nas demandas das cidades marcadas aqui.</div>
           <div class="cidades-wrap" id="tc-cidades"></div>
           <div class="field" style="max-width:340px;margin-top:6px">
@@ -908,11 +969,11 @@
           </div>
         </div>
         <div class="cal-legend">
-          <div class="cal-legend-item"><div class="cal-legend-dot" style="background:#FECACA"></div>Recebimento atrasado</div>
-          <div class="cal-legend-item"><div class="cal-legend-dot" style="background:#BBF7D0"></div>Recebido</div>
-          <div class="cal-legend-item"><div class="cal-legend-dot" style="background:#FDE68A"></div>Previsto</div>
+          <div class="cal-legend-item"><div class="cal-legend-dot" style="background:#EBC0C6"></div>Recebimento atrasado</div>
+          <div class="cal-legend-item"><div class="cal-legend-dot" style="background:#C9DAB0"></div>Recebido</div>
+          <div class="cal-legend-item"><div class="cal-legend-dot" style="background:#EFD6A3"></div>Previsto</div>
           <div class="cal-legend-item"><div class="cal-legend-dot" style="background:var(--accent)"></div>Diligência(s)</div>
-          <div class="cal-legend-item">🔒 Bloqueio Esdras</div>
+          <div class="cal-legend-item"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="11" width="16" height="10" rx="2.5"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg> Bloqueio Esdras</div>
         </div>
         <div class="card card-pad">
           <div class="cal-grid" id="cal-grid"></div>
@@ -928,7 +989,7 @@
 <!-- MODAL DE CUSTO REAL (ao marcar como Realizado) -->
 <div id="custo-modal" class="modal-overlay hidden" onclick="if(event.target===this)closeCustoModal()">
   <div class="modal-box" style="max-width:420px">
-    <div class="modal-icon">🚗</div>
+    <div class="modal-icon"><svg class="ic xl" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 15l1.5-5A2 2 0 0 1 7.4 8.5h9.2a2 2 0 0 1 1.9 1.5L20 15M4 15h16v4H4zM4 15v-1M20 15v-1"/><circle cx="7.5" cy="19" r="1.5"/><circle cx="16.5" cy="19" r="1.5"/></svg></div>
     <div class="modal-title">Custo real da diligência</div>
     <div class="modal-sub">Informe o veículo usado para calcular o gasto real</div>
 
@@ -936,15 +997,15 @@
       <label style="font-size:12px;font-weight:600;color:var(--text2);margin-bottom:6px;display:block">Veículo utilizado *</label>
       <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px">
         <button class="veiculo-btn" id="vbtn-captur" onclick="selectVeiculo('captur')">
-          🚙<div style="font-size:11px;font-weight:700;margin-top:2px">Captur</div>
+          <svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 15l2-6h11l4 4h1v2M3 15h18v4H3z"/><circle cx="7" cy="19" r="1.5"/><circle cx="17" cy="19" r="1.5"/><path d="M10 9v6"/></svg><div style="font-size:11px;font-weight:700;margin-top:2px">Captur</div>
           <div style="font-size:10px;color:var(--text3)">7 km/l</div>
         </button>
         <button class="veiculo-btn" id="vbtn-c3" onclick="selectVeiculo('c3')">
-          🚗<div style="font-size:11px;font-weight:700;margin-top:2px">C3</div>
+          <svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 15l1.5-5A2 2 0 0 1 7.4 8.5h9.2a2 2 0 0 1 1.9 1.5L20 15M4 15h16v4H4zM4 15v-1M20 15v-1"/><circle cx="7.5" cy="19" r="1.5"/><circle cx="16.5" cy="19" r="1.5"/></svg><div style="font-size:11px;font-weight:700;margin-top:2px">C3</div>
           <div style="font-size:10px;color:var(--text3)">10,5 km/l</div>
         </button>
         <button class="veiculo-btn" id="vbtn-moto" onclick="selectVeiculo('moto')">
-          🏍️<div style="font-size:11px;font-weight:700;margin-top:2px">Moto</div>
+          <svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="5.5" cy="17" r="3.5"/><circle cx="18.5" cy="17" r="3.5"/><path d="M5.5 17l3.5-7h5l2 3h-6M14 10l1.5-3H18M18.5 17l-3-7"/></svg><div style="font-size:11px;font-weight:700;margin-top:2px">Moto</div>
           <div style="font-size:10px;color:var(--text3)">20 km/l</div>
         </button>
       </div>
@@ -964,7 +1025,7 @@
     </div>
 
     <!-- Preview do cálculo -->
-    <div id="cm-preview" style="display:none;background:#F5F3FF;border:1px solid #DDD6FE;border-radius:10px;padding:14px;margin-bottom:16px;font-size:12px">
+    <div id="cm-preview" style="display:none;background:#E4ECF8;border:1px solid #C5D5EE;border-radius:10px;padding:14px;margin-bottom:16px;font-size:12px">
       <div id="cm-preview-body"></div>
     </div>
 
@@ -1001,7 +1062,7 @@
 <!-- MODAL DE CONFLITO -->
 <div id="conflict-modal" class="modal-overlay hidden" onclick="if(event.target===this)closeConflictModal()">
   <div class="modal-box">
-    <div class="modal-icon">⚠️</div>
+    <div class="modal-icon" style="color:var(--yellow)"><svg class="ic xl" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l10 17H2z"/><path d="M12 10v4M12 17.5h.01"/></svg></div>
     <div class="modal-title">Possível conflito de horário</div>
     <div class="modal-sub">Confira antes de confirmar:</div>
     <div id="conflict-modal-body"></div>
@@ -1015,7 +1076,7 @@
 <!-- MODAL DE CONFLITO AO CRIAR BLOQUEIO -->
 <div id="bloqueio-conflict-modal" class="modal-overlay hidden" onclick="if(event.target===this)closeBloqueioConflictModal()">
   <div class="modal-box">
-    <div class="modal-icon">📌</div>
+    <div class="modal-icon"><svg class="ic xl" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s-6-5.3-6-11a6 6 0 0 1 12 0c0 5.7-6 11-6 11z"/><circle cx="12" cy="10" r="2.2"/></svg></div>
     <div class="modal-title">Você já tem compromisso nesse período</div>
     <div class="modal-sub">Confira antes de bloquear:</div>
     <div id="bloqueio-conflict-body"></div>
@@ -1032,10 +1093,10 @@ const sb = supabase; // cliente já inicializado no topo
 
 // ── CONFIG ──
 const STATUS = {
-  aguardando_cumprimento: { label:'Aguardando Cumprimento', short:'Pendente',  cls:'badge-pending', dot:'#F59E0B' },
-  realizado:              { label:'Realizado',              short:'Realizado', cls:'badge-done',    dot:'#3B82F6' },
-  aguardando_pagamento:   { label:'Aguardando Pagamento',   short:'Ag. Pgto',  cls:'badge-waiting', dot:'#8B5CF6' },
-  pago:                   { label:'Pago',                   short:'Pago',      cls:'badge-paid',    dot:'#10B981' },
+  aguardando_cumprimento: { label:'Aguardando Cumprimento', short:'Pendente',  cls:'badge-pending', dot:'#B7791F' },
+  realizado:              { label:'Realizado',              short:'Realizado', cls:'badge-done',    dot:'#1F4E9C' },
+  aguardando_pagamento:   { label:'Aguardando Pagamento',   short:'Ag. Pgto',  cls:'badge-waiting', dot:'#4A5570' },
+  pago:                   { label:'Pago',                   short:'Pago',      cls:'badge-paid',    dot:'#5B7A3A' },
 };
 const STATUS_FLOW = ['aguardando_cumprimento','realizado','aguardando_pagamento','pago'];
 const PLATAFORMAS = ['Correspondente Dinâmico','Jurídico Certo','Direto'];
@@ -1069,7 +1130,7 @@ const fISO = d => { const y=d.getFullYear(), m=String(d.getMonth()+1).padStart(2
 const id = x => document.getElementById(x);
 const badge = s => `<span class="badge ${STATUS[s].cls}"><span class="badge-dot" style="background:${STATUS[s].dot}"></span>${STATUS[s].short}</span>`;
 const badgeFull = s => `<span class="badge ${STATUS[s].cls}"><span class="badge-dot" style="background:${STATUS[s].dot}"></span>${STATUS[s].label}</span>`;
-const progressStrip = s => { const ci=STATUS_FLOW.indexOf(s); const dot=STATUS[s].dot; return `<div class="progress-strip">${STATUS_FLOW.map((_,i)=>`<span style="background:${i<=ci?dot:'#F3F4F6'}"></span>`).join('')}</div>`; };
+const progressStrip = s => { const ci=STATUS_FLOW.indexOf(s); const dot=STATUS[s].dot; return `<div class="progress-strip">${STATUS_FLOW.map((_,i)=>`<span style="background:${i<=ci?dot:'#EFEBE2'}"></span>`).join('')}</div>`; };
 
 function showToast(msg, type='ok') {
   const t=id('toast'); t.textContent=msg; t.className=type; t.classList.add('show');
@@ -1079,7 +1140,7 @@ function showToast(msg, type='ok') {
 // ── OCULTAR VALORES ──
 function atualizaHideBtnIcon(){
   const btn=id('hide-values-btn');
-  if(btn) btn.textContent = valoresOcultos ? '🙈' : '👁️';
+  if(btn) btn.innerHTML = valoresOcultos ? '<svg class="ic lg" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 3l18 18M10.6 10.6a3 3 0 0 0 4.2 4.2M9.9 5.1A10 10 0 0 1 12 5c6.5 0 10 7 10 7a15 15 0 0 1-2.6 3.4M6.6 6.6A15 15 0 0 0 2 12s3.5 7 10 7a10 10 0 0 0 3.4-.6"/></svg>' : '<svg class="ic lg" viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg>';
 }
 function rerenderPaginaAtual(){
   const activePage = document.querySelector('.page.active');
@@ -1140,7 +1201,7 @@ sb.auth.onAuthStateChange(async (event, session) => {
     }
     id('user-name').textContent = displayName;
     id('user-avatar').textContent = displayName.charAt(0).toUpperCase();
-    id('dash-greeting').textContent = `Olá, ${displayName}! 👋`;
+    id('dash-greeting').textContent = `Olá, ${displayName}`;
     id('login-screen').classList.add('hidden');
     id('app').classList.remove('hidden');
     atualizaHideBtnIcon();
@@ -1201,7 +1262,7 @@ async function enviarNotificacao(form) {
       body: JSON.stringify({
         tipo: 'nova_diligencia',
         subscription: subAlvo.subscription,
-        title: '📋 Nova diligência para você!',
+        title: 'Nova diligência para você!',
         body: form.descricao + (form.local ? ' — ' + form.local : '')
       })
     });
@@ -1275,7 +1336,7 @@ function goPage(page, demandId, filtroStatus) {
     if(id('demand-search')) id('demand-search').value = '';
     if(filtroStatus==='a_receber') {
       filterStatus='all'; filterResp='all';
-      renderDemandasFiltradas(demands.filter(d=>d.status!=='pago'), '💳 A Receber');
+      renderDemandasFiltradas(demands.filter(d=>d.status!=='pago'), '<svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2.5"/><path d="M3 10h18M7 15h3"/></svg> A Receber');
     } else if(filtroStatus) {
       filterStatus=filtroStatus; filterResp='all'; renderDemandas();
     } else {
@@ -1303,15 +1364,15 @@ function renderDashboard() {
   const totalPago=demands.filter(d=>d.status==='pago').reduce((s,d)=>s+parseFloat(d.valor||0),0);
   const totalAR=demands.filter(d=>d.status!=='pago').reduce((s,d)=>s+parseFloat(d.valor||0),0);
   id('dash-stats').innerHTML=`
-    <div class="stat-card" style="border-top-color:#7C3AED;cursor:pointer" onclick="goPage('demandas')"><div class="stat-label">📋 Total</div><div class="stat-value">${total}</div></div>
-    <div class="stat-card" style="border-top-color:#D97706;cursor:pointer" onclick="goPage('demandas',null,'aguardando_cumprimento')"><div class="stat-label">⏳ Pendentes</div><div class="stat-value">${pendentes}</div></div>
-    <div class="stat-card" style="border-top-color:#7C3AED;cursor:pointer" onclick="goPage('demandas',null,'a_receber')"><div class="stat-label">💳 A Receber</div><div class="stat-value sm">${fmt(totalAR)}</div></div>
-    <div class="stat-card" style="border-top-color:#059669;cursor:pointer" onclick="goPage('demandas',null,'pago')"><div class="stat-label">✅ Recebido</div><div class="stat-value sm">${fmt(totalPago)}</div></div>
+    <div class="stat-card" style="border-top-color:#1F4E9C;cursor:pointer" onclick="goPage('demandas')"><div class="stat-label"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="4" width="14" height="18" rx="2.5"/><path d="M9 4V3h6v1M9 11h6M9 15h4"/></svg> Total</div><div class="stat-value">${total}</div></div>
+    <div class="stat-card" style="border-top-color:#B7791F;cursor:pointer" onclick="goPage('demandas',null,'aguardando_cumprimento')"><div class="stat-label"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg> Pendentes</div><div class="stat-value">${pendentes}</div></div>
+    <div class="stat-card" style="border-top-color:#1F4E9C;cursor:pointer" onclick="goPage('demandas',null,'a_receber')"><div class="stat-label"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2.5"/><path d="M3 10h18M7 15h3"/></svg> A Receber</div><div class="stat-value sm">${fmt(totalAR)}</div></div>
+    <div class="stat-card" style="border-top-color:#5B7A3A;cursor:pointer" onclick="goPage('demandas',null,'pago')"><div class="stat-label"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M8 12l3 3 5-6"/></svg> Recebido</div><div class="stat-value sm">${fmt(totalPago)}</div></div>
   `;
   const statusHtml=STATUS_FLOW.map(s=>{ const c=demands.filter(d=>d.status===s).length; const pct=total?Math.round((c/total)*100):0; return `<div style="margin-bottom:10px"><div style="display:flex;justify-content:space-between;margin-bottom:4px"><span style="font-size:12px;color:var(--text)">${STATUS[s].label}</span><span style="font-size:12px;font-weight:700;color:${STATUS[s].dot}">${c}</span></div><div class="bar-track"><div class="bar-fill" style="width:${pct}%;background:${STATUS[s].dot}"></div></div></div>`; }).join('');
-  const respHtml=RESPONSAVEIS.map(r=>{ const rd=demands.filter(d=>d.responsavel===r); const rv=rd.reduce((s,d)=>s+parseFloat(d.valor||0),0); return `<div style="margin-bottom:12px;padding-bottom:12px;border-bottom:1px solid var(--border2)"><div style="font-size:13px;font-weight:600;color:var(--text);margin-bottom:5px">👤 ${r}</div><div style="display:flex;gap:12px"><span style="font-size:12px;color:var(--text3)">${rd.length} dem.</span><span style="font-size:12px;font-weight:600;color:var(--accent)">${fmt(rv)}</span></div></div>`; }).join('');
+  const respHtml=RESPONSAVEIS.map(r=>{ const rd=demands.filter(d=>d.responsavel===r); const rv=rd.reduce((s,d)=>s+parseFloat(d.valor||0),0); return `<div style="margin-bottom:12px;padding-bottom:12px;border-bottom:1px solid var(--border2)"><div style="font-size:13px;font-weight:600;color:var(--text);margin-bottom:5px"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg> ${r}</div><div style="display:flex;gap:12px"><span style="font-size:12px;color:var(--text3)">${rd.length} dem.</span><span style="font-size:12px;font-weight:600;color:var(--accent)">${fmt(rv)}</span></div></div>`; }).join('');
   id('dash-panels').innerHTML=`<div class="card card-pad"><div class="section-title">Por Status</div>${statusHtml}</div><div class="card card-pad"><div class="section-title">Por Responsável</div>${respHtml}</div>`;
-  if(!demands.length){ id('dash-recent').innerHTML=`<div class="empty"><div class="empty-icon">📂</div><div class="empty-title">Nenhuma demanda ainda</div><div class="empty-sub">Cadastre sua primeira</div><button class="btn btn-primary" onclick="goPage('novo')">+ Nova Demanda</button></div>`; return; }
+  if(!demands.length){ id('dash-recent').innerHTML=`<div class="empty"><div class="empty-icon"><svg class="ic xl" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg></div><div class="empty-title">Nenhuma demanda ainda</div><div class="empty-sub">Cadastre sua primeira</div><button class="btn btn-primary" onclick="goPage('novo')">+ Nova Demanda</button></div>`; return; }
   id('dash-recent').innerHTML=demands.slice(0,5).map(d=>`<div class="demand-row" onclick="goPage('detail','${d.id}')"><div style="flex:1;min-width:0"><div class="demand-title">${d.descricao}</div><div class="demand-meta">${fmtDate(d.data)} · ${d.local}<br>${d.responsavel}</div></div><div class="demand-right">${badge(d.status)}<div class="demand-value">${fmt(d.valor)}</div></div></div>`).join('');
 }
 
@@ -1325,10 +1386,10 @@ function renderDemandasFiltradas(lista, titulo) {
   id('sidebar').classList.remove('open'); id('overlay').classList.remove('open');
   id('main').scrollTop = 0;
   const listaFiltrada = lista.filter(matchesSearch);
-  id('filters').innerHTML = `<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap"><span style="font-size:13px;font-weight:600;color:var(--accent)">${titulo}</span><button class="filter-btn" onclick="goPage('demandas')" style="font-size:11px">✕ Limpar filtro</button></div>`;
+  id('filters').innerHTML = `<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap"><span style="font-size:13px;font-weight:600;color:var(--accent)">${titulo}</span><button class="filter-btn" onclick="goPage('demandas')" style="font-size:11px"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg> Limpar filtro</button></div>`;
   id('demand-count').textContent = listaFiltrada.length + ' resultado(s)';
-  if(!listaFiltrada.length){ id('demand-list').innerHTML=`<div class="empty"><div class="empty-icon">📂</div><div class="empty-title">Nenhuma demanda</div></div>`; return; }
-  id('demand-list').innerHTML=listaFiltrada.map(d=>`<div onclick="goPage('detail','${d.id}')"><div class="demand-row"><div style="flex:1;min-width:0"><div class="demand-title">${d.descricao}</div><div class="demand-meta">${d.plataforma} · ${d.responsavel}<br>${fmtDate(d.data)} · 📍 ${d.local}</div></div><div class="demand-right">${badgeFull(d.status)}<div class="demand-value">${fmt(d.valor)}</div>${d.previsao_pagamento?`<div style="font-size:11px;color:var(--text3)">Pgto: ${fmtDate(d.previsao_pagamento)}</div>`:''}</div></div>${progressStrip(d.status)}</div>`).join('');
+  if(!listaFiltrada.length){ id('demand-list').innerHTML=`<div class="empty"><div class="empty-icon"><svg class="ic xl" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg></div><div class="empty-title">Nenhuma demanda</div></div>`; return; }
+  id('demand-list').innerHTML=listaFiltrada.map(d=>`<div onclick="goPage('detail','${d.id}')"><div class="demand-row"><div style="flex:1;min-width:0"><div class="demand-title">${d.descricao}</div><div class="demand-meta">${d.plataforma} · ${d.responsavel}<br>${fmtDate(d.data)} · <svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s-6-5.3-6-11a6 6 0 0 1 12 0c0 5.7-6 11-6 11z"/><circle cx="12" cy="10" r="2.2"/></svg> ${d.local}</div></div><div class="demand-right">${badgeFull(d.status)}<div class="demand-value">${fmt(d.valor)}</div>${d.previsao_pagamento?`<div style="font-size:11px;color:var(--text3)">Pgto: ${fmtDate(d.previsao_pagamento)}</div>`:''}</div></div>${progressStrip(d.status)}</div>`).join('');
 }
 
 // ── DEMANDAS ──
@@ -1339,8 +1400,8 @@ function renderDemandas() {
   id('filters').innerHTML=statusBtns+`<div class="filter-divider"></div>`+respBtns;
   const filtered=demands.filter(d=>{ if(filterStatus!=='all'&&d.status!==filterStatus) return false; if(filterResp!=='all'&&d.responsavel!==filterResp) return false; if(!matchesSearch(d)) return false; return true; });
   id('demand-count').textContent=`${filtered.length} resultado(s)`;
-  if(!filtered.length){ id('demand-list').innerHTML=`<div class="empty"><div class="empty-icon">📂</div><div class="empty-title">Nenhuma demanda</div><div class="empty-sub">Tente outros filtros ou cadastre uma nova</div><button class="btn btn-primary" onclick="goPage('novo')">+ Nova Demanda</button></div>`; return; }
-  id('demand-list').innerHTML=filtered.map(d=>`<div onclick="goPage('detail','${d.id}')"><div class="demand-row"><div style="flex:1;min-width:0"><div class="demand-title">${d.descricao}</div><div class="demand-meta">${d.plataforma} · ${d.responsavel}<br>${fmtDate(d.data)} · 📍 ${d.local}</div></div><div class="demand-right">${badgeFull(d.status)}<div class="demand-value">${fmt(d.valor)}</div>${d.previsao_pagamento?`<div style="font-size:11px;color:var(--text3)">Pgto: ${fmtDate(d.previsao_pagamento)}</div>`:''}</div></div>${progressStrip(d.status)}</div>`).join('');
+  if(!filtered.length){ id('demand-list').innerHTML=`<div class="empty"><div class="empty-icon"><svg class="ic xl" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg></div><div class="empty-title">Nenhuma demanda</div><div class="empty-sub">Tente outros filtros ou cadastre uma nova</div><button class="btn btn-primary" onclick="goPage('novo')">+ Nova Demanda</button></div>`; return; }
+  id('demand-list').innerHTML=filtered.map(d=>`<div onclick="goPage('detail','${d.id}')"><div class="demand-row"><div style="flex:1;min-width:0"><div class="demand-title">${d.descricao}</div><div class="demand-meta">${d.plataforma} · ${d.responsavel}<br>${fmtDate(d.data)} · <svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s-6-5.3-6-11a6 6 0 0 1 12 0c0 5.7-6 11-6 11z"/><circle cx="12" cy="10" r="2.2"/></svg> ${d.local}</div></div><div class="demand-right">${badgeFull(d.status)}<div class="demand-value">${fmt(d.valor)}</div>${d.previsao_pagamento?`<div style="font-size:11px;color:var(--text3)">Pgto: ${fmtDate(d.previsao_pagamento)}</div>`:''}</div></div>${progressStrip(d.status)}</div>`).join('');
 }
 
 function matchesSearch(d) {
@@ -1368,31 +1429,31 @@ function renderDetail(did) {
   currentDetailId = did;
   const d=demands.find(x=>x.id===did); if(!d){ goPage('demandas'); return; }
   const ci=STATUS_FLOW.indexOf(d.status); const dot=STATUS[d.status].dot;
-  const steps=STATUS_FLOW.map((s,i)=>`<div class="step"><div class="step-bar" style="background:${i<=ci?dot:'#F3F4F6'};opacity:${i===ci?1:i<ci?.5:.15}"></div><div class="step-label" style="color:${i===ci?dot:'var(--text3)'};font-weight:${i===ci?700:400}">${STATUS[s].short}</div></div>`).join('');
+  const steps=STATUS_FLOW.map((s,i)=>`<div class="step"><div class="step-bar" style="background:${i<=ci?dot:'#EFEBE2'};opacity:${i===ci?1:i<ci?.5:.15}"></div><div class="step-label" style="color:${i===ci?dot:'var(--text3)'};font-weight:${i===ci?700:400}">${STATUS[s].short}</div></div>`).join('');
   const waBtn=d.contratante_whatsapp?`<a href="https://wa.me/55${d.contratante_whatsapp.replace(/\D/g,'')}" target="_blank" class="wa-link"><svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>${d.contratante_whatsapp}</a>`:'<span style="color:var(--text3)">—</span>';
   const advBtn = d.status!=='pago' ? `<button class="btn btn-primary" onclick="advanceStatus('${d.id}')">Avançar Status →</button>` : '';
   const custoBtn = (d.status==='realizado' && d.custo_real==null && !d.online && d.responsavel!=='Terceiro')
-    ? `<button class="btn btn-secondary" onclick="abrirCustoModal('${d.id}')">🚗 Registrar custo</button>` : '';
+    ? `<button class="btn btn-secondary" onclick="abrirCustoModal('${d.id}')"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 15l1.5-5A2 2 0 0 1 7.4 8.5h9.2a2 2 0 0 1 1.9 1.5L20 15M4 15h16v4H4zM4 15v-1M20 15v-1"/><circle cx="7.5" cy="19" r="1.5"/><circle cx="16.5" cy="19" r="1.5"/></svg> Registrar custo</button>` : '';
 
   // Bloco financeiro — aparece se tem custo_real OU valor_sugerido OU é online
   let custoBloco = '';
   if(d.custo_real != null || d.valor_sugerido || d.online) {
     const lucro = d.custo_real != null ? (d.valor||0) - d.custo_real : null;
     const pct   = (lucro != null && d.valor) ? ((lucro/d.valor)*100).toFixed(0) : null;
-    const cor   = lucro != null ? (lucro >= 0 ? '#059669' : '#B91C1C') : '#6B7280';
-    custoBloco  = `<div style="margin:0 20px 16px;background:#F5F3FF;border:1px solid #DDD6FE;border-radius:12px;padding:14px">
-      <div class="section-title" style="margin-bottom:10px">📊 Análise de Custo</div>
-      ${d.online ? `<div class="detail-row"><span class="detail-label">🌐 Modalidade</span><span class="detail-value" style="color:#059669;font-weight:700">Atendimento online — sem custo</span></div>` : ''}
-      ${d.veiculo_usado ? `<div class="detail-row"><span class="detail-label">🚗 Veículo</span><span class="detail-value">${d.veiculo_usado}</span></div>` : ''}
-      ${d.estacionamento_real ? `<div class="detail-row"><span class="detail-label">🅿️ Estacionamento</span><span class="detail-value">${fmt(d.estacionamento_real)}</span></div>` : ''}
-      ${d.custo_real != null ? `<div class="detail-row"><span class="detail-label">💸 Custo real</span><span class="detail-value" style="font-weight:700;color:#7C3AED">${fmt(d.custo_real)}</span></div>` : ''}
-      ${d.valor_sugerido ? `<div class="detail-row"><span class="detail-label">💡 Valor sugerido</span><span class="detail-value" style="font-weight:700;color:var(--accent)">${fmt(d.valor_sugerido)}</span></div>` : ''}
-      <div class="detail-row"><span class="detail-label">💰 Valor cobrado</span><span class="detail-value" style="font-weight:700">${fmt(d.valor)}</span></div>
-      ${lucro != null ? `<div class="detail-row" style="border-bottom:none"><span class="detail-label">📈 Margem real</span><span class="detail-value" style="font-weight:700;color:${cor}">${fmt(lucro)} (${pct}%)</span></div>` : ''}
+    const cor   = lucro != null ? (lucro >= 0 ? '#5B7A3A' : '#8B2635') : '#4A5570';
+    custoBloco  = `<div style="margin:0 20px 16px;background:#E4ECF8;border:1px solid #C5D5EE;border-radius:12px;padding:14px">
+      <div class="section-title" style="margin-bottom:10px"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 20V10M12 20V4M19 20v-7"/></svg> Análise de Custo</div>
+      ${d.online ? `<div class="detail-row"><span class="detail-label"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"/></svg> Modalidade</span><span class="detail-value" style="color:#5B7A3A;font-weight:700">Atendimento online — sem custo</span></div>` : ''}
+      ${d.veiculo_usado ? `<div class="detail-row"><span class="detail-label"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 15l1.5-5A2 2 0 0 1 7.4 8.5h9.2a2 2 0 0 1 1.9 1.5L20 15M4 15h16v4H4zM4 15v-1M20 15v-1"/><circle cx="7.5" cy="19" r="1.5"/><circle cx="16.5" cy="19" r="1.5"/></svg> Veículo</span><span class="detail-value">${d.veiculo_usado}</span></div>` : ''}
+      ${d.estacionamento_real ? `<div class="detail-row"><span class="detail-label"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="4" width="16" height="16" rx="3"/><path d="M9.5 16.5v-9H13a2.5 2.5 0 0 1 0 5H9.5"/></svg> Estacionamento</span><span class="detail-value">${fmt(d.estacionamento_real)}</span></div>` : ''}
+      ${d.custo_real != null ? `<div class="detail-row"><span class="detail-label"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3h12v18l-2-1.5L14 21l-2-1.5L10 21l-2-1.5L6 21z"/><path d="M9 8h6M9 12h6M9 16h3"/></svg> Custo real</span><span class="detail-value" style="font-weight:700;color:#1F4E9C">${fmt(d.custo_real)}</span></div>` : ''}
+      ${d.valor_sugerido ? `<div class="detail-row"><span class="detail-label"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 18h6M10 21h4M8.5 14.5A5.5 5.5 0 1 1 15.5 14.5c-.6.6-1 1.5-1 2.5h-5c0-1-.4-1.9-1-2.5z"/></svg> Valor sugerido</span><span class="detail-value" style="font-weight:700;color:var(--accent)">${fmt(d.valor_sugerido)}</span></div>` : ''}
+      <div class="detail-row"><span class="detail-label"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 7a2 2 0 0 1 2-2h13v4"/><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M16 13.5h5"/><circle cx="16" cy="13.5" r=".8"/></svg> Valor cobrado</span><span class="detail-value" style="font-weight:700">${fmt(d.valor)}</span></div>
+      ${lucro != null ? `<div class="detail-row" style="border-bottom:none"><span class="detail-label"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 17l6-6 4 4 8-8M15 7h6v6"/></svg> Margem real</span><span class="detail-value" style="font-weight:700;color:${cor}">${fmt(lucro)} (${pct}%)</span></div>` : ''}
     </div>`;
   }
 
-  id('detail-content').innerHTML=`<div class="detail-header"><div><div class="detail-title">${d.descricao}</div>${badgeFull(d.status)}</div><div style="text-align:right"><div class="detail-value-big">${fmt(d.valor)}</div>${d.valor_sugerido?`<div style="font-size:11px;color:var(--text3);margin-top:2px">sugerido: ${fmt(d.valor_sugerido)}</div>`:''}</div></div><div class="steps">${steps}</div>${custoBloco}<div style="padding:0 20px"><div class="detail-row"><span class="detail-label">📅 Data</span><span class="detail-value">${fmtDate(d.data)}</span></div><div class="detail-row"><span class="detail-label">🕐 Horário</span><span class="detail-value">${d.horario||'—'}</span></div><div class="detail-row"><span class="detail-label">📍 Local</span><span class="detail-value">${d.local}</span></div>${d.endereco?`<div class="detail-row"><span class="detail-label">🗺️ Endereço</span><span class="detail-value">${d.endereco}</span></div>`:''}${d.cidade?`<div class="detail-row"><span class="detail-label">🏙️ Cidade</span><span class="detail-value">${d.cidade}</span></div>`:''}<div class="detail-row"><span class="detail-label">🏢 Plataforma</span><span class="detail-value">${d.plataforma}</span></div><div class="detail-row"><span class="detail-label">👤 Responsável</span><span class="detail-value">${d.responsavel}</span></div>${blocoParticipantes(d)}<div class="detail-row"><span class="detail-label">💳 Previsão Pgto</span><span class="detail-value">${fmtDate(d.previsao_pagamento)}</span></div><div class="detail-row"><span class="detail-label">🙋 Contratante</span><span class="detail-value">${d.contratante_nome||'—'}</span></div><div class="detail-row" style="border-bottom:none"><span class="detail-label">📱 WhatsApp</span>${waBtn}</div></div><div style="padding:14px 20px;border-top:1px solid var(--border2);display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px"><button class="btn btn-danger" onclick="deleteDemand('${d.id}')">Remover</button><div style="display:flex;gap:10px"><button class="btn btn-secondary" onclick="goPage('novo','${d.id}')">Editar</button>${custoBtn}${advBtn}</div></div>`;
+  id('detail-content').innerHTML=`<div class="detail-header"><div><div class="detail-title">${d.descricao}</div>${badgeFull(d.status)}</div><div style="text-align:right"><div class="detail-value-big">${fmt(d.valor)}</div>${d.valor_sugerido?`<div style="font-size:11px;color:var(--text3);margin-top:2px">sugerido: ${fmt(d.valor_sugerido)}</div>`:''}</div></div><div class="steps">${steps}</div>${custoBloco}<div style="padding:0 20px"><div class="detail-row"><span class="detail-label"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="3"/><path d="M3 10h18M8 3v4M16 3v4"/></svg> Data</span><span class="detail-value">${fmtDate(d.data)}</span></div><div class="detail-row"><span class="detail-label"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg> Horário</span><span class="detail-value">${d.horario||'—'}</span></div><div class="detail-row"><span class="detail-label"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s-6-5.3-6-11a6 6 0 0 1 12 0c0 5.7-6 11-6 11z"/><circle cx="12" cy="10" r="2.2"/></svg> Local</span><span class="detail-value">${d.local}</span></div>${d.endereco?`<div class="detail-row"><span class="detail-label"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s-6-5.3-6-11a6 6 0 0 1 12 0c0 5.7-6 11-6 11z"/><circle cx="12" cy="10" r="2.2"/></svg> Endereço</span><span class="detail-value">${d.endereco}</span></div>`:''}${d.cidade?`<div class="detail-row"><span class="detail-label"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="3" width="16" height="18" rx="1.5"/><path d="M9 7h2M13 7h2M9 11h2M13 11h2M9 15h2M13 15h2M10 21v-3h4v3"/></svg> Cidade</span><span class="detail-value">${d.cidade}</span></div>`:''}<div class="detail-row"><span class="detail-label"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="3" width="16" height="18" rx="1.5"/><path d="M9 7h2M13 7h2M9 11h2M13 11h2M9 15h2M13 15h2M10 21v-3h4v3"/></svg> Plataforma</span><span class="detail-value">${d.plataforma}</span></div><div class="detail-row"><span class="detail-label"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg> Responsável</span><span class="detail-value">${d.responsavel}</span></div>${blocoParticipantes(d)}<div class="detail-row"><span class="detail-label"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2.5"/><path d="M3 10h18M7 15h3"/></svg> Previsão Pgto</span><span class="detail-value">${fmtDate(d.previsao_pagamento)}</span></div><div class="detail-row"><span class="detail-label"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg> Contratante</span><span class="detail-value">${d.contratante_nome||'—'}</span></div><div class="detail-row" style="border-bottom:none"><span class="detail-label"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="7" y="2" width="10" height="20" rx="2.5"/><path d="M11 18h2"/></svg> WhatsApp</span>${waBtn}</div></div><div style="padding:14px 20px;border-top:1px solid var(--border2);display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px"><button class="btn btn-danger" onclick="deleteDemand('${d.id}')">Remover</button><div style="display:flex;gap:10px"><button class="btn btn-secondary" onclick="goPage('novo','${d.id}')">Editar</button>${custoBtn}${advBtn}</div></div>`;
 }
 
 // ── RELATÓRIO ──
@@ -1402,8 +1463,8 @@ function renderRelatorio() {
   const total=rd.reduce((s,d)=>s+parseFloat(d.valor||0),0);
   const pago=rd.filter(d=>d.status==='pago').reduce((s,d)=>s+parseFloat(d.valor||0),0);
   const ar=rd.filter(d=>d.status!=='pago').reduce((s,d)=>s+parseFloat(d.valor||0),0);
-  id('report-stats').innerHTML=[{label:'Volume Total',value:fmt(total),accent:'#7C3AED'},{label:'Recebido',value:fmt(pago),accent:'#059669'},{label:'A Receber',value:fmt(ar),accent:'#D97706'},{label:'Demandas',value:rd.length,accent:'#2563EB'}].map(s=>`<div class="mini-stat" style="border-top-color:${s.accent}"><div class="label">${s.label}</div><div class="value">${s.value}</div></div>`).join('');
-  id('report-resp').innerHTML=RESPONSAVEIS.map(r=>{ const rr=rd.filter(d=>d.responsavel===r); const rv=rr.reduce((s,d)=>s+parseFloat(d.valor||0),0); const rp=rr.filter(d=>d.status==='pago').reduce((s,d)=>s+parseFloat(d.valor||0),0); const rar=rr.filter(d=>d.status!=='pago').reduce((s,d)=>s+parseFloat(d.valor||0),0); return `<div class="resp-card"><div class="resp-name">👤 ${r}</div><div class="mini-row"><span>Demandas</span><span>${rr.length}</span></div><div class="mini-row"><span>Volume</span><span style="color:#7C3AED">${fmt(rv)}</span></div><div class="mini-row"><span>Recebido</span><span style="color:#059669">${fmt(rp)}</span></div><div class="mini-row"><span>A Receber</span><span style="color:#D97706">${fmt(rar)}</span></div></div>`; }).join('');
+  id('report-stats').innerHTML=[{label:'Volume Total',value:fmt(total),accent:'#1F4E9C'},{label:'Recebido',value:fmt(pago),accent:'#5B7A3A'},{label:'A Receber',value:fmt(ar),accent:'#B7791F'},{label:'Demandas',value:rd.length,accent:'#1F4E9C'}].map(s=>`<div class="mini-stat" style="border-top-color:${s.accent}"><div class="label">${s.label}</div><div class="value">${s.value}</div></div>`).join('');
+  id('report-resp').innerHTML=RESPONSAVEIS.map(r=>{ const rr=rd.filter(d=>d.responsavel===r); const rv=rr.reduce((s,d)=>s+parseFloat(d.valor||0),0); const rp=rr.filter(d=>d.status==='pago').reduce((s,d)=>s+parseFloat(d.valor||0),0); const rar=rr.filter(d=>d.status!=='pago').reduce((s,d)=>s+parseFloat(d.valor||0),0); return `<div class="resp-card"><div class="resp-name"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg> ${r}</div><div class="mini-row"><span>Demandas</span><span>${rr.length}</span></div><div class="mini-row"><span>Volume</span><span style="color:#1F4E9C">${fmt(rv)}</span></div><div class="mini-row"><span>Recebido</span><span style="color:#5B7A3A">${fmt(rp)}</span></div><div class="mini-row"><span>A Receber</span><span style="color:#B7791F">${fmt(rar)}</span></div></div>`; }).join('');
   const pltHtml=PLATAFORMAS.map(p=>{ const pd=rd.filter(d=>d.plataforma===p); const pv=pd.reduce((s,d)=>s+parseFloat(d.valor||0),0); const pct=total?Math.round((pv/total)*100):0; return `<div style="margin-bottom:12px"><div style="display:flex;justify-content:space-between;margin-bottom:4px"><span style="font-size:13px;color:var(--text)">${p}</span><span style="font-size:12px;font-weight:600;color:var(--accent)">${fmt(pv)} · ${pd.length} dem.</span></div><div class="bar-track"><div class="bar-fill" style="width:${pct}%;background:var(--accent)"></div></div></div>`; }).join('');
   id('report-plataformas').innerHTML=`<div class="section-title" style="margin-bottom:14px">Por Plataforma</div>${pltHtml}`;
   if(!rd.length){ id('report-list').innerHTML=''; return; }
@@ -1537,11 +1598,11 @@ function checkConflitos(f) {
       const outros = participantesDaDemanda(d.id).map(v=>v.terceiro_id).filter(Boolean);
       const comuns = outros.filter(t=>envolvidos.has(t));
       if(comuns.length) {
-        avisos.push(`🕐 <b>${comuns.map(nomeTerc).join(', ')}</b> já tem "${d.descricao}" às <b>${d.horario.slice(0,5)}</b> no mesmo dia (diferença de ${dif} min — mínimo recomendado é ${TOLERANCIA_MIN} min).`);
+        avisos.push(`<svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg> <b>${comuns.map(nomeTerc).join(', ')}</b> já tem "${d.descricao}" às <b>${d.horario.slice(0,5)}</b> no mesmo dia (diferença de ${dif} min — mínimo recomendado é ${TOLERANCIA_MIN} min).`);
       } else if(!outros.length) {
         // Demanda antiga, sem participantes registrados: mantém o aviso
         // genérico de antes para não deixar de alertar sobre nada.
-        avisos.push(`🕐 <b>${d.responsavel}</b> já tem "${d.descricao}" marcado para <b>${d.horario.slice(0,5)}</b> no mesmo dia (diferença de ${dif} min).`);
+        avisos.push(`<svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg> <b>${d.responsavel}</b> já tem "${d.descricao}" marcado para <b>${d.horario.slice(0,5)}</b> no mesmo dia (diferença de ${dif} min).`);
       }
     });
   }
@@ -1554,18 +1615,18 @@ function checkConflitos(f) {
     if(envolvidos.size && !envolvidos.has(donoId)) return;
     const motivo = b.motivo ? ` — ${b.motivo}` : '';
     if(!b.horario_inicio && !b.horario_fim) {
-      avisos.push(`🔒 ${dono} bloqueou <b>o dia ${fmtDate(f.data)}</b> (indisponível)${motivo}.`);
+      avisos.push(`<svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="11" width="16" height="10" rx="2.5"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg> ${dono} bloqueou <b>o dia ${fmtDate(f.data)}</b> (indisponível)${motivo}.`);
       return;
     }
     const ini = b.horario_inicio ? timeToMin(b.horario_inicio) : 0;
     const fim = b.horario_fim ? timeToMin(b.horario_fim) : (24*60-1);
     if(!f.horario) {
-      avisos.push(`🔒 ${dono} está indisponível entre <b>${(b.horario_inicio||'00:00').slice(0,5)}</b> e <b>${(b.horario_fim||'23:59').slice(0,5)}</b> em ${fmtDate(f.data)}${motivo}. Confira o horário desta diligência.`);
+      avisos.push(`<svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="11" width="16" height="10" rx="2.5"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg> ${dono} está indisponível entre <b>${(b.horario_inicio||'00:00').slice(0,5)}</b> e <b>${(b.horario_fim||'23:59').slice(0,5)}</b> em ${fmtDate(f.data)}${motivo}. Confira o horário desta diligência.`);
       return;
     }
     const novoMin = timeToMin(f.horario);
     if(novoMin >= ini && novoMin <= fim) {
-      avisos.push(`🔒 ${dono} está indisponível das <b>${(b.horario_inicio||'00:00').slice(0,5)}</b> às <b>${(b.horario_fim||'23:59').slice(0,5)}</b> em ${fmtDate(f.data)}${motivo}.`);
+      avisos.push(`<svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="11" width="16" height="10" rx="2.5"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg> ${dono} está indisponível das <b>${(b.horario_inicio||'00:00').slice(0,5)}</b> às <b>${(b.horario_fim||'23:59').slice(0,5)}</b> em ${fmtDate(f.data)}${motivo}.`);
     }
   });
 
@@ -1607,7 +1668,7 @@ async function submitForm() {
   // Vaga sem pessoa não impede o cadastro: serve justamente para registrar
   // que ainda falta alguém. Vira aviso junto com os conflitos de agenda.
   if(abertas.length) {
-    avisos.unshift(`👥 ${abertas.length} vaga(s) ainda sem pessoa definida: ${abertas.map(p=>LABEL_FUNCAO[p.papel]).join(', ')}.`);
+    avisos.unshift(`<svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0M16 4a3.5 3.5 0 0 1 0 7M21.5 20a6.5 6.5 0 0 0-5-6.3"/></svg> ${abertas.length} vaga(s) ainda sem pessoa definida: ${abertas.map(p=>LABEL_FUNCAO[p.papel]).join(', ')}.`);
   }
   if(avisos.length) { pendingForm = f; showConflictModal(avisos); return; }
   await proceedSave(f);
@@ -1680,23 +1741,23 @@ function calcCustoPreview() {
   if(kmIda) {
     const kmTotal = kmIda * 2;
     combustivel = (kmTotal / consumo) * gas;
-    linhas.push(`⛽ Combustível: ${kmTotal.toFixed(1)} km total ÷ ${consumo} km/l × R$ ${gas.toFixed(2)}/l = <b>${fmt(combustivel)}</b>`);
+    linhas.push(`<svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 21V5a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2v16M3 21h12M4 10h10M14 8h2a2 2 0 0 1 2 2v6a1.5 1.5 0 0 0 3 0v-7l-3-3"/></svg> Combustível: ${kmTotal.toFixed(1)} km total ÷ ${consumo} km/l × R$ ${gas.toFixed(2)}/l = <b>${fmt(combustivel)}</b>`);
   } else {
-    linhas.push(`⚠️ Distância não disponível (diligência sem rota calculada) — combustível não estimado`);
+    linhas.push(`<svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l10 17H2z"/><path d="M12 10v4M12 17.5h.01"/></svg> Distância não disponível (diligência sem rota calculada) — combustível não estimado`);
   }
-  if(estac) linhas.push(`🅿️ Estacionamento: <b>${fmt(estac)}</b>`);
+  if(estac) linhas.push(`<svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="4" width="16" height="16" rx="3"/><path d="M9.5 16.5v-9H13a2.5 2.5 0 0 1 0 5H9.5"/></svg> Estacionamento: <b>${fmt(estac)}</b>`);
 
   const custoReal = (combustivel||0) + estac;
-  linhas.push(`<hr style="border:none;border-top:1px solid #DDD6FE;margin:8px 0"/>`);
-  linhas.push(`💸 <b>Custo real: ${fmt(custoReal)}</b>`);
+  linhas.push(`<hr style="border:none;border-top:1px solid #C5D5EE;margin:8px 0"/>`);
+  linhas.push(`<svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3h12v18l-2-1.5L14 21l-2-1.5L10 21l-2-1.5L6 21z"/><path d="M9 8h6M9 12h6M9 16h3"/></svg> <b>Custo real: ${fmt(custoReal)}</b>`);
 
   // confronto
-  if(d.valor_sugerido) linhas.push(`💡 Valor sugerido: ${fmt(d.valor_sugerido)}`);
+  if(d.valor_sugerido) linhas.push(`<svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 18h6M10 21h4M8.5 14.5A5.5 5.5 0 1 1 15.5 14.5c-.6.6-1 1.5-1 2.5h-5c0-1-.4-1.9-1-2.5z"/></svg> Valor sugerido: ${fmt(d.valor_sugerido)}`);
   if(d.valor) {
     const lucro = (d.valor||0) - custoReal;
     const pct = d.valor ? ((lucro/d.valor)*100).toFixed(0) : 0;
-    linhas.push(`💰 Valor cobrado: ${fmt(d.valor)}`);
-    linhas.push(`📊 Margem real: <b style="color:${lucro>=0?'#059669':'#B91C1C'}">${fmt(lucro)} (${pct}%)</b>`);
+    linhas.push(`<svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 7a2 2 0 0 1 2-2h13v4"/><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M16 13.5h5"/><circle cx="16" cy="13.5" r=".8"/></svg> Valor cobrado: ${fmt(d.valor)}`);
+    linhas.push(`<svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 20V10M12 20V4M19 20v-7"/></svg> Margem real: <b style="color:${lucro>=0?'#5B7A3A':'#8B2635'}">${fmt(lucro)} (${pct}%)</b>`);
   }
 
   id('cm-preview-body').innerHTML = linhas.map(l=>`<div style="margin-bottom:5px">${l}</div>`).join('');
@@ -1821,7 +1882,7 @@ function checkBloqueioVsDiligencias(data, horario_inicio, horario_fim) {
 }
 
 function showBloqueioConflictModal(conflitos) {
-  id('bloqueio-conflict-body').innerHTML = conflitos.map(d => `<div class="conflict-item">📌 Você já tem <b>"${d.descricao}"</b> agendado${d.horario?` para <b>${d.horario.slice(0,5)}</b>`:''} em ${fmtDate(d.data)}${d.local?` (${d.local})`:''}.<div style="margin-top:8px"><button class="btn btn-secondary" style="font-size:12px;padding:6px 12px" onclick="verDemandaConflito('${d.id}')">Ver demanda →</button></div></div>`).join('');
+  id('bloqueio-conflict-body').innerHTML = conflitos.map(d => `<div class="conflict-item"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s-6-5.3-6-11a6 6 0 0 1 12 0c0 5.7-6 11-6 11z"/><circle cx="12" cy="10" r="2.2"/></svg> Você já tem <b>"${d.descricao}"</b> agendado${d.horario?` para <b>${d.horario.slice(0,5)}</b>`:''} em ${fmtDate(d.data)}${d.local?` (${d.local})`:''}.<div style="margin-top:8px"><button class="btn btn-secondary" style="font-size:12px;padding:6px 12px" onclick="verDemandaConflito('${d.id}')">Ver demanda →</button></div></div>`).join('');
   id('bloqueio-conflict-modal').classList.remove('hidden');
 }
 function closeBloqueioConflictModal() {
@@ -1849,7 +1910,7 @@ async function removeBloqueio(bid) {
 }
 
 function renderBloqueios() {
-  if(!bloqueios.length) { id('bloqueios-list').innerHTML = `<div class="empty"><div class="empty-icon">🔓</div><div class="empty-title">Nenhum bloqueio cadastrado</div><div class="empty-sub">Adicione acima para marcar quem está indisponível</div></div>`; return; }
+  if(!bloqueios.length) { id('bloqueios-list').innerHTML = `<div class="empty"><div class="empty-icon"><svg class="ic xl" viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="11" width="16" height="10" rx="2.5"/><path d="M8 11V7a4 4 0 0 1 7.5-2"/></svg></div><div class="empty-title">Nenhum bloqueio cadastrado</div><div class="empty-sub">Adicione acima para marcar quem está indisponível</div></div>`; return; }
   id('bloqueios-list').innerHTML = bloqueios.map(b => {
     const periodo = (!b.horario_inicio && !b.horario_fim) ? 'Dia inteiro' : `${(b.horario_inicio||'00:00').slice(0,5)} – ${(b.horario_fim||'23:59').slice(0,5)}`;
     const dono = b.terceiro_id ? nomeTerc(b.terceiro_id) : 'Esdras';
@@ -1921,7 +1982,7 @@ function renderCalendario() {
     }
     let badges = '';
     if(m?.dem) badges += `<span class="cal-badge-dem">${m.dem}</span>`;
-    if(m?.bloq) badges += `<span class="cal-badge-lock">🔒</span>`;
+    if(m?.bloq) badges += `<span class="cal-badge-lock"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="11" width="16" height="10" rx="2.5"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg></span>`;
     h += `<div class="${cls}" onclick="abreCalDia('${iso}')"><div class="cal-day-num">${dia}</div>${badges?`<div class="cal-badges">${badges}</div>`:''}</div>`;
   }
   id('cal-grid').innerHTML = h;
@@ -1982,25 +2043,25 @@ function renderCalDia(iso) {
 
   // Bloco de resumo
   html += `<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px">
-    <div style="background:#FFFBEB;border:1px solid #FDE68A;border-radius:10px;padding:10px 12px">
-      <div style="font-size:9px;font-weight:700;color:#B45309;text-transform:uppercase;letter-spacing:.6px;margin-bottom:2px">A receber hoje</div>
-      <div style="font-size:15px;font-weight:700;color:#92400E">${fmt(previstoDia)}</div>
-      <div style="font-size:10px;color:#B45309;margin-top:2px">previsão de pgto hoje, não pago</div>
+    <div style="background:#FAF0DC;border:1px solid #EFD6A3;border-radius:10px;padding:10px 12px">
+      <div style="font-size:9px;font-weight:700;color:#B7791F;text-transform:uppercase;letter-spacing:.6px;margin-bottom:2px">A receber hoje</div>
+      <div style="font-size:15px;font-weight:700;color:#B7791F">${fmt(previstoDia)}</div>
+      <div style="font-size:10px;color:#B7791F;margin-top:2px">previsão de pgto hoje, não pago</div>
     </div>
-    <div style="background:#F0FDF4;border:1px solid #BBF7D0;border-radius:10px;padding:10px 12px">
-      <div style="font-size:9px;font-weight:700;color:#065F46;text-transform:uppercase;letter-spacing:.6px;margin-bottom:2px">Recebido hoje</div>
-      <div style="font-size:15px;font-weight:700;color:#065F46">${fmt(recebidoDia)}</div>
-      <div style="font-size:10px;color:#059669;margin-top:2px">previsão de pgto hoje, já pago</div>
+    <div style="background:#EAF0E1;border:1px solid #C9DAB0;border-radius:10px;padding:10px 12px">
+      <div style="font-size:9px;font-weight:700;color:#3F5A28;text-transform:uppercase;letter-spacing:.6px;margin-bottom:2px">Recebido hoje</div>
+      <div style="font-size:15px;font-weight:700;color:#3F5A28">${fmt(recebidoDia)}</div>
+      <div style="font-size:10px;color:#5B7A3A;margin-top:2px">previsão de pgto hoje, já pago</div>
     </div>
-    <div style="background:#FFFBEB;border:1px solid #FDE68A;border-radius:10px;padding:10px 12px">
-      <div style="font-size:9px;font-weight:700;color:#B45309;text-transform:uppercase;letter-spacing:.6px;margin-bottom:2px">A receber na semana</div>
-      <div style="font-size:15px;font-weight:700;color:#92400E">${fmt(previstoSemana)}</div>
-      <div style="font-size:10px;color:#B45309;margin-top:2px">dom a sáb desta semana, não pago</div>
+    <div style="background:#FAF0DC;border:1px solid #EFD6A3;border-radius:10px;padding:10px 12px">
+      <div style="font-size:9px;font-weight:700;color:#B7791F;text-transform:uppercase;letter-spacing:.6px;margin-bottom:2px">A receber na semana</div>
+      <div style="font-size:15px;font-weight:700;color:#B7791F">${fmt(previstoSemana)}</div>
+      <div style="font-size:10px;color:#B7791F;margin-top:2px">dom a sáb desta semana, não pago</div>
     </div>
-    <div style="background:#F0FDF4;border:1px solid #BBF7D0;border-radius:10px;padding:10px 12px">
-      <div style="font-size:9px;font-weight:700;color:#065F46;text-transform:uppercase;letter-spacing:.6px;margin-bottom:2px">Recebido na semana</div>
-      <div style="font-size:15px;font-weight:700;color:#065F46">${fmt(recebidoSemana)}</div>
-      <div style="font-size:10px;color:#059669;margin-top:2px">dom a sáb desta semana, já pago</div>
+    <div style="background:#EAF0E1;border:1px solid #C9DAB0;border-radius:10px;padding:10px 12px">
+      <div style="font-size:9px;font-weight:700;color:#3F5A28;text-transform:uppercase;letter-spacing:.6px;margin-bottom:2px">Recebido na semana</div>
+      <div style="font-size:15px;font-weight:700;color:#3F5A28">${fmt(recebidoSemana)}</div>
+      <div style="font-size:10px;color:#5B7A3A;margin-top:2px">dom a sáb desta semana, já pago</div>
     </div>
   </div>`;
 
@@ -2008,7 +2069,7 @@ function renderCalDia(iso) {
     html += bloqDia.map(b => {
       const periodo = (!b.horario_inicio && !b.horario_fim) ? 'Dia inteiro' : `${(b.horario_inicio||'00:00').slice(0,5)} – ${(b.horario_fim||'23:59').slice(0,5)}`;
       const dono = b.terceiro_id ? nomeTerc(b.terceiro_id) : 'Esdras';
-      return `<div class="conflict-item">🔒 ${dono} indisponível — ${periodo}${b.motivo?` (${b.motivo})`:''}</div>`;
+      return `<div class="conflict-item"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="11" width="16" height="10" rx="2.5"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg> ${dono} indisponível — ${periodo}${b.motivo?` (${b.motivo})`:''}</div>`;
     }).join('');
   }
 
@@ -2075,7 +2136,7 @@ function calcValorNosso() {
   const terceiro = somaTerceiros();
   const nosso = total - terceiro;
   id('f-valor-terceiro').value = terceiro ? fmt(terceiro) : '—';
-  id('f-valor-nosso').value = nosso >= 0 ? fmt(nosso) : '⚠️ ' + fmt(nosso);
+  id('f-valor-nosso').value = nosso >= 0 ? fmt(nosso) : '! ' + fmt(nosso);
 }
 
 // Enter no login
@@ -2092,7 +2153,7 @@ const CIDADES = ['Almirante Tamandaré','Araucária','Campina Grande do Sul','Co
 // Funções possíveis. "representante" substituiu "preposto" na v2.7.
 const FUNCOES = ['advogado','representante','outro'];
 const LABEL_FUNCAO = { advogado:'Advogado', representante:'Representante', outro:'Outro' };
-const ICONE_FUNCAO = { advogado:'⚖️', representante:'🧍', outro:'👤' };
+const ICONE_FUNCAO = { advogado:'<svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v18M5 21h14M3 8l9-2 9 2M6 8l-3 8a4 4 0 0 0 6 0L6 8zM18 8l-3 8a4 4 0 0 0 6 0l-3-8z"/></svg>', representante:'<svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>', outro:'<svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>' };
 
 let terceiros = [];          // equipe interna + terceiros externos
 let vinculos = [];           // demanda_terceiros: quem participou de qual demanda
@@ -2240,20 +2301,20 @@ function renderTerceiros() {
   lista.sort((a,b)=> (b.interno?1:0)-(a.interno?1:0) || a.nome.localeCompare(b.nome));
 
   if(!lista.length) {
-    id('terceiros-list').innerHTML = `<div class="empty"><div class="empty-icon">👥</div><div class="empty-title">Ninguém aqui</div><div class="empty-sub">Cadastre acima para começar</div></div>`;
+    id('terceiros-list').innerHTML = `<div class="empty"><div class="empty-icon"><svg class="ic xl" viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0M16 4a3.5 3.5 0 0 1 0 7M21.5 20a6.5 6.5 0 0 0-5-6.3"/></svg></div><div class="empty-title">Ninguém aqui</div><div class="empty-sub">Cadastre acima para começar</div></div>`;
     return;
   }
   id('terceiros-list').innerHTML = lista.map(t => {
     const qtd = vinculos.filter(v=>v.terceiro_id===t.id).length;
     const cidades = (t.cidades||[]).length
       ? (t.cidades||[]).map(c=>`<span class="chip-ro">${c}</span>`).join('')
-      : `<span style="font-size:12px;color:var(--red)">⚠️ Nenhuma cidade marcada — não vai aparecer como opção nas demandas</span>`;
+      : `<span style="font-size:12px;color:var(--red)"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l10 17H2z"/><path d="M12 10v4M12 17.5h.01"/></svg> Nenhuma cidade marcada — não vai aparecer como opção nas demandas</span>`;
     // Sem função marcada a pessoa não entra em nenhuma vaga, mesmo com
     // cidade certa. O aviso evita que ela "suma" sem explicação.
     const semFuncao = !(t.funcoes||[]).length
-      ? `<div style="font-size:12px;color:var(--red);margin-top:6px">⚠️ Nenhuma função marcada — não vai aparecer em nenhuma vaga</div>` : '';
-    const wpp = t.whatsapp ? `<a href="https://wa.me/55${String(t.whatsapp).replace(/\D/g,'')}" target="_blank" style="color:var(--green);text-decoration:none">📱 ${t.whatsapp}</a>` : '';
-    const pix = t.pix ? `<button class="btn-mini" onclick="copiarPix('${t.id}')">📋 PIX${t.pix_tipo?' ('+t.pix_tipo+')':''}</button>` : '';
+      ? `<div style="font-size:12px;color:var(--red);margin-top:6px"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l10 17H2z"/><path d="M12 10v4M12 17.5h.01"/></svg> Nenhuma função marcada — não vai aparecer em nenhuma vaga</div>` : '';
+    const wpp = t.whatsapp ? `<a href="https://wa.me/55${String(t.whatsapp).replace(/\D/g,'')}" target="_blank" style="color:var(--green);text-decoration:none"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="7" y="2" width="10" height="20" rx="2.5"/><path d="M11 18h2"/></svg> ${t.whatsapp}</a>` : '';
+    const pix = t.pix ? `<button class="btn-mini" onclick="copiarPix('${t.id}')"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="4" width="14" height="18" rx="2.5"/><path d="M9 4V3h6v1M9 11h6M9 15h4"/></svg> PIX${t.pix_tipo?' ('+t.pix_tipo+')':''}</button>` : '';
     return `<div class="terc-card${t.ativo?'':' inativo'}">
       <div class="terc-head">
         <div style="flex:1;min-width:180px">
@@ -2264,17 +2325,17 @@ function renderTerceiros() {
             ${t.valor_padrao?' · sugerido '+fmt(t.valor_padrao):''}
             · ${qtd} diligência(s)
           </div>
-          <div class="terc-meta" style="margin-top:4px">${wpp}${t.email?(wpp?' · ':'')+'✉️ '+t.email:''}</div>
+          <div class="terc-meta" style="margin-top:4px">${wpp}${t.email?(wpp?' · ':'')+'<svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2.5"/><path d="M3 8l9 6 9-6"/></svg> '+t.email:''}</div>
         </div>
         <div style="display:flex;gap:6px;flex-wrap:wrap">
           ${pix}
-          <button class="btn-mini" onclick="abrirAgenda('${t.id}')">📅 Agenda</button>
+          <button class="btn-mini" onclick="abrirAgenda('${t.id}')"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="3"/><path d="M3 10h18M8 3v4M16 3v4"/></svg> Agenda</button>
           <button class="btn-mini" onclick="editarTerceiro('${t.id}')">Editar</button>
           <button class="btn-mini danger" onclick="toggleAtivoTerceiro('${t.id}')">${t.ativo?'Arquivar':'Reativar'}</button>
         </div>
       </div>
       <div style="margin-top:10px">${cidades}</div>${semFuncao}
-      ${t.observacoes?`<div class="terc-meta" style="margin-top:8px;font-style:italic">💬 ${t.observacoes}</div>`:''}
+      ${t.observacoes?`<div class="terc-meta" style="margin-top:8px;font-style:italic"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 12a8 8 0 0 1-11.5 7.2L4 21l1.8-4.5A8 8 0 1 1 21 12z"/></svg> ${t.observacoes}</div>`:''}
     </div>`;
   }).join('');
 }
@@ -2289,7 +2350,7 @@ function preencheSelectCidadeDemanda() {
   const todas = [...CIDADES, ...extras.sort()];
   sel.innerHTML = `<option value="">Selecione...</option>` +
     todas.map(c=>`<option value="${c}">${c}</option>`).join('') +
-    `<option value="__OUTRA__">➕ Outra cidade...</option>`;
+    `<option value="__OUTRA__">+ Outra cidade...</option>`;
   if(atual) sel.value = atual;
 }
 function cidadeDemandaAtual() {
@@ -2337,7 +2398,7 @@ function renderParticipantes() {
     // foi arquivada, perdeu a função), ela continua na lista marcada em
     // vermelho em vez de sumir calada da demanda.
     if(p.terceiro_id && !cand.some(x=>x.id===p.terceiro_id)) {
-      opcoes += `<option value="${p.terceiro_id}" selected>⚠️ ${nomeTerc(p.terceiro_id)} (não atende esta vaga)</option>`;
+      opcoes += `<option value="${p.terceiro_id}" selected>! ${nomeTerc(p.terceiro_id)} (não atende esta vaga)</option>`;
     }
 
     const aviso = !cidade ? '<span style="color:var(--text3)"> — escolha a cidade</span>'
@@ -2359,8 +2420,8 @@ function renderParticipantes() {
           : `<input type="number" step="0.01" value="${p.valor??''}" placeholder="0.00" oninput="setPartCampo(${i},'valor',this.value)"/>`}
       </div>
       <div style="display:flex;gap:6px;padding-bottom:8px">
-        ${p.terceiro_id?`<button type="button" class="btn-mini" onclick="abrirAgenda('${p.terceiro_id}')">📅</button>`:''}
-        <button type="button" class="btn-mini danger" onclick="removerParticipante(${i})">✕</button>
+        ${p.terceiro_id?`<button type="button" class="btn-mini" onclick="abrirAgenda('${p.terceiro_id}')"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="3"/><path d="M3 10h18M8 3v4M16 3v4"/></svg></button>`:''}
+        <button type="button" class="btn-mini danger" onclick="removerParticipante(${i})"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
       </div>
     </div>`;
   }).join('');
@@ -2438,13 +2499,13 @@ function abrirAgenda(tid) {
   id('agenda-title').textContent = `Agenda de ${t.nome}`;
   id('agenda-sub').textContent = 'Próximos 30 dias';
   const linhas = [
-    ...dems.map(d=>({iso:(d.data||'').split('T')[0], h:`<div class="agenda-item"><b>${fmtDate(d.data)}</b>${d.horario?' · '+d.horario:''}<br>${d.descricao||''}<br><span style="color:var(--text3)">📍 ${d.local||''}${d.cidade?' — '+d.cidade:''}</span></div>`})),
-    ...blqs.map(b=>({iso:(b.data||'').split('T')[0], h:`<div class="agenda-item" style="border-left-color:var(--red)"><b>🔒 ${fmtDate(b.data)}</b>${b.horario_inicio?' · '+b.horario_inicio.slice(0,5)+'–'+(b.horario_fim||'').slice(0,5):' · dia inteiro'}<br>${b.motivo||'Indisponível'}</div>`}))
+    ...dems.map(d=>({iso:(d.data||'').split('T')[0], h:`<div class="agenda-item"><b>${fmtDate(d.data)}</b>${d.horario?' · '+d.horario:''}<br>${d.descricao||''}<br><span style="color:var(--text3)"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s-6-5.3-6-11a6 6 0 0 1 12 0c0 5.7-6 11-6 11z"/><circle cx="12" cy="10" r="2.2"/></svg> ${d.local||''}${d.cidade?' — '+d.cidade:''}</span></div>`})),
+    ...blqs.map(b=>({iso:(b.data||'').split('T')[0], h:`<div class="agenda-item" style="border-left-color:var(--red)"><b><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="11" width="16" height="10" rx="2.5"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg> ${fmtDate(b.data)}</b>${b.horario_inicio?' · '+b.horario_inicio.slice(0,5)+'–'+(b.horario_fim||'').slice(0,5):' · dia inteiro'}<br>${b.motivo||'Indisponível'}</div>`}))
   ].sort((a,b)=>a.iso.localeCompare(b.iso));
 
   id('agenda-body').innerHTML = linhas.length
     ? linhas.map(x=>x.h).join('')
-    : `<div class="agenda-item livre">✅ Agenda livre nos próximos 30 dias</div>`;
+    : `<div class="agenda-item livre"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M8 12l3 3 5-6"/></svg> Agenda livre nos próximos 30 dias</div>`;
   id('agenda-modal').classList.remove('hidden');
 }
 function closeAgendaModal() { id('agenda-modal').classList.add('hidden'); }
@@ -2453,8 +2514,8 @@ function closeAgendaModal() { id('agenda-modal').classList.add('hidden'); }
 function preencheSelectPerfil() {
   const sel = id('cal-perfil'); if(!sel) return;
   const ativos = terceiros.filter(t=>t.ativo).sort((a,b)=>(b.interno?1:0)-(a.interno?1:0) || a.nome.localeCompare(b.nome));
-  sel.innerHTML = `<option value="GERAL">📆 Geral (todos)</option>` +
-    ativos.map(t=>`<option value="${t.id}">${t.interno?'👤':'🤝'} ${t.nome}</option>`).join('');
+  sel.innerHTML = `<option value="GERAL">Geral (todos)</option>` +
+    ativos.map(t=>`<option value="${t.id}">${t.interno?'':'(terceiro) '}${t.nome}</option>`).join('');
   // Se o perfil selecionado foi arquivado, volta para Geral em vez de
   // deixar o calendário mostrando vazio sem explicação.
   if(calPerfil!=='GERAL' && !ativos.some(t=>t.id===calPerfil)) calPerfil='GERAL';
@@ -2506,16 +2567,16 @@ function blocoParticipantes(d) {
   const ps = participantesDaDemanda(d.id);
   if(!ps.length) {
     if(d.responsavel==='Terceiro' && d.valor_terceiro) {
-      return `<div class="detail-row"><span class="detail-label">🤝 Val. Terceiro</span><span class="detail-value">${fmt(d.valor_terceiro)}</span></div>`
-           + `<div class="detail-row"><span class="detail-label">💼 Val. de vocês</span><span class="detail-value" style="color:#059669;font-weight:700">${fmt((d.valor||0)-(d.valor_terceiro||0))}</span></div>`;
+      return `<div class="detail-row"><span class="detail-label"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0M16 4a3.5 3.5 0 0 1 0 7M21.5 20a6.5 6.5 0 0 0-5-6.3"/></svg> Val. Terceiro</span><span class="detail-value">${fmt(d.valor_terceiro)}</span></div>`
+           + `<div class="detail-row"><span class="detail-label"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="7" width="18" height="13" rx="2.5"/><path d="M9 7V5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2M3 12h18"/></svg> Val. de vocês</span><span class="detail-value" style="color:#5B7A3A;font-weight:700">${fmt((d.valor||0)-(d.valor_terceiro||0))}</span></div>`;
     }
     return '';
   }
   const linhas = ps.map(v => {
     const t = tercById(v.terceiro_id);
-    const wpp = t?.whatsapp ? ` <a href="https://wa.me/55${String(t.whatsapp).replace(/\D/g,'')}" target="_blank" style="color:var(--green);text-decoration:none">📱</a>` : '';
+    const wpp = t?.whatsapp ? ` <a href="https://wa.me/55${String(t.whatsapp).replace(/\D/g,'')}" target="_blank" style="color:var(--green);text-decoration:none"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="7" y="2" width="10" height="20" rx="2.5"/><path d="M11 18h2"/></svg></a>` : '';
     const pix = t?.pix ? ` <button class="btn-mini" onclick="copiarPix('${t.id}')">PIX</button>` : '';
-    const icone = ICONE_FUNCAO[v.papel] || '👤';
+    const icone = ICONE_FUNCAO[v.papel] || '<svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>';
     if(!v.terceiro_id) {
       return `<div class="detail-row"><span class="detail-label">${icone} ${LABEL_FUNCAO[v.papel]||'Vaga'}</span><span class="detail-value" style="color:var(--yellow)">a definir</span></div>`;
     }
@@ -2524,8 +2585,8 @@ function blocoParticipantes(d) {
   }).join('');
   const totalT = ps.reduce((acc,v)=>{ if(!v.terceiro_id) return acc; const t=tercById(v.terceiro_id); return acc + (t?.interno?0:(parseFloat(v.valor)||0)); },0);
   return linhas
-    + (totalT?`<div class="detail-row"><span class="detail-label">🤝 Total a terceiros</span><span class="detail-value">${fmt(totalT)}</span></div>`:'')
-    + `<div class="detail-row"><span class="detail-label">💼 Val. de vocês</span><span class="detail-value" style="color:#059669;font-weight:700">${fmt((d.valor||0)-totalT)}</span></div>`;
+    + (totalT?`<div class="detail-row"><span class="detail-label"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0M16 4a3.5 3.5 0 0 1 0 7M21.5 20a6.5 6.5 0 0 0-5-6.3"/></svg> Total a terceiros</span><span class="detail-value">${fmt(totalT)}</span></div>`:'')
+    + `<div class="detail-row"><span class="detail-label"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="7" width="18" height="13" rx="2.5"/><path d="M9 7V5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2M3 12h18"/></svg> Val. de vocês</span><span class="detail-value" style="color:#5B7A3A;font-weight:700">${fmt((d.valor||0)-totalT)}</span></div>`;
 }
 
 function quemCumpre(d) {
@@ -2649,7 +2710,7 @@ async function calcularRota() {
     const estac   = calcParking ? 10 : 0;
     const valMin  = comb + estac + lucro;
 
-    id('calc-rota-desc').textContent   = '📍 ' + orig.label.split(',').slice(0,3).join(',') + '  →  🏁 ' + dest.label.split(',').slice(0,3).join(',');
+    id('calc-rota-desc').textContent   = ''  + orig.label.split(',').slice(0,3).join(',') + '  →  ' + dest.label.split(',').slice(0,3).join(',');
     id('calc-r-km-ida').textContent    = kmIda.toFixed(1) + ' km';
     id('calc-r-min-ida').textContent   = calcFmtMin(minIda);
     id('calc-r-km-total').textContent  = kmTotal.toFixed(1) + ' km';
@@ -2675,7 +2736,7 @@ async function calcularRota() {
     };
     id('calc-criar-btn').style.display = 'block';
   } catch (e) {
-    id('calc-erro-msg').textContent = '⚠️ ' + (e.message || 'Erro inesperado.');
+    id('calc-erro-msg').textContent = '' + (e.message || 'Erro inesperado.');
     id('calc-erro').style.display = 'block';
   } finally {
     id('calc-loading').style.display = 'none';
@@ -2711,7 +2772,7 @@ function renderRevisao() {
   id('rev-counter').textContent = `${lista.length} demanda(s)`;
 
   if(!lista.length) {
-    id('revisao-list').innerHTML = `<div class="empty"><div class="empty-icon">✅</div><div class="empty-title">Todas as demandas já têm custo registrado!</div></div>`;
+    id('revisao-list').innerHTML = `<div class="empty"><div class="empty-icon"><svg class="ic xl" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M8 12l3 3 5-6"/></svg></div><div class="empty-title">Todas as demandas já têm custo registrado!</div></div>`;
     return;
   }
 
@@ -2726,22 +2787,22 @@ function renderRevisao() {
           <div class="rev-card-meta">${fmtDate(d.data)}${d.horario?' · '+d.horario.slice(0,5):''}${d.local?' · '+d.local:''} · ${d.responsavel}</div>
         </div>
         ${feito
-          ? `<span class="rev-done-badge">✓ Registrado</span>`
+          ? `<span class="rev-done-badge"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M8 12l3 3 5-6"/></svg> Registrado</span>`
           : `<span class="badge badge-waiting">${fmt(d.valor)}</span>`}
       </div>
 
       ${feito
         ? `<div class="rev-preview">
-            🚗 ${d.veiculo_usado||'—'} · Ida+volta: ${d.km_total||'—'}<br>
-            💸 Custo real: <b>${fmt(d.custo_real)}</b>${d.estacionamento_real?` (🅿️ R$${parseFloat(d.estacionamento_real).toFixed(2)})`:''}
-            · 📈 Margem: <b style="color:${lucroFeito>=0?'#059669':'#B91C1C'}">${fmt(lucroFeito)}</b>
+            <svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 15l1.5-5A2 2 0 0 1 7.4 8.5h9.2a2 2 0 0 1 1.9 1.5L20 15M4 15h16v4H4zM4 15v-1M20 15v-1"/><circle cx="7.5" cy="19" r="1.5"/><circle cx="16.5" cy="19" r="1.5"/></svg> ${d.veiculo_usado||'—'} · Ida+volta: ${d.km_total||'—'}<br>
+            <svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3h12v18l-2-1.5L14 21l-2-1.5L10 21l-2-1.5L6 21z"/><path d="M9 8h6M9 12h6M9 16h3"/></svg> Custo real: <b>${fmt(d.custo_real)}</b>${d.estacionamento_real?` (<svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="4" width="16" height="16" rx="3"/><path d="M9.5 16.5v-9H13a2.5 2.5 0 0 1 0 5H9.5"/></svg> R$${parseFloat(d.estacionamento_real).toFixed(2)})`:''}
+            · <svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 17l6-6 4 4 8-8M15 7h6v6"/></svg> Margem: <b style="color:${lucroFeito>=0?'#5B7A3A':'#8B2635'}">${fmt(lucroFeito)}</b>
            </div>`
         : `<div class="rev-fields">
             <div class="rev-field" style="grid-column:1/-1">
               <label>Origem</label>
               <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap">
-                <button class="filter-btn active" id="rev-orig-pill-base-${d.id}" style="font-size:10px;padding:5px 8px;white-space:nowrap" onclick="revToggleOrigem('${d.id}','base')">📍 Base — Pinhais</button>
-                <button class="filter-btn" id="rev-orig-pill-outro-${d.id}" style="font-size:10px;padding:5px 8px;white-space:nowrap" onclick="revToggleOrigem('${d.id}','outro')">📌 Outro endereço</button>
+                <button class="filter-btn active" id="rev-orig-pill-base-${d.id}" style="font-size:10px;padding:5px 8px;white-space:nowrap" onclick="revToggleOrigem('${d.id}','base')"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s-6-5.3-6-11a6 6 0 0 1 12 0c0 5.7-6 11-6 11z"/><circle cx="12" cy="10" r="2.2"/></svg> Base — Pinhais</button>
+                <button class="filter-btn" id="rev-orig-pill-outro-${d.id}" style="font-size:10px;padding:5px 8px;white-space:nowrap" onclick="revToggleOrigem('${d.id}','outro')"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s-6-5.3-6-11a6 6 0 0 1 12 0c0 5.7-6 11-6 11z"/><circle cx="12" cy="10" r="2.2"/></svg> Outro endereço</button>
               </div>
               <input type="text" id="rev-orig-${d.id}" placeholder="Rua, número, cidade…" style="display:none;margin-top:6px;width:100%;padding:7px 10px;font-size:12px;border:1px solid var(--border);border-radius:8px;font-family:inherit;box-sizing:border-box"/>
             </div>
@@ -2753,9 +2814,9 @@ function renderRevisao() {
           <div style="margin-bottom:10px">
             <div style="font-size:10px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.4px;margin-bottom:5px">Veículo *</div>
             <div class="rev-veiculos">
-              <button class="rev-vbtn" id="rev-v-captur-${d.id}" onclick="revSelVeiculo('${d.id}','captur')">🚙<div>Captur</div><div style="font-size:9px;opacity:.6">7 km/l</div></button>
-              <button class="rev-vbtn" id="rev-v-c3-${d.id}" onclick="revSelVeiculo('${d.id}','c3')">🚗<div>C3</div><div style="font-size:9px;opacity:.6">10,5 km/l</div></button>
-              <button class="rev-vbtn" id="rev-v-moto-${d.id}" onclick="revSelVeiculo('${d.id}','moto')">🏍️<div>Moto</div><div style="font-size:9px;opacity:.6">20 km/l</div></button>
+              <button class="rev-vbtn" id="rev-v-captur-${d.id}" onclick="revSelVeiculo('${d.id}','captur')"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 15l2-6h11l4 4h1v2M3 15h18v4H3z"/><circle cx="7" cy="19" r="1.5"/><circle cx="17" cy="19" r="1.5"/><path d="M10 9v6"/></svg><div>Captur</div><div style="font-size:9px;opacity:.6">7 km/l</div></button>
+              <button class="rev-vbtn" id="rev-v-c3-${d.id}" onclick="revSelVeiculo('${d.id}','c3')"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 15l1.5-5A2 2 0 0 1 7.4 8.5h9.2a2 2 0 0 1 1.9 1.5L20 15M4 15h16v4H4zM4 15v-1M20 15v-1"/><circle cx="7.5" cy="19" r="1.5"/><circle cx="16.5" cy="19" r="1.5"/></svg><div>C3</div><div style="font-size:9px;opacity:.6">10,5 km/l</div></button>
+              <button class="rev-vbtn" id="rev-v-moto-${d.id}" onclick="revSelVeiculo('${d.id}','moto')"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="5.5" cy="17" r="3.5"/><circle cx="18.5" cy="17" r="3.5"/><path d="M5.5 17l3.5-7h5l2 3h-6M14 10l1.5-3H18M18.5 17l-3-7"/></svg><div>Moto</div><div style="font-size:9px;opacity:.6">20 km/l</div></button>
             </div>
           </div>
           <div style="margin-bottom:10px">
@@ -2805,7 +2866,7 @@ async function revCalcular(did) {
   if(st.parking && !(id(`rev-park-val-${did}`)?.value)) return showToast('Informe o valor do estacionamento.','err');
 
   const previewEl = id(`rev-preview-${did}`);
-  previewEl.textContent = '⏳ Calculando rota…';
+  previewEl.textContent = 'Calculando rota…';
   previewEl.style.display = 'block';
   id(`rev-salvar-${did}`).style.display = 'none';
 
@@ -2842,14 +2903,14 @@ async function revCalcular(did) {
     const pct      = d?.valor ? ((lucro/d.valor)*100).toFixed(0) : 0;
 
     previewEl.innerHTML = [
-      `📍 ${orig.label.split(',').slice(0,3).join(',')} → 🏁 ${dest.label.split(',').slice(0,3).join(',')}`,
-      `⛽ ${kmTotal.toFixed(1)} km ida+volta ÷ ${consumo} km/l × R$${gas.toFixed(2)}/l = <b>${fmt(comb)}</b>`,
-      estac ? `🅿️ Estacionamento: <b>${fmt(estac)}</b>` : null,
-      `<hr style="border:none;border-top:1px solid #DDD6FE;margin:5px 0"/>`,
-      `💸 Custo real: <b>${fmt(custoReal)}</b>`,
-      d?.valor_sugerido ? `💡 Valor sugerido: ${fmt(d.valor_sugerido)}` : null,
-      `💰 Valor cobrado: <b>${fmt(d?.valor)}</b>`,
-      `📈 Margem real: <b style="color:${lucro>=0?'#059669':'#B91C1C'}">${fmt(lucro)} (${pct}%)</b>`
+      `<svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s-6-5.3-6-11a6 6 0 0 1 12 0c0 5.7-6 11-6 11z"/><circle cx="12" cy="10" r="2.2"/></svg> ${orig.label.split(',').slice(0,3).join(',')} → <svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 21V4M5 4h11l-2 4 2 4H5"/></svg> ${dest.label.split(',').slice(0,3).join(',')}`,
+      `<svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 21V5a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2v16M3 21h12M4 10h10M14 8h2a2 2 0 0 1 2 2v6a1.5 1.5 0 0 0 3 0v-7l-3-3"/></svg> ${kmTotal.toFixed(1)} km ida+volta ÷ ${consumo} km/l × R$${gas.toFixed(2)}/l = <b>${fmt(comb)}</b>`,
+      estac ? `<svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="4" width="16" height="16" rx="3"/><path d="M9.5 16.5v-9H13a2.5 2.5 0 0 1 0 5H9.5"/></svg> Estacionamento: <b>${fmt(estac)}</b>` : null,
+      `<hr style="border:none;border-top:1px solid #C5D5EE;margin:5px 0"/>`,
+      `<svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3h12v18l-2-1.5L14 21l-2-1.5L10 21l-2-1.5L6 21z"/><path d="M9 8h6M9 12h6M9 16h3"/></svg> Custo real: <b>${fmt(custoReal)}</b>`,
+      d?.valor_sugerido ? `<svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 18h6M10 21h4M8.5 14.5A5.5 5.5 0 1 1 15.5 14.5c-.6.6-1 1.5-1 2.5h-5c0-1-.4-1.9-1-2.5z"/></svg> Valor sugerido: ${fmt(d.valor_sugerido)}` : null,
+      `<svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 7a2 2 0 0 1 2-2h13v4"/><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M16 13.5h5"/><circle cx="16" cy="13.5" r=".8"/></svg> Valor cobrado: <b>${fmt(d?.valor)}</b>`,
+      `<svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 17l6-6 4 4 8-8M15 7h6v6"/></svg> Margem real: <b style="color:${lucro>=0?'#5B7A3A':'#8B2635'}">${fmt(lucro)} (${pct}%)</b>`
     ].filter(Boolean).map(l=>`<div style="margin-bottom:3px">${l}</div>`).join('');
 
     const btn = id(`rev-salvar-${did}`);
@@ -2861,7 +2922,7 @@ async function revCalcular(did) {
     btn.dataset.destino = dest.label;
     btn.dataset.veiculo = VEICULOS[st.veiculo].label;
   } catch(e) {
-    previewEl.innerHTML = `⚠️ ${e.message||'Erro inesperado.'}`;
+    previewEl.innerHTML = `<svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l10 17H2z"/><path d="M12 10v4M12 17.5h.01"/></svg> ${e.message||'Erro inesperado.'}`;
   }
 }
 
@@ -2879,7 +2940,7 @@ async function revSalvar(did) {
   const { error } = await sb.from('demandas').update(payload).eq('id', did);
   if(error) { showToast('Erro ao salvar.','err'); btn.textContent='Salvar'; btn.disabled=false; return; }
   await loadDemands();
-  showToast('✅ Salvo!');
+  showToast('Salvo!');
   renderRevisao();
 }
 </script>
