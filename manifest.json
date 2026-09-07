@@ -1,11 +1,11 @@
 {
-  "name": "Diligências — Escritório Naiarha",
+  "name": "Diligências — Naiarha Almeida Advogada",
   "short_name": "Diligências",
   "description": "Gestão de diligências jurídicas",
   "start_url": ".",
   "display": "standalone",
-  "background_color": "#F5F4F2",
-  "theme_color": "#5B21B6",
+  "background_color": "#003462",
+  "theme_color": "#003462",
   "orientation": "portrait-primary",
   "icons": [
     {

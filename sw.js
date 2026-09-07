@@ -1,4 +1,4 @@
-const CACHE = 'diligencias-v7';
+const CACHE = 'diligencias-v8';
 
 self.addEventListener('install', e => {
   self.skipWaiting();
