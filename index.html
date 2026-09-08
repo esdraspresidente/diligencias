@@ -532,7 +532,7 @@
         <div class="user-avatar" id="user-avatar">?</div>
         <div class="user-name" id="user-name">...</div>
       </div>
-      <button id="new-btn" onclick="goPage('calculadora')">+ Nova</button>
+      <button id="new-btn" onclick="goPage('novo')">+ Nova</button>
     </div>
   </header>
 
@@ -552,7 +552,7 @@
     <button class="nav-item" id="nav-bloqueios" onclick="goPage('bloqueios')"><span class="nav-icon"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="11" width="16" height="10" rx="2.5"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg></span> Bloqueios</button>
     <button class="nav-item" id="nav-revisao" onclick="goPage('revisao')"><span class="nav-icon"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="4" width="14" height="18" rx="2.5"/><path d="M9 4V3h6v1M9 11h6M9 15h4"/></svg></span> Revisão em Lote</button>
     <div class="sidebar-footer">
-      <p style="font-size:10px;color:var(--text3);margin-bottom:10px">v2.8 · Com Supabase</p>
+      <p style="font-size:10px;color:var(--text3);margin-bottom:10px">v2.9 · Com Supabase</p>
       <button class="logout-btn" onclick="doLogout()">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16,17 21,12 16,7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
         Sair da conta
@@ -609,6 +609,11 @@
           <div class="page-title" id="form-title">Nova Demanda</div>
         </div>
         <div class="card card-pad">
+
+          <!-- A calculadora virou opcional: quem quiser a rota entra por aqui. -->
+          <button type="button" class="btn btn-secondary" id="f-abrir-calc" style="width:100%;margin-bottom:16px" onclick="goPage('calculadora')">
+            Calcular rota e valor sugerido
+          </button>
 
           <!-- Bloco de rota (preenchido pela calculadora) -->
           <div id="f-rota-bloco" style="display:none;margin-bottom:16px">
@@ -809,6 +814,12 @@
 
         <div id="calc-erro" style="display:none" class="card card-pad">
           <p style="color:var(--red);font-size:13px" id="calc-erro-msg"></p>
+          <!-- ⚠️ ELEMENTO CRÍTICO — NÃO REMOVER -->
+          <!-- Saída de emergência: o cálculo depende de serviço externo que pode
+               falhar. Sem este botão, uma queda lá fora impede o cadastro aqui. -->
+          <button class="btn btn-secondary" style="width:100%;margin-top:12px" onclick="cadastrarSemCalcular()">
+            Cadastrar sem calcular
+          </button>
         </div>
 
         <div id="calc-resultado" style="display:none">
@@ -2101,13 +2112,29 @@ function fecharCalEAbrirDetalhe(did) {
 
 function novaDiligenciaNoDia(iso) {
   closeCalDayModal();
-  goPage('calculadora');
-  setTimeout(()=>{ id('f-data') && (id('f-data').value = iso); }, 100);
-  // Guarda data para pré-preencher depois que calcular
+  // Vai direto ao formulário. Antes passava pela calculadora, o que fazia o
+  // cadastro depender de um serviço de mapas de terceiro estar no ar.
+  goPage('novo');
+  // Depois do goPage: clearForm() limpa os campos, então a data tem que ser
+  // escrita em seguida, não antes.
+  id('f-data').value = iso;
+  // Guarda a data caso a pessoa decida passar pela calculadora depois.
   calcDataPreenchida = iso;
 }
 
 let calcDataPreenchida = null;
+
+// Leva ao formulário aproveitando o endereço já digitado, sem exigir rota.
+// Os campos de km/combustível/valor sugerido são opcionais no salvamento
+// (gravam como null), então a demanda fica íntegra sem eles.
+function cadastrarSemCalcular() {
+  const destino = (id('calc-destino').value || '').trim();
+  goPage('novo');
+  if (destino) id('f-endereco').value = destino;
+  if (calcDataPreenchida) { id('f-data').value = calcDataPreenchida; calcDataPreenchida = null; }
+  id('form-back-btn').onclick = () => goPage('calculadora');
+  showToast('Informe o valor manualmente.', 'ok');
+}
 
 function irParaFormularioDaCalculadora() {
   if(!calcUltimoResultado) { showToast('Calcule a rota antes de continuar.','err'); return; }
@@ -2736,7 +2763,12 @@ async function calcularRota() {
     };
     id('calc-criar-btn').style.display = 'block';
   } catch (e) {
-    id('calc-erro-msg').textContent = '' + (e.message || 'Erro inesperado.');
+    // "Failed to fetch" é TypeError e não diz nada a quem está usando o app.
+    // Quando a falha é de rede, a mensagem precisa apontar a saída.
+    const msg = (e && e.name === 'TypeError')
+      ? 'Serviço de mapas indisponível agora. Cadastre a diligência e informe o valor manualmente.'
+      : (e.message || 'Erro inesperado.');
+    id('calc-erro-msg').textContent = msg;
     id('calc-erro').style.display = 'block';
   } finally {
     id('calc-loading').style.display = 'none';
