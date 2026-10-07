@@ -3092,7 +3092,7 @@ const TF_URL = 'https://ggyngtqknonwnohbzkyj.supabase.co/rest/v1/';
 const TF_KEY = 'sb_publishable_WJOo1uEpdSXTPoPDlErTJw_vPSe5x1S';
 const TF_TIPO = { outro:'Tarefa', rotina:'Rotina', processo:'Processo', protocolo:'Protocolo', prazo_projudi:'Prazo PROJUDI', prazo_inss:'Prazo INSS' };
 const TF_STATUS = { a_fazer:'A fazer', fazendo:'Fazendo', aguardando:'Aguardando', feito:'Feito', cancelada:'Cancelada' };
-const TF_FILTROS = [['abertas','Abertas'],['urgentes','Vencidas e hoje'],['crm','Vindas do CRM'],['prazos','Prazos'],['minhas','Só minhas'],['feitas','Feitas']];
+const TF_FILTROS = [['abertas','Abertas'],['urgentes','Vencidas e hoje'],['djen','Intimações (DJEN)'],['crm','Vindas do CRM'],['prazos','Prazos'],['minhas','Só minhas'],['feitas','Feitas']];
 let tfDados = [], tfMembros = [], tfFiltro = 'abertas', tfBusca = '', tfEditando = null, tfSouMembro = false;
 
 const tfEsc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -3159,7 +3159,8 @@ function tfFiltrar() {
     if (tfFiltro === 'feitas') { if (aberta(t)) return false; }
     else if (!aberta(t)) return false;
     if (tfFiltro === 'urgentes' && !(t.prazo_em && t.prazo_em <= hoje)) return false;
-    if (tfFiltro === 'crm' && !t.origem_app) return false;
+    if (tfFiltro === 'crm' && t.origem_app !== 'previmater-crm') return false;
+    if (tfFiltro === 'djen' && t.origem_app !== 'djen') return false;
     if (tfFiltro === 'prazos' && !['prazo_projudi','prazo_inss','processo'].includes(t.tipo)) return false;
     if (tfFiltro === 'minhas' && t.responsavel_id !== currentUser?.id) return false;
     if (q && !`${t.titulo} ${t.numero_processo||''} ${t.descricao||''} ${t.orgao||''}`.toLowerCase().includes(q)) return false;
@@ -3199,7 +3200,7 @@ function tfLinha(t) {
   const feita = t.status === 'feito', hoje = tfHoje();
   const resp = tfMembros.find(m => m.user_id === t.responsavel_id);
   const tags = [];
-  if (t.origem_app) tags.push('<span class="tf-tag crm">CRM</span>');
+  if (t.origem_app) tags.push(`<span class="tf-tag crm">${t.origem_app === 'djen' ? 'DJEN' : 'CRM'}</span>`);
   tags.push(`<span class="tf-tag">${TF_TIPO[t.tipo]||'Tarefa'}</span>`);
   if (['fazendo','aguardando','cancelada'].includes(t.status)) tags.push(`<span class="tf-tag st">${TF_STATUS[t.status]}</span>`);
   if (t.prazo_em) {
@@ -3238,7 +3239,12 @@ async function tfAbrir(tid) {
   const t = tid ? tfDados.find(x => x.id === tid) : null;
   tfEditando = t ? t.id : null;
   id('tf-m-titulo').textContent = t ? 'Editar tarefa' : 'Nova tarefa';
-  id('tf-m-origem').textContent = t?.origem_app ? 'Veio do CRM. Concluir move o card para "Protocolado judicial" e avisa a cliente pelo WhatsApp.' : '';
+  // Tarefa do DJEN nasce SEM prazo: o leitor não conta prazo processual.
+  id('tf-m-origem').textContent = t?.origem_app === 'previmater-crm'
+    ? 'Veio do CRM. Concluir move o card para "Protocolado judicial" e avisa a cliente pelo WhatsApp.'
+    : t?.origem_app === 'djen' ? 'Veio do DJEN. Confira a publicação e digite o prazo final para receber os avisos.' : '';
+  const link = t?.origem_app === 'djen' && (t.descricao || '').match(/Link: (https?:\/\/\S+)/);
+  if (link) id('tf-m-origem').innerHTML = tfEsc(id('tf-m-origem').textContent) + ` <a href="${tfEsc(link[1])}" target="_blank" rel="noopener">Abrir a publicação</a>`;
   id('tf-resp').innerHTML = tfMembros.map(m => `<option value="${m.user_id}">${tfEsc(m.nome)}</option>`).join('');
   id('tf-titulo').value = t?.titulo || '';
   id('tf-tipo').value = t?.tipo || 'outro';
