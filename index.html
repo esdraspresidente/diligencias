@@ -275,6 +275,8 @@
     #app:has(#page-novo.active)        #tab-demandas,
     #app:has(#page-calendario.active)  #tab-calendario,
     #app:has(#page-calculadora.active) #tab-calculadora,
+    #app:has(#page-processuais.active) #tab-processuais,
+    #app:has(#page-tarefas.active)     #tab-tarefas,
     #app:has(#sidebar.open)            #tab-mais { color: var(--accent); }
 
     #main { padding: 22px 16px calc(var(--tab-h) + 24px + env(safe-area-inset-bottom)); }
@@ -568,6 +570,7 @@
     </div>
     <div class="sidebar-section-label">Menu</div>
     <button class="nav-item active" id="nav-dashboard" onclick="goPage('dashboard')"><span class="nav-icon"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg></span> Dashboard</button>
+    <button class="nav-item" id="nav-processuais" style="display:none" onclick="goPage('processuais')"><span class="nav-icon"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v18M7 21h10M5 7h14M5 7l-3 6a3 3 0 0 0 6 0zM19 7l-3 6a3 3 0 0 0 6 0z"/></svg></span> Processuais</button>
     <button class="nav-item" id="nav-tarefas" style="display:none" onclick="goPage('tarefas')"><span class="nav-icon"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="4" width="16" height="16" rx="3"/><path d="M8 12l3 3 5-6"/></svg></span> Tarefas</button>
     <button class="nav-item" id="nav-demandas" onclick="goPage('demandas')"><span class="nav-icon"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h10"/></svg></span> Demandas</button>
     <button class="nav-item" id="nav-calendario" onclick="goPage('calendario')"><span class="nav-icon"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="3"/><path d="M3 10h18M8 3v4M16 3v4"/></svg></span> Calendário</button>
@@ -577,7 +580,7 @@
     <button class="nav-item" id="nav-bloqueios" onclick="goPage('bloqueios')"><span class="nav-icon"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="11" width="16" height="10" rx="2.5"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg></span> Bloqueios</button>
     <button class="nav-item" id="nav-revisao" onclick="goPage('revisao')"><span class="nav-icon"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="4" width="14" height="18" rx="2.5"/><path d="M9 4V3h6v1M9 11h6M9 15h4"/></svg></span> Revisão em Lote</button>
     <div class="sidebar-footer">
-      <p style="font-size:10px;color:var(--text3);margin-bottom:10px">v3.0 · Com Supabase</p>
+      <p style="font-size:10px;color:var(--text3);margin-bottom:10px">v3.1 · Com Supabase</p>
       <button class="logout-btn" onclick="doLogout()">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16,17 21,12 16,7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
         Sair da conta
@@ -588,10 +591,11 @@
   <!-- BARRA INFERIOR (celular) -->
   <nav id="tabbar">
     <button class="tab-item" id="tab-dashboard" onclick="goPage('dashboard')"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>Dashboard</button>
+    <button class="tab-item" id="tab-processuais" style="display:none" onclick="goPage('processuais')"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v18M7 21h10M5 7h14M5 7l-3 6a3 3 0 0 0 6 0zM19 7l-3 6a3 3 0 0 0 6 0z"/></svg>Processuais</button>
+    <button class="tab-item" id="tab-tarefas" style="display:none" onclick="goPage('tarefas')"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="4" width="16" height="16" rx="3"/><path d="M8 12l3 3 5-6"/></svg>Tarefas</button>
     <button class="tab-item" id="tab-demandas" onclick="goPage('demandas')"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h10"/></svg>Demandas</button>
     <button class="tab-item" id="tab-calendario" onclick="goPage('calendario')"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="3"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>Agenda</button>
     <button class="tab-item" id="tab-calculadora" onclick="goPage('calculadora')"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="2" width="14" height="20" rx="2.5"/><path d="M8 6h8M8 11h.01M12 11h.01M16 11h.01M8 15h.01M12 15h.01M16 15h.01M8 19h.01M12 19h.01M16 19h.01"/></svg>Calculadora</button>
-    <button class="tab-item" id="tab-tarefas" style="display:none" onclick="goPage('tarefas')"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="4" width="16" height="16" rx="3"/><path d="M8 12l3 3 5-6"/></svg>Tarefas</button>
     <button class="tab-item" id="tab-mais" onclick="toggleSidebar()"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="5" cy="12" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="19" cy="12" r="1.6"/></svg>Mais</button>
   </nav>
 
@@ -610,16 +614,20 @@
         <div class="card" id="dash-recent"></div>
       </div>
 
-      <!-- TAREFAS (v3.0) — ver docs/sql/tarefas_v1.sql no previmater-ops -->
+      <!-- PROCESSUAIS e TAREFAS (v3.1) — ver docs/sql/tarefas_v*.sql no previmater-ops.
+           As duas telas mostram o MESMO bloco #tf-conteudo, que muda de página
+           conforme a área: um só código de lista, filtro e formulário. -->
+      <div id="page-processuais" class="page"></div>
       <div id="page-tarefas" class="page">
+        <div id="tf-conteudo">
         <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin-bottom:16px;flex-wrap:wrap">
           <div>
-            <div class="page-title">Tarefas</div>
+            <div class="page-title" id="tf-titulo-pg">Tarefas</div>
             <div class="page-sub" id="tf-sub">Carregando…</div>
           </div>
           <div class="btn-row">
             <button class="btn btn-secondary" id="btn-ativar-notif" style="display:none" onclick="ativarNotificacoes()">Ativar avisos neste aparelho</button>
-            <button class="btn btn-primary" onclick="tfAbrir()">+ Nova tarefa</button>
+            <button class="btn btn-primary" id="tf-btn-novo" onclick="tfAbrir()">+ Nova tarefa</button>
           </div>
         </div>
         <div class="field form-full" style="margin-bottom:12px">
@@ -627,6 +635,7 @@
         </div>
         <div class="filters" id="tf-filtros"></div>
         <div id="tf-lista"></div>
+        </div>
       </div>
 
       <!-- DEMANDAS -->
@@ -1050,6 +1059,8 @@
     <div class="modal-sub" id="tf-m-origem"></div>
     <div class="form-grid">
       <div class="field form-full"><label>O que fazer *</label><input type="text" id="tf-titulo" placeholder="Ex: Protocolar inicial — Maria"/></div>
+      <div class="field"><label>Onde aparece</label>
+        <select id="tf-area"><option value="processual">Processuais</option><option value="escritorio">Tarefas do escritório</option></select></div>
       <div class="field"><label>Tipo</label>
         <select id="tf-tipo">
           <option value="outro">Tarefa</option><option value="rotina">Rotina</option>
@@ -1262,7 +1273,7 @@ function rerenderPaginaAtual(){
   else if(page==='terceiros') renderTerceiros();
   else if(page==='calendario') renderCalendario();
   else if(page==='revisao') renderRevisao();
-  else if(page==='tarefas') tfRender();
+  else if(page==='tarefas' || page==='processuais') tfRender();
 }
 function toggleValoresOcultos(){
   valoresOcultos = !valoresOcultos;
@@ -1456,7 +1467,7 @@ function goPage(page, demandId, filtroStatus) {
   if(page==='terceiros') renderTerceiros();
   if(page==='bloqueios') { preencheSelectBloqueioPessoa(); renderBloqueios(); }
   if(page==='calendario') { preencheSelectPerfil(); renderCalendario(); }
-  if(page==='tarefas') renderTarefas();
+  if(page==='tarefas' || page==='processuais') { tfArea = page==='processuais' ? 'processual' : 'escritorio'; renderTarefas(); }
   if(page==='revisao') renderRevisao();
   if(page==='novo' && !demandId) { editId=null; id('form-title').textContent='Nova Demanda'; id('form-submit-btn').textContent='Cadastrar Demanda'; clearForm(); }
   if(page==='novo' && demandId) {
@@ -3092,8 +3103,17 @@ const TF_URL = 'https://ggyngtqknonwnohbzkyj.supabase.co/rest/v1/';
 const TF_KEY = 'sb_publishable_WJOo1uEpdSXTPoPDlErTJw_vPSe5x1S';
 const TF_TIPO = { outro:'Tarefa', rotina:'Rotina', processo:'Processo', protocolo:'Protocolo', prazo_projudi:'Prazo PROJUDI', prazo_inss:'Prazo INSS' };
 const TF_STATUS = { a_fazer:'A fazer', fazendo:'Fazendo', aguardando:'Aguardando', feito:'Feito', cancelada:'Cancelada' };
-const TF_FILTROS = [['abertas','Abertas'],['urgentes','Vencidas e hoje'],['djen','Intimações (DJEN)'],['crm','Vindas do CRM'],['prazos','Prazos'],['minhas','Só minhas'],['feitas','Feitas']];
-let tfDados = [], tfMembros = [], tfFiltro = 'abertas', tfBusca = '', tfEditando = null, tfSouMembro = false;
+// Pedido da Naiarha (07/10): o que vem dos tribunais e os prazos de processo
+// são PROCESSUAIS; TAREFAS são o trabalho do escritório fora do prazo
+// processual (mensagem, protocolo de benefício, diligência, documento).
+const TF_AREA = {
+  processual: { pagina: 'processuais', titulo: 'Processuais', novo: '+ Novo prazo', item: 'publicação ou prazo',
+    filtros: [['abertas','Abertos'],['semprazo','Sem prazo — conferir'],['urgentes','Vencidos e hoje'],['djen','Do DJEN'],['feitas','Concluídos']] },
+  escritorio: { pagina: 'tarefas', titulo: 'Tarefas do escritório', novo: '+ Nova tarefa', item: 'tarefa',
+    filtros: [['abertas','Abertas'],['urgentes','Vencidas e hoje'],['crm','Vindas do CRM'],['minhas','Só minhas'],['feitas','Feitas']] }
+};
+let tfDados = [], tfMembros = [], tfFiltro = 'abertas', tfBusca = '', tfEditando = null, tfSouMembro = false, tfArea = 'escritorio';
+const tfAreaDe = t => t.area || (t.origem_app === 'djen' || ['prazo_projudi','processo'].includes(t.tipo) ? 'processual' : 'escritorio');
 
 const tfEsc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 function tfHoje() {
@@ -3126,7 +3146,11 @@ async function tarefasIniciar() {
     tfMembros = await tfApi('tarefas_membros?select=user_id,nome&order=nome');
   } catch (e) { tfMembros = []; }
   tfSouMembro = tfMembros.some(m => m.user_id === currentUser?.id);
-  ['nav-tarefas','tab-tarefas'].forEach(x => { const el = id(x); if (el) el.style.display = tfSouMembro ? '' : 'none'; });
+  ['nav-processuais','tab-processuais','nav-tarefas','tab-tarefas'].forEach(x => { const el = id(x); if (el) el.style.display = tfSouMembro ? '' : 'none'; });
+  // Na barra de baixo cabem cinco. Para quem usa o módulo, Processuais e
+  // Tarefas ocupam o lugar do Dashboard e da Calculadora (os dois seguem
+  // no menu "Mais").
+  if (id('tab-dashboard')) id('tab-dashboard').style.display = tfSouMembro ? 'none' : '';
   // Na barra de baixo cabem cinco. Para quem usa Tarefas, ela ocupa o lugar
   // da Calculadora, que continua no menu "Mais".
   if (id('tab-calculadora')) id('tab-calculadora').style.display = tfSouMembro ? 'none' : '';
@@ -3135,9 +3159,15 @@ async function tarefasIniciar() {
   // dada, ele mostra o botão "Ativar avisos" na tela de tarefas.
   if (typeof verificarPush === 'function') verificarPush(currentUser.id, currentUser.email);
   if (location.hash === '#tarefas') goPage('tarefas');
+  if (location.hash === '#processuais') goPage('processuais');
 }
 
 async function renderTarefas() {
+  // Leva o bloco único para a página da área que está aberta.
+  const cfg = TF_AREA[tfArea], pg = id('page-' + cfg.pagina);
+  if (pg && id('tf-conteudo').parentNode !== pg) { pg.appendChild(id('tf-conteudo')); tfFiltro = 'abertas'; }
+  id('tf-titulo-pg').textContent = cfg.titulo;
+  id('tf-btn-novo').textContent = cfg.novo;
   id('tf-sub').textContent = 'Carregando…';
   try {
     // Abertas inteiras + feitas/canceladas dos últimos 30 dias. Sem o corte,
@@ -3156,12 +3186,13 @@ function tfFiltrar() {
   const hoje = tfHoje(), q = tfBusca.trim().toLowerCase();
   const aberta = t => !['feito','cancelada'].includes(t.status);
   return tfDados.filter(t => {
+    if (tfAreaDe(t) !== tfArea) return false;
+    if (tfFiltro === 'semprazo' && (t.prazo_em || !aberta(t))) return false;
     if (tfFiltro === 'feitas') { if (aberta(t)) return false; }
     else if (!aberta(t)) return false;
     if (tfFiltro === 'urgentes' && !(t.prazo_em && t.prazo_em <= hoje)) return false;
     if (tfFiltro === 'crm' && t.origem_app !== 'previmater-crm') return false;
     if (tfFiltro === 'djen' && t.origem_app !== 'djen') return false;
-    if (tfFiltro === 'prazos' && !['prazo_projudi','prazo_inss','processo'].includes(t.tipo)) return false;
     if (tfFiltro === 'minhas' && t.responsavel_id !== currentUser?.id) return false;
     if (q && !`${t.titulo} ${t.numero_processo||''} ${t.descricao||''} ${t.orgao||''}`.toLowerCase().includes(q)) return false;
     return true;
@@ -3169,17 +3200,20 @@ function tfFiltrar() {
 }
 
 function tfRender() {
-  const abertas = tfDados.filter(t => !['feito','cancelada'].includes(t.status));
+  const cfg = TF_AREA[tfArea];
+  const abertas = tfDados.filter(t => tfAreaDe(t) === tfArea && !['feito','cancelada'].includes(t.status));
+  const semPrazo = abertas.filter(t => !t.prazo_em).length;
   const hoje = tfHoje();
   const venc = abertas.filter(t => t.prazo_em && t.prazo_em < hoje).length;
   const deHoje = abertas.filter(t => t.prazo_em === hoje).length;
-  id('tf-sub').textContent = `${abertas.length} aberta(s)` + (venc ? ` · ${venc} vencida(s)` : '') + (deHoje ? ` · ${deHoje} para hoje` : '');
-  id('tf-filtros').innerHTML = TF_FILTROS.map(([k,r]) =>
+  id('tf-sub').textContent = `${abertas.length} em aberto` + (venc ? ` · ${venc} vencido(s)` : '') + (deHoje ? ` · ${deHoje} para hoje` : '')
+    + (tfArea === 'processual' && semPrazo ? ` · ${semPrazo} sem prazo` : '');
+  id('tf-filtros').innerHTML = cfg.filtros.map(([k,r]) =>
     `<button class="filter-btn ${tfFiltro===k?'active':''}" onclick="tfFiltro='${k}';tfRender()">${r}</button>`).join('');
 
   const lista = tfFiltrar();
   if (!lista.length) {
-    id('tf-lista').innerHTML = `<div class="card"><div class="empty"><div class="empty-title">Nada por aqui</div><div class="empty-sub">${tfFiltro==='feitas'?'Nenhuma tarefa concluída nos últimos 30 dias.':'Nenhuma tarefa neste filtro.'}</div></div></div>`;
+    id('tf-lista').innerHTML = `<div class="card"><div class="empty"><div class="empty-title">Nada por aqui</div><div class="empty-sub">${tfFiltro==='feitas'?'Nada concluído nos últimos 30 dias.':'Nada neste filtro.'}</div></div></div>`;
     return;
   }
   if (tfFiltro === 'feitas') {
@@ -3192,6 +3226,9 @@ function tfRender() {
     const g = !t.prazo_em ? 4 : t.prazo_em < hoje ? 0 : t.prazo_em === hoje ? 1 : tfDias(t.prazo_em) <= 7 ? 2 : 3;
     grupos[g][2].push(t);
   }
+  // Nos Processuais, o que chegou do DJEN sem prazo vem PRIMEIRO: enquanto
+  // a data não for digitada, nenhum aviso protege esse prazo.
+  if (tfArea === 'processual') { const sp = grupos.pop(); sp[1] = 'Sem prazo — conferir e digitar a data'; sp[0] = 'hoje'; grupos.unshift(sp); }
   id('tf-lista').innerHTML = grupos.filter(g => g[2].length).map(([cls,rot,ts]) =>
     `<div class="tf-grupo ${cls}">${rot} <span class="n">${ts.length}</span></div><div class="card">${ts.map(tfLinha).join('')}</div>`).join('');
 }
@@ -3238,7 +3275,7 @@ async function tfConcluir(tid) {
 async function tfAbrir(tid) {
   const t = tid ? tfDados.find(x => x.id === tid) : null;
   tfEditando = t ? t.id : null;
-  id('tf-m-titulo').textContent = t ? 'Editar tarefa' : 'Nova tarefa';
+  id('tf-m-titulo').textContent = t ? 'Editar' : (tfArea === 'processual' ? 'Novo prazo processual' : 'Nova tarefa');
   // Tarefa do DJEN nasce SEM prazo: o leitor não conta prazo processual.
   id('tf-m-origem').textContent = t?.origem_app === 'previmater-crm'
     ? 'Veio do CRM. Concluir move o card para "Protocolado judicial" e avisa a cliente pelo WhatsApp.'
@@ -3247,7 +3284,8 @@ async function tfAbrir(tid) {
   if (link) id('tf-m-origem').innerHTML = tfEsc(id('tf-m-origem').textContent) + ` <a href="${tfEsc(link[1])}" target="_blank" rel="noopener">Abrir a publicação</a>`;
   id('tf-resp').innerHTML = tfMembros.map(m => `<option value="${m.user_id}">${tfEsc(m.nome)}</option>`).join('');
   id('tf-titulo').value = t?.titulo || '';
-  id('tf-tipo').value = t?.tipo || 'outro';
+  id('tf-area').value = t ? tfAreaDe(t) : tfArea;
+  id('tf-tipo').value = t?.tipo || (tfArea === 'processual' ? 'prazo_projudi' : 'outro');
   id('tf-resp').value = t?.responsavel_id || currentUser?.id || '';
   id('tf-prazo').value = t?.prazo_em || '';
   id('tf-hora').value = t?.prazo_hora ? t.prazo_hora.slice(0,5) : '';
@@ -3287,7 +3325,7 @@ async function tfSalvar() {
   // Tarefa que repete precisa de data: é a partir dela que nasce a próxima.
   if (rec && !prazo) { showToast('Tarefa que repete precisa de data.', 'err'); return; }
   const dados = {
-    titulo, tipo: id('tf-tipo').value, responsavel_id: id('tf-resp').value || null,
+    titulo, area: id('tf-area').value, tipo: id('tf-tipo').value, responsavel_id: id('tf-resp').value || null,
     prazo_em: prazo, prazo_hora: id('tf-hora').value || null,
     avisos_dias: [...document.querySelectorAll('.tf-av:checked')].map(c => Number(c.value)).sort((a,b)=>b-a),
     numero_processo: id('tf-proc').value.trim() || null, orgao: id('tf-orgao').value.trim() || null,
@@ -3316,12 +3354,17 @@ async function tfExcluir() {
 }
 
 // Toque no aviso com o app aberto: o service worker troca só o #.
-window.addEventListener('hashchange', () => { if (location.hash === '#tarefas' && tfSouMembro) goPage('tarefas'); });
+window.addEventListener('hashchange', () => {
+  if (!tfSouMembro) return;
+  if (location.hash === '#tarefas') goPage('tarefas');
+  if (location.hash === '#processuais') goPage('processuais');
+});
 
 // Card novo do CRM aparece sem precisar recarregar: a cada 60 s, só se a
 // tela de tarefas estiver aberta e o app em primeiro plano.
 setInterval(() => {
-  if (document.visibilityState === 'visible' && id('page-tarefas')?.classList.contains('active') &&
+  if (document.visibilityState === 'visible' &&
+      (id('page-tarefas')?.classList.contains('active') || id('page-processuais')?.classList.contains('active')) &&
       id('tf-modal')?.classList.contains('hidden')) renderTarefas();
 }, 60000);
 </script>
