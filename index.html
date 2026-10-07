@@ -384,6 +384,30 @@
     .spinner { width: 28px; height: 28px; border: 3px solid rgba(255,255,255,.18); border-top-color: #fff; border-radius: 50%; animation: spin .7s linear infinite; }
     @keyframes spin { to { transform: rotate(360deg); } }
 
+    /* ── TAREFAS (v3.0) ────────────────────────────────────────────
+       Mesma pele do resto do app: papel, navy, três cores de estado.
+       Grupo vencido em vinho, hoje em âmbar; o resto neutro, para a
+       cor só aparecer onde exige ação. */
+    .tf-grupo { font-size: 12px; font-weight: 800; letter-spacing: .02em; text-transform: uppercase; color: var(--text3); padding: 16px 4px 8px; display:flex; align-items:center; gap:8px; }
+    .tf-grupo.venc { color: var(--red); } .tf-grupo.hoje { color: var(--yellow); }
+    .tf-grupo .n { background: var(--paper2); color: var(--text2); border-radius: 20px; padding: 1px 8px; font-size: 11px; }
+    .tf-row { display:flex; gap:12px; align-items:flex-start; padding: 13px 16px; border-bottom: 1px solid var(--border2); cursor:pointer; }
+    .tf-row:last-child { border-bottom: none; }
+    .tf-row:active { background: var(--paper2); }
+    .tf-check { width: 24px; height: 24px; border-radius: 8px; border: 2px solid var(--border); background: var(--white); flex-shrink:0; margin-top:1px; display:flex; align-items:center; justify-content:center; cursor:pointer; color:#fff; padding:0; }
+    .tf-check.on { background: var(--green); border-color: var(--green); }
+    .tf-tit { font-size: 14.5px; font-weight: 700; color: var(--text); line-height:1.3; }
+    .tf-row.feita .tf-tit { text-decoration: line-through; color: var(--text3); }
+    .tf-meta { font-size: 12px; color: var(--text2); margin-top: 4px; display:flex; flex-wrap:wrap; gap:6px; align-items:center; font-weight:500; }
+    .tf-tag { font-size: 10.5px; font-weight: 800; padding: 2px 7px; border-radius: 6px; background: var(--paper2); color: var(--text2); }
+    .tf-tag.crm { background: var(--accent-bg); color: var(--accent); }
+    .tf-tag.venc { background: var(--red-bg); color: var(--red); }
+    .tf-tag.hoje { background: var(--yellow-bg); color: var(--yellow); }
+    .tf-tag.st { background: var(--blue-bg); color: var(--blue); }
+    .tf-avisos { display:flex; gap:8px; flex-wrap:wrap; }
+    .tf-avisos label { display:flex; align-items:center; gap:6px; white-space:nowrap; font-size:13px; font-weight:600; color:var(--text2); background:var(--paper2); padding:7px 10px; border-radius:10px; }
+    .tf-hist { font-size:12px; color:var(--text3); border-top:1px solid var(--border2); margin-top:14px; padding-top:10px; line-height:1.7; }
+    #tf-notif { display:none; align-items:center; gap:8px; }
     #toast { position: fixed; bottom: calc(var(--tab-h) + 16px + env(safe-area-inset-bottom)); left: 50%; transform: translateX(-50%) translateY(160px); background: var(--text); color: #fff; padding: 12px 20px; border-radius: 14px; font-size: 13px; font-weight: 700; z-index: 999; transition: transform .25s cubic-bezier(.34,1.56,.64,1); white-space: nowrap; box-shadow: 0 12px 28px -8px rgba(20,33,61,.5); }
     @media (min-width: 768px) { #toast { bottom: 24px; } }
     #toast.show { transform: translateX(-50%) translateY(0); }
@@ -544,6 +568,7 @@
     </div>
     <div class="sidebar-section-label">Menu</div>
     <button class="nav-item active" id="nav-dashboard" onclick="goPage('dashboard')"><span class="nav-icon"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg></span> Dashboard</button>
+    <button class="nav-item" id="nav-tarefas" style="display:none" onclick="goPage('tarefas')"><span class="nav-icon"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="4" width="16" height="16" rx="3"/><path d="M8 12l3 3 5-6"/></svg></span> Tarefas</button>
     <button class="nav-item" id="nav-demandas" onclick="goPage('demandas')"><span class="nav-icon"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h10"/></svg></span> Demandas</button>
     <button class="nav-item" id="nav-calendario" onclick="goPage('calendario')"><span class="nav-icon"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="3"/><path d="M3 10h18M8 3v4M16 3v4"/></svg></span> Calendário</button>
     <button class="nav-item" id="nav-relatorio" onclick="goPage('relatorio')"><span class="nav-icon"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 19V5M4 15l5-5 4 4 7-7"/></svg></span> Relatório</button>
@@ -552,7 +577,7 @@
     <button class="nav-item" id="nav-bloqueios" onclick="goPage('bloqueios')"><span class="nav-icon"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="11" width="16" height="10" rx="2.5"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg></span> Bloqueios</button>
     <button class="nav-item" id="nav-revisao" onclick="goPage('revisao')"><span class="nav-icon"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="4" width="14" height="18" rx="2.5"/><path d="M9 4V3h6v1M9 11h6M9 15h4"/></svg></span> Revisão em Lote</button>
     <div class="sidebar-footer">
-      <p style="font-size:10px;color:var(--text3);margin-bottom:10px">v2.9 · Com Supabase</p>
+      <p style="font-size:10px;color:var(--text3);margin-bottom:10px">v3.0 · Com Supabase</p>
       <button class="logout-btn" onclick="doLogout()">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16,17 21,12 16,7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
         Sair da conta
@@ -566,6 +591,7 @@
     <button class="tab-item" id="tab-demandas" onclick="goPage('demandas')"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h10"/></svg>Demandas</button>
     <button class="tab-item" id="tab-calendario" onclick="goPage('calendario')"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="3"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>Agenda</button>
     <button class="tab-item" id="tab-calculadora" onclick="goPage('calculadora')"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="2" width="14" height="20" rx="2.5"/><path d="M8 6h8M8 11h.01M12 11h.01M16 11h.01M8 15h.01M12 15h.01M16 15h.01M8 19h.01M12 19h.01M16 19h.01"/></svg>Calculadora</button>
+    <button class="tab-item" id="tab-tarefas" style="display:none" onclick="goPage('tarefas')"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="4" width="16" height="16" rx="3"/><path d="M8 12l3 3 5-6"/></svg>Tarefas</button>
     <button class="tab-item" id="tab-mais" onclick="toggleSidebar()"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="5" cy="12" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="19" cy="12" r="1.6"/></svg>Mais</button>
   </nav>
 
@@ -582,6 +608,25 @@
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:20px" id="dash-panels"></div>
         <div class="section-title">Recentes</div>
         <div class="card" id="dash-recent"></div>
+      </div>
+
+      <!-- TAREFAS (v3.0) — ver docs/sql/tarefas_v1.sql no previmater-ops -->
+      <div id="page-tarefas" class="page">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin-bottom:16px;flex-wrap:wrap">
+          <div>
+            <div class="page-title">Tarefas</div>
+            <div class="page-sub" id="tf-sub">Carregando…</div>
+          </div>
+          <div class="btn-row">
+            <button class="btn btn-secondary" id="btn-ativar-notif" style="display:none" onclick="ativarNotificacoes()">Ativar avisos neste aparelho</button>
+            <button class="btn btn-primary" onclick="tfAbrir()">+ Nova tarefa</button>
+          </div>
+        </div>
+        <div class="field form-full" style="margin-bottom:12px">
+          <input type="text" id="tf-busca" placeholder="Pesquisar por título, processo, cliente…" oninput="tfBusca=this.value;tfRender()"/>
+        </div>
+        <div class="filters" id="tf-filtros"></div>
+        <div id="tf-lista"></div>
       </div>
 
       <!-- DEMANDAS -->
@@ -998,6 +1043,55 @@
 <div id="toast"></div>
 
 <!-- MODAL DE CUSTO REAL (ao marcar como Realizado) -->
+<!-- TAREFA: criar / editar -->
+<div id="tf-modal" class="modal-overlay hidden" onclick="if(event.target===this)tfFechar()">
+  <div class="modal-box" style="max-width:520px">
+    <div class="modal-title" id="tf-m-titulo">Nova tarefa</div>
+    <div class="modal-sub" id="tf-m-origem"></div>
+    <div class="form-grid">
+      <div class="field form-full"><label>O que fazer *</label><input type="text" id="tf-titulo" placeholder="Ex: Protocolar inicial — Maria"/></div>
+      <div class="field"><label>Tipo</label>
+        <select id="tf-tipo">
+          <option value="outro">Tarefa</option><option value="rotina">Rotina</option>
+          <option value="processo">Processo</option><option value="protocolo">Protocolo</option>
+          <option value="prazo_projudi">Prazo PROJUDI / eproc</option><option value="prazo_inss">Prazo INSS</option>
+        </select></div>
+      <div class="field"><label>Responsável</label><select id="tf-resp"></select></div>
+      <div class="field"><label>Prazo final (data)</label><input type="date" id="tf-prazo"/></div>
+      <div class="field"><label>Hora (opcional)</label><input type="time" id="tf-hora"/></div>
+      <div class="field form-full"><label>Avisar antes</label>
+        <div class="tf-avisos">
+          <label><input type="checkbox" value="5" class="tf-av"/> 5 dias</label>
+          <label><input type="checkbox" value="2" class="tf-av"/> 2 dias</label>
+          <label><input type="checkbox" value="1" class="tf-av"/> 1 dia</label>
+          <label><input type="checkbox" value="0" class="tf-av"/> No dia</label>
+        </div>
+        <div style="font-size:11.5px;color:var(--text3);margin-top:4px">A data é a que você digita. O app não calcula prazo processual.</div>
+      </div>
+      <div class="field"><label>Nº do processo</label><input type="text" id="tf-proc" placeholder="0000000-00.0000.8.16.0000"/></div>
+      <div class="field"><label>Onde</label><input type="text" id="tf-orgao" list="tf-orgaos" placeholder="PROJUDI, eproc, INSS…"/>
+        <datalist id="tf-orgaos"><option>PROJUDI</option><option>eproc TJPR</option><option>eproc TRF4</option><option>PJe TRT9</option><option>INSS</option><option>Juizado</option></datalist></div>
+      <div class="field"><label>Repetir</label>
+        <select id="tf-rec">
+          <option value="">Não repete</option><option value="dias_uteis">Todo dia útil</option>
+          <option value="diaria">Todo dia</option><option value="semanal">Toda semana</option><option value="mensal">Todo mês</option>
+        </select></div>
+      <div class="field"><label>Situação</label>
+        <select id="tf-status">
+          <option value="a_fazer">A fazer</option><option value="fazendo">Fazendo</option>
+          <option value="aguardando">Aguardando</option><option value="feito">Feito</option><option value="cancelada">Cancelada</option>
+        </select></div>
+      <div class="field form-full"><label>Observações</label><textarea id="tf-desc"></textarea></div>
+    </div>
+    <div id="tf-hist" class="tf-hist" style="display:none"></div>
+    <div class="btn-row" style="margin-top:16px">
+      <button class="btn btn-danger" id="tf-btn-excluir" style="margin-right:auto;display:none" onclick="tfExcluir()">Excluir</button>
+      <button class="btn btn-secondary" onclick="tfFechar()">Voltar</button>
+      <button class="btn btn-primary" id="tf-btn-salvar" onclick="tfSalvar()">Salvar</button>
+    </div>
+  </div>
+</div>
+
 <div id="custo-modal" class="modal-overlay hidden" onclick="if(event.target===this)closeCustoModal()">
   <div class="modal-box" style="max-width:420px">
     <div class="modal-icon"><svg class="ic xl" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 15l1.5-5A2 2 0 0 1 7.4 8.5h9.2a2 2 0 0 1 1.9 1.5L20 15M4 15h16v4H4zM4 15v-1M20 15v-1"/><circle cx="7.5" cy="19" r="1.5"/><circle cx="16.5" cy="19" r="1.5"/></svg></div>
@@ -1168,6 +1262,7 @@ function rerenderPaginaAtual(){
   else if(page==='terceiros') renderTerceiros();
   else if(page==='calendario') renderCalendario();
   else if(page==='revisao') renderRevisao();
+  else if(page==='tarefas') tfRender();
 }
 function toggleValoresOcultos(){
   valoresOcultos = !valoresOcultos;
@@ -1221,6 +1316,7 @@ sb.auth.onAuthStateChange(async (event, session) => {
     await loadTerceiros();
     await loadVinculos();
     renderDashboard();
+    tarefasIniciar();
   } else {
     currentUser = null;
     demands = [];
@@ -1360,6 +1456,7 @@ function goPage(page, demandId, filtroStatus) {
   if(page==='terceiros') renderTerceiros();
   if(page==='bloqueios') { preencheSelectBloqueioPessoa(); renderBloqueios(); }
   if(page==='calendario') { preencheSelectPerfil(); renderCalendario(); }
+  if(page==='tarefas') renderTarefas();
   if(page==='revisao') renderRevisao();
   if(page==='novo' && !demandId) { editId=null; id('form-title').textContent='Nova Demanda'; id('form-submit-btn').textContent='Cadastrar Demanda'; clearForm(); }
   if(page==='novo' && demandId) {
@@ -2975,6 +3072,250 @@ async function revSalvar(did) {
   showToast('Salvo!');
   renderRevisao();
 }
+</script>
+
+<script>
+/* ════════════════════════════════════════════════════════════════
+   TAREFAS (v3.0 — 07/10/2026)
+   Banco: tarefas, tarefa_eventos, tarefas_membros, integracao_regras
+   (docs/sql/tarefas_v1.sql no previmater-ops).
+
+   A ponte com o CRM NÃO está aqui: é gatilho no banco. Card que entra
+   em "Protocolar judicial" vira tarefa sozinho, e marcar a tarefa como
+   feita move o card para "Protocolado judicial". Por isso esta tela só
+   lê e grava em `tarefas` — se a tela cair, a ponte continua.
+
+   Fala direto com o PostgREST em vez do mini-cliente `sb`: ele só filtra
+   por uma coluna e esta tela precisa de várias (status, prazo, busca).
+   ════════════════════════════════════════════════════════════════ */
+const TF_URL = 'https://ggyngtqknonwnohbzkyj.supabase.co/rest/v1/';
+const TF_KEY = 'sb_publishable_WJOo1uEpdSXTPoPDlErTJw_vPSe5x1S';
+const TF_TIPO = { outro:'Tarefa', rotina:'Rotina', processo:'Processo', protocolo:'Protocolo', prazo_projudi:'Prazo PROJUDI', prazo_inss:'Prazo INSS' };
+const TF_STATUS = { a_fazer:'A fazer', fazendo:'Fazendo', aguardando:'Aguardando', feito:'Feito', cancelada:'Cancelada' };
+const TF_FILTROS = [['abertas','Abertas'],['urgentes','Vencidas e hoje'],['crm','Vindas do CRM'],['prazos','Prazos'],['minhas','Só minhas'],['feitas','Feitas']];
+let tfDados = [], tfMembros = [], tfFiltro = 'abertas', tfBusca = '', tfEditando = null, tfSouMembro = false;
+
+const tfEsc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+function tfHoje() {
+  // Data de Brasília, não a UTC: às 21h o toISOString já está no dia seguinte.
+  return new Intl.DateTimeFormat('en-CA',{timeZone:'America/Sao_Paulo',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date());
+}
+const tfBr = ymd => ymd ? ymd.split('-').reverse().join('/') : '';
+function tfDias(ymd) {
+  const [a,b,c] = tfHoje().split('-').map(Number), [d,e,f] = ymd.split('-').map(Number);
+  return Math.round((Date.UTC(d,e-1,f) - Date.UTC(a,b-1,c)) / 86400000);
+}
+
+async function tfApi(caminho, opt = {}) {
+  const sess = JSON.parse(localStorage.getItem('supa_sess') || '{}');
+  const r = await fetch(TF_URL + caminho, {
+    ...opt,
+    headers: { apikey: TF_KEY, Authorization: 'Bearer ' + (sess.access_token || ''),
+               'Content-Type': 'application/json', Prefer: 'return=representation', ...(opt.headers || {}) }
+  });
+  const txt = await r.text();
+  const dados = txt ? JSON.parse(txt) : null;
+  if (!r.ok) throw new Error((dados && (dados.message || dados.hint)) || ('HTTP ' + r.status));
+  return dados;
+}
+
+// Chamada no login. Quem não está em tarefas_membros não vê o módulo:
+// o Diligências tem outros logins e tarefa tem nome de cliente.
+async function tarefasIniciar() {
+  try {
+    tfMembros = await tfApi('tarefas_membros?select=user_id,nome&order=nome');
+  } catch (e) { tfMembros = []; }
+  tfSouMembro = tfMembros.some(m => m.user_id === currentUser?.id);
+  ['nav-tarefas','tab-tarefas'].forEach(x => { const el = id(x); if (el) el.style.display = tfSouMembro ? '' : 'none'; });
+  // Na barra de baixo cabem cinco. Para quem usa Tarefas, ela ocupa o lugar
+  // da Calculadora, que continua no menu "Mais".
+  if (id('tab-calculadora')) id('tab-calculadora').style.display = tfSouMembro ? 'none' : '';
+  if (!tfSouMembro) return;
+  // Assina o push deste aparelho (push.js). Se a permissão ainda não foi
+  // dada, ele mostra o botão "Ativar avisos" na tela de tarefas.
+  if (typeof verificarPush === 'function') verificarPush(currentUser.id, currentUser.email);
+  if (location.hash === '#tarefas') goPage('tarefas');
+}
+
+async function renderTarefas() {
+  id('tf-sub').textContent = 'Carregando…';
+  try {
+    // Abertas inteiras + feitas/canceladas dos últimos 30 dias. Sem o corte,
+    // a rotina diária acumularia uma linha por dia para sempre na tela.
+    const corte = new Date(Date.now() - 30*86400000).toISOString();
+    tfDados = await tfApi('tarefas?select=*&or=(status.in.(a_fazer,fazendo,aguardando),atualizado_em.gte."' + encodeURIComponent(corte) + '")&order=prazo_em.asc.nullslast,prazo_hora.asc.nullslast,criado_em.asc&limit=1000');
+  } catch (e) {
+    id('tf-sub').textContent = 'Não consegui carregar as tarefas.';
+    id('tf-lista').innerHTML = `<div class="card"><div class="empty"><div class="empty-title">Erro ao carregar</div><div class="empty-sub">${tfEsc(e.message)}</div></div></div>`;
+    return;
+  }
+  tfRender();
+}
+
+function tfFiltrar() {
+  const hoje = tfHoje(), q = tfBusca.trim().toLowerCase();
+  const aberta = t => !['feito','cancelada'].includes(t.status);
+  return tfDados.filter(t => {
+    if (tfFiltro === 'feitas') { if (aberta(t)) return false; }
+    else if (!aberta(t)) return false;
+    if (tfFiltro === 'urgentes' && !(t.prazo_em && t.prazo_em <= hoje)) return false;
+    if (tfFiltro === 'crm' && !t.origem_app) return false;
+    if (tfFiltro === 'prazos' && !['prazo_projudi','prazo_inss','processo'].includes(t.tipo)) return false;
+    if (tfFiltro === 'minhas' && t.responsavel_id !== currentUser?.id) return false;
+    if (q && !`${t.titulo} ${t.numero_processo||''} ${t.descricao||''} ${t.orgao||''}`.toLowerCase().includes(q)) return false;
+    return true;
+  });
+}
+
+function tfRender() {
+  const abertas = tfDados.filter(t => !['feito','cancelada'].includes(t.status));
+  const hoje = tfHoje();
+  const venc = abertas.filter(t => t.prazo_em && t.prazo_em < hoje).length;
+  const deHoje = abertas.filter(t => t.prazo_em === hoje).length;
+  id('tf-sub').textContent = `${abertas.length} aberta(s)` + (venc ? ` · ${venc} vencida(s)` : '') + (deHoje ? ` · ${deHoje} para hoje` : '');
+  id('tf-filtros').innerHTML = TF_FILTROS.map(([k,r]) =>
+    `<button class="filter-btn ${tfFiltro===k?'active':''}" onclick="tfFiltro='${k}';tfRender()">${r}</button>`).join('');
+
+  const lista = tfFiltrar();
+  if (!lista.length) {
+    id('tf-lista').innerHTML = `<div class="card"><div class="empty"><div class="empty-title">Nada por aqui</div><div class="empty-sub">${tfFiltro==='feitas'?'Nenhuma tarefa concluída nos últimos 30 dias.':'Nenhuma tarefa neste filtro.'}</div></div></div>`;
+    return;
+  }
+  if (tfFiltro === 'feitas') {
+    id('tf-lista').innerHTML = `<div class="card">${lista.sort((a,b)=>(b.concluida_em||b.atualizado_em||'').localeCompare(a.concluida_em||a.atualizado_em||'')).map(tfLinha).join('')}</div>`;
+    return;
+  }
+  // Agrupado por urgência, que é a pergunta de quem abre a tela.
+  const grupos = [['venc','Vencidas',[]],['hoje','Hoje',[]],['sem','Próximos 7 dias',[]],['dep','Depois',[]],['sp','Sem prazo',[]]];
+  for (const t of lista) {
+    const g = !t.prazo_em ? 4 : t.prazo_em < hoje ? 0 : t.prazo_em === hoje ? 1 : tfDias(t.prazo_em) <= 7 ? 2 : 3;
+    grupos[g][2].push(t);
+  }
+  id('tf-lista').innerHTML = grupos.filter(g => g[2].length).map(([cls,rot,ts]) =>
+    `<div class="tf-grupo ${cls}">${rot} <span class="n">${ts.length}</span></div><div class="card">${ts.map(tfLinha).join('')}</div>`).join('');
+}
+
+function tfLinha(t) {
+  const feita = t.status === 'feito', hoje = tfHoje();
+  const resp = tfMembros.find(m => m.user_id === t.responsavel_id);
+  const tags = [];
+  if (t.origem_app) tags.push('<span class="tf-tag crm">CRM</span>');
+  tags.push(`<span class="tf-tag">${TF_TIPO[t.tipo]||'Tarefa'}</span>`);
+  if (['fazendo','aguardando','cancelada'].includes(t.status)) tags.push(`<span class="tf-tag st">${TF_STATUS[t.status]}</span>`);
+  if (t.prazo_em) {
+    const d = tfDias(t.prazo_em), cls = !feita && t.prazo_em < hoje ? 'venc' : !feita && t.prazo_em === hoje ? 'hoje' : '';
+    const quando = d === 0 ? 'hoje' : d === 1 ? 'amanhã' : d === -1 ? 'ontem' : tfBr(t.prazo_em);
+    tags.push(`<span class="tf-tag ${cls}">${quando}${t.prazo_hora ? ' ' + t.prazo_hora.slice(0,5) : ''}</span>`);
+  }
+  const extras = [t.numero_processo, t.orgao, resp && resp.user_id !== currentUser?.id ? resp.nome : '', t.recorrencia ? 'repete' : '']
+    .filter(Boolean).map(tfEsc).join(' · ');
+  return `<div class="tf-row ${feita?'feita':''}" onclick="tfAbrir('${t.id}')">
+    <button class="tf-check ${feita?'on':''}" aria-label="${feita?'Reabrir':'Concluir'}" onclick="event.stopPropagation();tfConcluir('${t.id}')">
+      ${feita?'<svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12l5 5L20 7"/></svg>':''}</button>
+    <div style="min-width:0;flex:1"><div class="tf-tit">${tfEsc(t.titulo)}</div>
+      <div class="tf-meta">${tags.join('')}${extras ? `<span>${extras}</span>` : ''}</div></div></div>`;
+}
+
+async function tfConcluir(tid) {
+  const t = tfDados.find(x => x.id === tid); if (!t) return;
+  const novo = t.status === 'feito' ? 'a_fazer' : 'feito';
+  // Concluir tarefa do CRM mexe no card de uma cliente: pergunta antes.
+  if (novo === 'feito' && t.origem_app === 'previmater-crm' &&
+      !confirm('Marcar como protocolado?\n\nO card desta cliente vai para "Protocolado judicial" no CRM.')) return;
+  if (novo === 'a_fazer' && t.origem_app === 'previmater-crm' &&
+      !confirm('Reabrir esta tarefa?\n\nO card NÃO volta sozinho no CRM: se precisar, mova lá também.')) return;
+  try {
+    await tfApi('tarefas?id=eq.' + tid, { method: 'PATCH', body: JSON.stringify({ status: novo }) });
+    showToast(novo === 'feito' ? (t.origem_app ? 'Feito! Card movido no CRM.' : 'Feito!') : 'Reaberta');
+    if (novo === 'feito' && t.recorrencia) showToast('Feito! A próxima já foi agendada.');
+  } catch (e) { showToast('Não salvou: ' + e.message, 'err'); }
+  renderTarefas();
+}
+
+async function tfAbrir(tid) {
+  const t = tid ? tfDados.find(x => x.id === tid) : null;
+  tfEditando = t ? t.id : null;
+  id('tf-m-titulo').textContent = t ? 'Editar tarefa' : 'Nova tarefa';
+  id('tf-m-origem').textContent = t?.origem_app ? 'Veio do CRM. Concluir move o card para "Protocolado judicial".' : '';
+  id('tf-resp').innerHTML = tfMembros.map(m => `<option value="${m.user_id}">${tfEsc(m.nome)}</option>`).join('');
+  id('tf-titulo').value = t?.titulo || '';
+  id('tf-tipo').value = t?.tipo || 'outro';
+  id('tf-resp').value = t?.responsavel_id || currentUser?.id || '';
+  id('tf-prazo').value = t?.prazo_em || '';
+  id('tf-hora').value = t?.prazo_hora ? t.prazo_hora.slice(0,5) : '';
+  const av = t?.avisos_dias || [5,2,0];
+  document.querySelectorAll('.tf-av').forEach(c => c.checked = av.includes(Number(c.value)));
+  id('tf-proc').value = t?.numero_processo || '';
+  id('tf-orgao').value = t?.orgao || '';
+  id('tf-rec').value = t?.recorrencia || '';
+  id('tf-status').value = t?.status || 'a_fazer';
+  id('tf-desc').value = t?.descricao || '';
+  // Excluir só o que nasceu aqui. Tarefa do CRM se cancela: o histórico
+  // dela é o que mostra por que o card não andou.
+  id('tf-btn-excluir').style.display = t && !t.origem_app ? '' : 'none';
+  id('tf-hist').style.display = 'none';
+  id('tf-modal').classList.remove('hidden');
+  setTimeout(() => id('tf-titulo').focus(), 50);
+  if (t) {
+    try {
+      const ev = await tfApi('tarefa_eventos?select=tipo,de,para,detalhe,criado_em&tarefa_id=eq.' + t.id + '&order=criado_em.desc&limit=15');
+      if (ev.length && tfEditando === t.id) {
+        id('tf-hist').innerHTML = '<b>Histórico</b><br>' + ev.map(e => {
+          const q = new Date(e.criado_em).toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'});
+          const o = e.tipo === 'status' ? `${TF_STATUS[e.de]||e.de} → ${TF_STATUS[e.para]||e.para}` : tfEsc(e.detalhe || e.tipo);
+          return `${q} · ${o}`;
+        }).join('<br>');
+        id('tf-hist').style.display = '';
+      }
+    } catch (e) {}
+  }
+}
+function tfFechar() { id('tf-modal').classList.add('hidden'); tfEditando = null; }
+
+async function tfSalvar() {
+  const titulo = id('tf-titulo').value.trim();
+  if (!titulo) { showToast('Escreva o que fazer.', 'err'); return; }
+  const rec = id('tf-rec').value || null, prazo = id('tf-prazo').value || null;
+  // Tarefa que repete precisa de data: é a partir dela que nasce a próxima.
+  if (rec && !prazo) { showToast('Tarefa que repete precisa de data.', 'err'); return; }
+  const dados = {
+    titulo, tipo: id('tf-tipo').value, responsavel_id: id('tf-resp').value || null,
+    prazo_em: prazo, prazo_hora: id('tf-hora').value || null,
+    avisos_dias: [...document.querySelectorAll('.tf-av:checked')].map(c => Number(c.value)).sort((a,b)=>b-a),
+    numero_processo: id('tf-proc').value.trim() || null, orgao: id('tf-orgao').value.trim() || null,
+    recorrencia: rec, status: id('tf-status').value, descricao: id('tf-desc').value.trim() || null
+  };
+  const antes = tfEditando ? tfDados.find(x => x.id === tfEditando) : null;
+  if (antes?.origem_app === 'previmater-crm' && dados.status === 'feito' && antes.status !== 'feito' &&
+      !confirm('Marcar como protocolado?\n\nO card desta cliente vai para "Protocolado judicial" no CRM.')) return;
+  const btn = id('tf-btn-salvar'); btn.disabled = true; btn.textContent = 'Salvando…';
+  try {
+    if (tfEditando) await tfApi('tarefas?id=eq.' + tfEditando, { method: 'PATCH', body: JSON.stringify(dados) });
+    else await tfApi('tarefas', { method: 'POST', body: JSON.stringify(dados) });
+    showToast('Salvo!');
+    tfFechar();
+    renderTarefas();
+  } catch (e) { showToast('Não salvou: ' + e.message, 'err'); }
+  btn.disabled = false; btn.textContent = 'Salvar';
+}
+
+async function tfExcluir() {
+  if (!tfEditando || !confirm('Excluir esta tarefa? Não dá para desfazer.')) return;
+  try {
+    await tfApi('tarefas?id=eq.' + tfEditando, { method: 'DELETE' });
+    showToast('Excluída'); tfFechar(); renderTarefas();
+  } catch (e) { showToast('Não excluiu: ' + e.message, 'err'); }
+}
+
+// Toque no aviso com o app aberto: o service worker troca só o #.
+window.addEventListener('hashchange', () => { if (location.hash === '#tarefas' && tfSouMembro) goPage('tarefas'); });
+
+// Card novo do CRM aparece sem precisar recarregar: a cada 60 s, só se a
+// tela de tarefas estiver aberta e o app em primeiro plano.
+setInterval(() => {
+  if (document.visibilityState === 'visible' && id('page-tarefas')?.classList.contains('active') &&
+      id('tf-modal')?.classList.contains('hidden')) renderTarefas();
+}, 60000);
 </script>
 
 <script>
