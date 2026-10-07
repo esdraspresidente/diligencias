@@ -3219,9 +3219,11 @@ function tfLinha(t) {
 async function tfConcluir(tid) {
   const t = tfDados.find(x => x.id === tid); if (!t) return;
   const novo = t.status === 'feito' ? 'a_fazer' : 'feito';
-  // Concluir tarefa do CRM mexe no card de uma cliente: pergunta antes.
+  // Concluir tarefa do CRM mexe no card de uma cliente E dispara o motor:
+  // card em "Protocolado judicial" manda WhatsApp para a cliente e inicia
+  // o acompanhamento de 30 em 30 dias. Por isso pergunta antes.
   if (novo === 'feito' && t.origem_app === 'previmater-crm' &&
-      !confirm('Marcar como protocolado?\n\nO card desta cliente vai para "Protocolado judicial" no CRM.')) return;
+      !confirm('Marcar como protocolado?\n\nO card desta cliente vai para "Protocolado judicial" no CRM, e o sistema manda para ela pelo WhatsApp o aviso de que a ação foi protocolada.')) return;
   if (novo === 'a_fazer' && t.origem_app === 'previmater-crm' &&
       !confirm('Reabrir esta tarefa?\n\nO card NÃO volta sozinho no CRM: se precisar, mova lá também.')) return;
   try {
@@ -3236,7 +3238,7 @@ async function tfAbrir(tid) {
   const t = tid ? tfDados.find(x => x.id === tid) : null;
   tfEditando = t ? t.id : null;
   id('tf-m-titulo').textContent = t ? 'Editar tarefa' : 'Nova tarefa';
-  id('tf-m-origem').textContent = t?.origem_app ? 'Veio do CRM. Concluir move o card para "Protocolado judicial".' : '';
+  id('tf-m-origem').textContent = t?.origem_app ? 'Veio do CRM. Concluir move o card para "Protocolado judicial" e avisa a cliente pelo WhatsApp.' : '';
   id('tf-resp').innerHTML = tfMembros.map(m => `<option value="${m.user_id}">${tfEsc(m.nome)}</option>`).join('');
   id('tf-titulo').value = t?.titulo || '';
   id('tf-tipo').value = t?.tipo || 'outro';
@@ -3287,7 +3289,7 @@ async function tfSalvar() {
   };
   const antes = tfEditando ? tfDados.find(x => x.id === tfEditando) : null;
   if (antes?.origem_app === 'previmater-crm' && dados.status === 'feito' && antes.status !== 'feito' &&
-      !confirm('Marcar como protocolado?\n\nO card desta cliente vai para "Protocolado judicial" no CRM.')) return;
+      !confirm('Marcar como protocolado?\n\nO card desta cliente vai para "Protocolado judicial" no CRM, e o sistema manda para ela pelo WhatsApp o aviso de que a ação foi protocolada.')) return;
   const btn = id('tf-btn-salvar'); btn.disabled = true; btn.textContent = 'Salvando…';
   try {
     if (tfEditando) await tfApi('tarefas?id=eq.' + tfEditando, { method: 'PATCH', body: JSON.stringify(dados) });
